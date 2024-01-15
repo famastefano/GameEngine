@@ -3,7 +3,10 @@
 #include "BuildConfig.hpp"
 #include "Logging.hpp"
 
-DECLARE_LOGGER_CATEGORY_EXTERN(LogAssert, Core::LogLevel::Warning, Core::LogLevel::Warning)
+namespace Core::Private
+{
+CORE_API Core::Private::Logger& LogAssertRef();
+}
 
 #undef assert
 #undef assertf
@@ -43,7 +46,7 @@ struct RecursiveScopeCounter
         {                                                                  \
             if(!(condition))                                               \
             {                                                              \
-                LogAssert.log(Core::LogLevel::Fatal, format, __VA_ARGS__); \
+                ::Core::Private::LogAssertRef().log(Core::LogLevel::Fatal, format, __VA_ARGS__); \
             }                                                              \
         }
 
@@ -71,20 +74,20 @@ struct RecursiveScopeCounter
 #endif
 
 #if ENABLE_EXPECT
-#    define IMPL_expectf(checkName, condition, format, ...)                  \
-        {                                                                    \
-            static bool checkName = false;                                   \
-            if(!checkName && !(condition))                                   \
-                LogAssert.log(Core::LogLevel::Warning, format, __VA_ARGS__); \
-            checkName = true;                                                \
+#    define IMPL_expectf(checkName, condition, format, ...)                                \
+        {                                                                                  \
+            static bool checkName = false;                                                 \
+            if(!checkName && !(condition))                                                 \
+                ::Core::Private::LogAssertRef().log(Core::LogLevel::Warning, format, __VA_ARGS__); \
+            checkName = true;                                                              \
         }
 
 #    define expectf(condition, format, ...) IMPL_expectf(IMPL_GENERATE_UNIQUE_NAME(), (condition), format, __VA_ARGS__)
 #    define expect(condition)               expectf((condition), L"Expectation failed: " #condition)
-#    define expectAlwaysf(condition, format, ...)                            \
-        {                                                                    \
-            if(!(condition))                                                 \
-                LogAssert.log(Core::LogLevel::Warning, format, __VA_ARGS__); \
+#    define expectAlwaysf(condition, format, ...)                                          \
+        {                                                                                  \
+            if(!(condition))                                                               \
+                ::Core::Private::LogAssertRef().log(Core::LogLevel::Warning, format, __VA_ARGS__); \
         }
 #    define expectAlways(condition) expectAlwaysf((condition), L"Expectation failed: " #condition)
 #else
@@ -104,7 +107,7 @@ bool verifyfImpl(CondExpr&& cndExpr, wchar_t const* format, Args&&... args)
     bool condition = static_cast<bool>(cndExpr);
     if(!condition)
     {
-        LogAssert.log(Core::LogLevel::Warning, format, std::forward<Args>(args)...);
+        ::Core::Private::LogAssertRef().log(Core::LogLevel::Warning, format, std::forward<Args>(args)...);
     }
     return condition;
 }

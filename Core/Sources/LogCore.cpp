@@ -1,5 +1,4 @@
-#include "CoreLogger.hpp"
-#include "Core/AssertionMacros.hpp"
+#include "LogCore.hpp"
 
 DEFINE_LOGGER_CATEGORY(LogCore)
 DEFINE_LOGGER_CATEGORY(LogAssert)
