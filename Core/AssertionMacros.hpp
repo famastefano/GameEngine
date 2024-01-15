@@ -1,7 +1,7 @@
 #pragma once
 
-#include "BuildConfig.hpp"
-#include "Logging.hpp"
+#include "Core/BuildConfig.hpp"
+#include "Core/Logging.hpp"
 
 namespace Core::Private
 {
