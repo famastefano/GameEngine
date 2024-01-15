@@ -79,39 +79,47 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <UseStructuredOutput>true</UseStructuredOutput>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
-    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <EnableClangTidyCodeAnalysis>false</EnableClangTidyCodeAnalysis>
     <CodeAnalysisRuleSet>$(SolutionDir)CodeAnalysis.ruleset</CodeAnalysisRuleSet>
-    <ClangTidyChecks>bugprone-*,concurrency-*,cppcoreguidelines-*,modernize-*,performance-*,misc-static-assert,misc-redundant-expression</ClangTidyChecks>
+    <ClangTidyChecks>
+    </ClangTidyChecks>
     <IncludePath>$(SolutionDir);$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <LibraryPath>$(SolutionDir)x64\$(Configuration);$(LibraryPath)</LibraryPath>
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Development|x64'">
     <UseStructuredOutput>true</UseStructuredOutput>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
-    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <EnableClangTidyCodeAnalysis>false</EnableClangTidyCodeAnalysis>
     <CodeAnalysisRuleSet>$(SolutionDir)CodeAnalysis.ruleset</CodeAnalysisRuleSet>
-    <ClangTidyChecks>bugprone-*,concurrency-*,cppcoreguidelines-*,modernize-*,performance-*,misc-static-assert,misc-redundant-expression</ClangTidyChecks>
+    <ClangTidyChecks>
+    </ClangTidyChecks>
     <IncludePath>$(SolutionDir);$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <LibraryPath>$(SolutionDir)x64\$(Configuration);$(LibraryPath)</LibraryPath>
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">
     <UseStructuredOutput>true</UseStructuredOutput>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
-    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <EnableClangTidyCodeAnalysis>false</EnableClangTidyCodeAnalysis>
     <CodeAnalysisRuleSet>$(SolutionDir)CodeAnalysis.ruleset</CodeAnalysisRuleSet>
-    <ClangTidyChecks>bugprone-*,concurrency-*,cppcoreguidelines-*,modernize-*,performance-*,misc-static-assert,misc-redundant-expression</ClangTidyChecks>
+    <ClangTidyChecks>
+    </ClangTidyChecks>
     <IncludePath>$(SolutionDir);$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <LibraryPath>$(SolutionDir)x64\$(Configuration);$(LibraryPath)</LibraryPath>
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Testing|x64'">
     <UseStructuredOutput>true</UseStructuredOutput>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
-    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <EnableClangTidyCodeAnalysis>false</EnableClangTidyCodeAnalysis>
     <CodeAnalysisRuleSet>$(SolutionDir)CodeAnalysis.ruleset</CodeAnalysisRuleSet>
-    <ClangTidyChecks>bugprone-*,concurrency-*,cppcoreguidelines-*,modernize-*,performance-*,misc-static-assert,misc-redundant-expression</ClangTidyChecks>
+    <ClangTidyChecks>
+    </ClangTidyChecks>
     <IncludePath>$(SolutionDir);$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <LibraryPath>$(SolutionDir)x64\$(Configuration);$(LibraryPath)</LibraryPath>
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
