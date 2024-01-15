@@ -1,0 +1,92 @@
+#pragma once
+
+#include "Core/Export.hpp"
+
+#include <cstdint>
+#include <cstdio>
+#include <format>
+#include <memory>
+#include <span>
+#include <string>
+
+template<>
+struct std::formatter<char const*, wchar_t>
+{
+    bool quoted = false;
+
+    template<class ParseContext>
+    constexpr ParseContext::iterator parse(ParseContext& ctx)
+    {
+        return ctx.end();
+    }
+
+    template<class FmtContext>
+    FmtContext::iterator format(char const* text, FmtContext& ctx) const
+    {
+        if(text)
+        {
+            std::size_t const len = strlen(text);
+            std::wstring      convertedString(len, L'\0');
+            mbstowcs(convertedString.data(), text, len);
+            return std::ranges::copy(convertedString, ctx.out()).out;
+        }
+        return ctx.out();
+    }
+};
+
+namespace Core
+{
+enum class LogLevel : uint8_t
+{
+    Trace,
+    Debug,
+    Info,
+    Warning,
+    Error,
+    Fatal
+};
+
+namespace Private
+{
+    class CORE_API Logger
+    {
+        FILE*    file;
+        LogLevel currLevel;
+        LogLevel maxLevel;
+
+        public:
+        Logger(char const* name, LogLevel defaultLevel, LogLevel maximumLevel) noexcept;
+        ~Logger();
+
+        void     logText(LogLevel level, wchar_t const* text, std::size_t length) const noexcept;
+        void     changeLevel(LogLevel newLoggingLevel) noexcept;
+        LogLevel currentLevel() const noexcept;
+        LogLevel maximumLevel() const noexcept;
+        bool     canLog(LogLevel level) const noexcept;
+
+        template<typename... Args>
+        void log(LogLevel level, wchar_t const* format, Args&&... args) const noexcept
+        {
+            if(canLog(level))
+            {
+                auto const text{std::vformat(format, std::make_wformat_args(std::forward<Args>(args)...))};
+                logText(level, text.data(), text.size());
+            }
+        }
+    };
+}
+}
+
+#define DECLARE_LOGGER_CATEGORY_EXTERN(CategoryName, DefaultLoggingLevel, MaximumLoggingLevel)                                   \
+    extern struct Logger_##CategoryName : public Core::Private::Logger                                                           \
+    {                                                                                                                            \
+        Logger_##CategoryName() noexcept : Core::Private::Logger(#CategoryName, (DefaultLoggingLevel), (MaximumLoggingLevel)) {} \
+    } CategoryName;
+
+#define DECLARE_LOGGER_CATEGORY(CategoryName, DefaultLoggingLevel, MaximumLoggingLevel)                                          \
+    struct Logger_##CategoryName : public Core::Private::Logger                                                                  \
+    {                                                                                                                            \
+        Logger_##CategoryName() noexcept : Core::Private::Logger(#CategoryName, (DefaultLoggingLevel), (MaximumLoggingLevel)) {} \
+    } CategoryName;
+
+#define DEFINE_LOGGER_CATEGORY(CategoryName) struct Logger_##CategoryName CategoryName;

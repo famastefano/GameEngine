@@ -1,0 +1,64 @@
+#include "Core/Logging.hpp"
+
+#include "Core/AssertionMacros.hpp"
+
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <Windows.h>
+#include <debugapi.h>
+
+namespace Core::Private
+{
+Logger::Logger(char const* name, LogLevel defaultLevel, LogLevel maximumLevel) noexcept
+    : file(fopen(name, "w"))
+    , currLevel(defaultLevel)
+    , maxLevel(maximumLevel)
+{
+    assertf(file != nullptr, L"Couldn't create logger {}", name);
+}
+
+Logger::~Logger()
+{
+    fflush(file);
+    fclose(file);
+}
+
+void Logger::logText(LogLevel level, wchar_t const* text, std::size_t length) const noexcept
+{
+    if(canLog(level))
+    {
+        if(IsDebuggerPresent())
+        {
+            OutputDebugStringW(text);
+            if(level == LogLevel::Fatal)
+                DebugBreak();
+        }
+
+        if(file)
+        {
+            fwrite(text, sizeof(*text), length, file);
+        }
+    }
+}
+
+void Logger::changeLevel(LogLevel newLoggingLevel) noexcept
+{
+    if(static_cast<uint8_t>(newLoggingLevel) >= static_cast<uint8_t>(maxLevel))
+        currLevel = newLoggingLevel;
+}
+
+LogLevel Logger::currentLevel() const noexcept
+{
+    return currLevel;
+}
+
+LogLevel Logger::maximumLevel() const noexcept
+{
+    return maxLevel;
+}
+
+bool Logger::canLog(LogLevel level) const noexcept
+{
+    return static_cast<uint8_t>(level) >= static_cast<uint8_t>(currLevel);
+}
+}
