@@ -42,12 +42,12 @@ struct RecursiveScopeCounter
 };
 }
 // TODO: assertf should log and start and notify the crash handler
-#    define assertf(condition, format, ...)                                \
-        {                                                                  \
-            if(!(condition))                                               \
-            {                                                              \
-                ::Core::Private::LogAssertRef().log(Core::LogLevel::Fatal, format, __VA_ARGS__); \
-            }                                                              \
+#    define assertf(condition, ...)                                                                    \
+        {                                                                                              \
+            if(!(condition))                                                                           \
+            {                                                                                          \
+                ::Core::Private::LogAssertRef().log(Core::LogLevel::Fatal __VA_OPT__(, ) __VA_ARGS__); \
+            }                                                                                          \
         }
 
 #    define IMPL_assertNoReentry(counterName)                                                   \
@@ -67,34 +67,34 @@ struct RecursiveScopeCounter
 #    define assertNoRecursion() IMPL_assertNoRecursion(IMPL_GENERATE_UNIQUE_NAME())
 #else
 #    define assert(condition)
-#    define assertf(condition, format, ...)
+#    define assertf(condition, ...)
 #    define assertNoEntry()
 #    define assertNoReentry()
 #    define assertNoRecursion()
 #endif
 
 #if ENABLE_EXPECT
-#    define IMPL_expectf(checkName, condition, format, ...)                                \
-        {                                                                                  \
-            static bool checkName = false;                                                 \
-            if(!checkName && !(condition))                                                 \
-                ::Core::Private::LogAssertRef().log(Core::LogLevel::Warning, format, __VA_ARGS__); \
-            checkName = true;                                                              \
+#    define IMPL_expectf(checkName, condition, ...)                                                       \
+        {                                                                                                 \
+            static bool checkName = false;                                                                \
+            if(!checkName && !(condition))                                                                \
+                ::Core::Private::LogAssertRef().log(Core::LogLevel::Warning, __VA_OPT__(, ) __VA_ARGS__); \
+            checkName = true;                                                                             \
         }
 
-#    define expectf(condition, format, ...) IMPL_expectf(IMPL_GENERATE_UNIQUE_NAME(), (condition), format, __VA_ARGS__)
-#    define expect(condition)               expectf((condition), L"Expectation failed: " #condition)
-#    define expectAlwaysf(condition, format, ...)                                          \
-        {                                                                                  \
-            if(!(condition))                                                               \
-                ::Core::Private::LogAssertRef().log(Core::LogLevel::Warning, format, __VA_ARGS__); \
+#    define expectf(condition, ...) IMPL_expectf(IMPL_GENERATE_UNIQUE_NAME(), (condition), __VA_ARGS__)
+#    define expect(condition)       expectf((condition), L"Expectation failed: " #condition)
+#    define expectAlwaysf(condition, ...)                                                                 \
+        {                                                                                                 \
+            if(!(condition))                                                                              \
+                ::Core::Private::LogAssertRef().log(Core::LogLevel::Warning, __VA_OPT__(, ) __VA_ARGS__); \
         }
 #    define expectAlways(condition) expectAlwaysf((condition), L"Expectation failed: " #condition)
 #else
-#    define expect(condition)                     condition
-#    define expectf(condition, format, ...)       condition
-#    define expectAlways(condition)               condition
-#    define expectAlwaysf(condition, format, ...) condition
+#    define expect(condition)             condition
+#    define expectf(condition, ...)       condition
+#    define expectAlways(condition)       condition
+#    define expectAlwaysf(condition, ...) condition
 #endif
 
 #if ENABLE_VERIFY
@@ -112,7 +112,7 @@ bool verifyfImpl(CondExpr&& cndExpr, wchar_t const* format, Args&&... args)
     return condition;
 }
 }
-#    define verifyf(condition, format, ...) Private::verifyfImpl((condition), format, __VA_ARGS__)
+#    define verifyf(condition, format, ...) Private::verifyfImpl((condition), __VA_OPT__(, ) __VA_ARGS__)
 #    define verify(condition)               verifyf((condition), "Verification failed: " #condition)
 #else
 #    define verify(condition)               condition
@@ -120,9 +120,9 @@ bool verifyfImpl(CondExpr&& cndExpr, wchar_t const* format, Args&&... args)
 #endif
 
 #if ENABLE_LOGGING
-#    define LOG(Category, Level, format, ...) Category.log(Level, format, __VA_ARGS__)
+#    define LOG(Category, Level, ...) Category.log(Level, __VA_ARGS__)
 #else
-#    define LOG(Category, Level, format, ...)
+#    define LOG(Category, Level, ...)
 #endif
 
 #define unimplemented() assertf(false, "Assertion failed: called unimplemented function.")
