@@ -163,6 +163,7 @@
       <DisableAnalyzeExternal>true</DisableAnalyzeExternal>
       <ErrorReporting>None</ErrorReporting>
       <DisableSpecificWarnings>4505;4530</DisableSpecificWarnings>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -200,6 +201,7 @@
       <ErrorReporting>None</ErrorReporting>
       <DisableSpecificWarnings>4505;4530</DisableSpecificWarnings>
       <WholeProgramOptimization>false</WholeProgramOptimization>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -238,6 +240,7 @@
       <ErrorReporting>None</ErrorReporting>
       <DisableSpecificWarnings>4505;4530</DisableSpecificWarnings>
       <WholeProgramOptimization>false</WholeProgramOptimization>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -275,6 +278,7 @@
       <ErrorReporting>None</ErrorReporting>
       <DisableSpecificWarnings>4505;4530</DisableSpecificWarnings>
       <DebugInformationFormat>None</DebugInformationFormat>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
