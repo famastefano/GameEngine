@@ -18,6 +18,24 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Sources\ExceptionHandlers.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Sources\ExceptionHandlers.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Core\Core.vcxproj">
+      <Project>{f827fdea-f2aa-4ed7-845a-0551edef4911}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\CrashHandlerInterop\CrashHandlerInterop.vcxproj">
+      <Project>{ebb9770f-c310-4e58-a13b-53a7209ec262}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\CrashHandler\CrashHandler.vcxproj">
+      <Project>{ea5908e9-83a3-41b2-92fa-70ed5462eeb3}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -148,7 +166,7 @@
       <DisableSpecificWarnings>4505</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <Profile>false</Profile>
       <LinkErrorReporting>NoErrorReport</LinkErrorReporting>
