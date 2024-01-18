@@ -164,6 +164,7 @@
       <ErrorReporting>None</ErrorReporting>
       <DisableSpecificWarnings>4505;4530</DisableSpecificWarnings>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -204,6 +205,7 @@
       <DisableSpecificWarnings>4505;4530</DisableSpecificWarnings>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -243,6 +245,7 @@
       <DisableSpecificWarnings>4505;4530</DisableSpecificWarnings>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -281,6 +284,7 @@
       <DisableSpecificWarnings>4505;4530</DisableSpecificWarnings>
       <DebugInformationFormat>None</DebugInformationFormat>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
