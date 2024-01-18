@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Core/Export.hpp"
-
 #include <cstdint>
 #include <cstdio>
 #include <format>
@@ -48,7 +46,7 @@ enum class LogLevel : uint8_t
 
 namespace Private
 {
-    class CORE_API Logger
+    class Logger
     {
         FILE*    file;
         LogLevel currLevel;

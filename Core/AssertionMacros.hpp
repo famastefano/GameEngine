@@ -5,7 +5,7 @@
 
 namespace Core::Private
 {
-CORE_API Core::Private::Logger& LogAssertRef();
+Core::Private::Logger& LogAssertRef();
 }
 
 #undef assert

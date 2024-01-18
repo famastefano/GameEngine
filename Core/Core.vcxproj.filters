@@ -24,9 +24,6 @@
     <ClInclude Include="AssertionMacros.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Export.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Logging.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
