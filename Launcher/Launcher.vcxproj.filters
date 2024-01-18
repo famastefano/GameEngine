@@ -18,9 +18,15 @@
     <ClCompile Include="Sources\ExceptionHandlers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\LogLauncher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\ExceptionHandlers.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\LogLauncher.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

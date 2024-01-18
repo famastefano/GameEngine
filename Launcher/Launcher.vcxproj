@@ -20,9 +20,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sources\ExceptionHandlers.cpp" />
+    <ClCompile Include="Sources\LogLauncher.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\ExceptionHandlers.hpp" />
+    <ClInclude Include="Sources\LogLauncher.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.vcxproj">
