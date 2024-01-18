@@ -23,6 +23,7 @@
     <ClCompile Include="Sources\LogLauncher.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Sources\CommandLineParser.hpp" />
     <ClInclude Include="Sources\ExceptionHandlers.hpp" />
     <ClInclude Include="Sources\LogLauncher.hpp" />
   </ItemGroup>
@@ -43,7 +44,7 @@
     <ProjectGuid>{56763223-CF78-4F70-A61E-07BCC36E7E57}</ProjectGuid>
     <RootNamespace>Launcher</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>LauncherLib</ProjectName>
+    <ProjectName>Launcher</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
