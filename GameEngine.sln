@@ -11,9 +11,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CrashHandler", "CrashHandle
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core", "Core\Core.vcxproj", "{F827FDEA-F2AA-4ED7-845A-0551EDEF4911}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{1A7487A0-B38F-4867-BAB3-98FFEEA85005}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ThirdParty", "ThirdParty", "{1D089776-651C-4B6F-A2FF-E0F7CD6FAEE7}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "catch2", "ThirdParty\catch2\catch2.vcxproj", "{97DED307-64C8-4285-B51B-6214A3CDD0C7}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PrecompiledMain", "PrecompiledMain\PrecompiledMain.vcxproj", "{66FA7406-0FC9-499C-A100-FA59E9E3EA5A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
