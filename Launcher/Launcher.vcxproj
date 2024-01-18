@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="Sources\ExceptionHandlers.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -29,11 +28,11 @@
     <ProjectReference Include="..\Core\Core.vcxproj">
       <Project>{f827fdea-f2aa-4ed7-845a-0551edef4911}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\CrashHandlerExecutable\CrashHandlerExecutable.vcxproj">
+      <Project>{ea5908e9-83a3-41b2-92fa-70ed5462eeb3}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\CrashHandlerInterop\CrashHandlerInterop.vcxproj">
       <Project>{ebb9770f-c310-4e58-a13b-53a7209ec262}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\CrashHandler\CrashHandler.vcxproj">
-      <Project>{ea5908e9-83a3-41b2-92fa-70ed5462eeb3}</Project>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -42,6 +41,7 @@
     <ProjectGuid>{56763223-CF78-4F70-A61E-07BCC36E7E57}</ProjectGuid>
     <RootNamespace>Launcher</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>LauncherLib</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -54,7 +54,7 @@
     <EnableFuzzer>false</EnableFuzzer>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Development|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -62,7 +62,7 @@
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Testing|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -70,7 +70,7 @@
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
