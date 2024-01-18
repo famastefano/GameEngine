@@ -59,9 +59,29 @@ Global
 		{F827FDEA-F2AA-4ED7-845A-0551EDEF4911}.Shipping|x64.Build.0 = Shipping|x64
 		{F827FDEA-F2AA-4ED7-845A-0551EDEF4911}.Testing|x64.ActiveCfg = Testing|x64
 		{F827FDEA-F2AA-4ED7-845A-0551EDEF4911}.Testing|x64.Build.0 = Testing|x64
+		{97DED307-64C8-4285-B51B-6214A3CDD0C7}.Debug|x64.ActiveCfg = Debug|x64
+		{97DED307-64C8-4285-B51B-6214A3CDD0C7}.Debug|x64.Build.0 = Debug|x64
+		{97DED307-64C8-4285-B51B-6214A3CDD0C7}.Development|x64.ActiveCfg = Development|x64
+		{97DED307-64C8-4285-B51B-6214A3CDD0C7}.Development|x64.Build.0 = Development|x64
+		{97DED307-64C8-4285-B51B-6214A3CDD0C7}.Shipping|x64.ActiveCfg = Shipping|x64
+		{97DED307-64C8-4285-B51B-6214A3CDD0C7}.Shipping|x64.Build.0 = Shipping|x64
+		{97DED307-64C8-4285-B51B-6214A3CDD0C7}.Testing|x64.ActiveCfg = Testing|x64
+		{97DED307-64C8-4285-B51B-6214A3CDD0C7}.Testing|x64.Build.0 = Testing|x64
+		{66FA7406-0FC9-499C-A100-FA59E9E3EA5A}.Debug|x64.ActiveCfg = Debug|x64
+		{66FA7406-0FC9-499C-A100-FA59E9E3EA5A}.Debug|x64.Build.0 = Debug|x64
+		{66FA7406-0FC9-499C-A100-FA59E9E3EA5A}.Development|x64.ActiveCfg = Development|x64
+		{66FA7406-0FC9-499C-A100-FA59E9E3EA5A}.Development|x64.Build.0 = Development|x64
+		{66FA7406-0FC9-499C-A100-FA59E9E3EA5A}.Shipping|x64.ActiveCfg = Shipping|x64
+		{66FA7406-0FC9-499C-A100-FA59E9E3EA5A}.Shipping|x64.Build.0 = Shipping|x64
+		{66FA7406-0FC9-499C-A100-FA59E9E3EA5A}.Testing|x64.ActiveCfg = Testing|x64
+		{66FA7406-0FC9-499C-A100-FA59E9E3EA5A}.Testing|x64.Build.0 = Testing|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{97DED307-64C8-4285-B51B-6214A3CDD0C7} = {1D089776-651C-4B6F-A2FF-E0F7CD6FAEE7}
+		{66FA7406-0FC9-499C-A100-FA59E9E3EA5A} = {1A7487A0-B38F-4867-BAB3-98FFEEA85005}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {01D0B71C-D6CC-448F-8DFA-8864AE771609}
