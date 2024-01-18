@@ -103,7 +103,7 @@ namespace Private
 template<typename CondExpr, typename... Args>
 bool verifyfImpl(CondExpr&& cndExpr, wchar_t const* format, Args&&... args)
 {
-    static_assert(std::is_convertible_v<CondExpr, bool>, "verify/verifyf can't convert the expression to bool");
+    static_assert(std::is_convertible_v<CondExpr, bool>, L"verify/verifyf can't convert the expression to bool");
     bool condition = static_cast<bool>(cndExpr);
     if(!condition)
     {
@@ -113,7 +113,7 @@ bool verifyfImpl(CondExpr&& cndExpr, wchar_t const* format, Args&&... args)
 }
 }
 #    define verifyf(condition, format, ...) Private::verifyfImpl((condition), __VA_OPT__(, ) __VA_ARGS__)
-#    define verify(condition)               verifyf((condition), "Verification failed: " #condition)
+#    define verify(condition)               verifyf((condition), L"Verification failed: " #condition)
 #else
 #    define verify(condition)               condition
 #    define verifyf(condition, format, ...) condition
@@ -125,4 +125,4 @@ bool verifyfImpl(CondExpr&& cndExpr, wchar_t const* format, Args&&... args)
 #    define LOG(Category, Level, ...)
 #endif
 
-#define unimplemented() assertf(false, "Assertion failed: called unimplemented function.")
+#define unimplemented() assertf(false, L"Assertion failed: called unimplemented function.")
