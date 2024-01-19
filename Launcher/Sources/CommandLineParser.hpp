@@ -103,7 +103,7 @@ class CommandLineParser
                 ViewType          name             = arg.substr(2, paramListInitPos);
                 if(isValidArgName(name))
                 {
-                    if(paramListInitPos != ViewType::npos)
+                    if(paramListInitPos == ViewType::npos)
                     {
                         // long flag like: `--help` or `--verbose`
                         results.hashedFlags.emplace(std::hash<ViewType>{}(name));
