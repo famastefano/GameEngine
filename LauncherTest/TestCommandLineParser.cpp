@@ -35,6 +35,16 @@ class ArgvHelper
     }
 };
 
+template<typename CharType, std::size_t N>
+std::basic_string<CharType> makeString(char const (&param)[N])
+{
+    using Traits = typename std::char_traits<CharType>;
+    std::basic_string<CharType> str(N - 1, CharType('\0'));
+    for(std::size_t i = 0; i < N - 1; ++i)
+        str[i] = Traits::to_char_type(param[i]);
+    return str;
+}
+
 TEMPLATE_TEST_CASE("Using the Command Line Parser", "[launcher]", char, wchar_t)
 {
     using Parser  = CommandLineParser<TestType>;
