@@ -50,7 +50,7 @@ class CommandLineParseResults
     bool isAnySet(ViewType flags) const noexcept
     {
         for(CharType flag: flags)
-            if(!isSet(flag))
+            if(isSet(flag))
                 return true;
         return false;
     }
