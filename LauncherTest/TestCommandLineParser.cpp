@@ -94,4 +94,63 @@ TEMPLATE_TEST_CASE("Using the Command Line Parser", "[launcher]", char, wchar_t)
     }
     }
 
+    SECTION("The results contains the short flags")
+    {
+        SECTION("if one flag is exist")
+        {
+            Results const params = parser.parse(helper.append("-x").argv());
+            auto          xstr   = makeString<TestType>("x");
+            REQUIRE(params.isSet(TestType('x')));
+            REQUIRE(params.isAnySet(xstr));
+            REQUIRE(params.areAllSet(xstr));
+        }
+
+        SECTION("if multiple flags as the same parameter are passed")
+        {
+            Results const params = parser.parse(helper.append("-xvf").argv());
+            auto          xvf    = makeString<TestType>("xvf");
+            auto          vf     = makeString<TestType>("vf");
+            auto          fv     = makeString<TestType>("fv");
+            REQUIRE(params.isSet(TestType('x')));
+            REQUIRE(params.isSet(TestType('v')));
+            REQUIRE(params.isSet(TestType('f')));
+            REQUIRE(params.isAnySet(xvf));
+            REQUIRE(params.areAllSet(xvf));
+            REQUIRE(params.areAllSet(vf));
+            REQUIRE(params.areAllSet(fv));
+        }
+
+        SECTION("if multiple flags as different parameters are passed")
+        {
+            Results const params = parser.parse(helper
+                                                    .append("-x")
+                                                    .append("-v")
+                                                    .append("-f")
+                                                    .argv());
+            auto          xvf    = makeString<TestType>("xvf");
+            auto          vf     = makeString<TestType>("vf");
+            auto          fv     = makeString<TestType>("fv");
+            REQUIRE(params.isSet(TestType('x')));
+            REQUIRE(params.isSet(TestType('v')));
+            REQUIRE(params.isSet(TestType('f')));
+            REQUIRE(params.isAnySet(xvf));
+            REQUIRE(params.areAllSet(xvf));
+            REQUIRE(params.areAllSet(vf));
+            REQUIRE(params.areAllSet(fv));
+        }
+
+        SECTION("if multiple parameters are passed, and some are contiguous")
+        {
+            Results const params = parser.parse(helper
+                                                    .append("-x")
+                                                    .append("-xvf")
+                                                    .append("-fqt")
+                                                    .append("-pxq")
+                                                    .append("-nsb")
+                                                    .argv());
+            auto          str    = makeString<TestType>("xvfqtpq");
+            REQUIRE(params.areAllSet(str));
+        }
+    }
+
 }
