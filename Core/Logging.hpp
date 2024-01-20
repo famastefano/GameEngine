@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Core/Export.hpp"
-
+#include <algorithm>
 #include <cstdint>
 #include <cstdio>
 #include <format>
@@ -25,7 +24,6 @@ struct std::formatter<char const*, wchar_t>
     {
         if(text)
         {
-            // TODO: move this in the source file to avoid header-leaks
             std::mbstate_t state{};
             auto           converter = [&state](char c)
             {
@@ -55,7 +53,6 @@ struct std::formatter<std::string_view, wchar_t>
     {
         if(!text.empty())
         {
-            // TODO: move this in the source file to avoid header-leaks
             std::mbstate_t state{};
             auto           converter = [&state](char c)
             {
@@ -83,7 +80,7 @@ enum class LogLevel : uint8_t
 
 namespace Private
 {
-    class CORE_API Logger
+    class Logger
     {
         FILE*    file;
         LogLevel currLevel;
