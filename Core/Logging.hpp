@@ -25,10 +25,45 @@ struct std::formatter<char const*, wchar_t>
     {
         if(text)
         {
-            std::size_t const len = strlen(text);
-            std::wstring      convertedString(len, L'\0');
-            mbstowcs(convertedString.data(), text, len);
-            return std::ranges::copy(convertedString, ctx.out()).out;
+            // TODO: move this in the source file to avoid header-leaks
+            std::mbstate_t state{};
+            auto           converter = [&state](char c)
+            {
+                wchar_t wc;
+                std::mbrtowc(&wc, &c, sizeof(char), &state);
+                return wc;
+            };
+            return std::transform(text, text + std::strlen(text), ctx.out(), converter);
+        }
+        return ctx.out();
+    }
+};
+
+template<>
+struct std::formatter<std::string_view, wchar_t>
+{
+    bool quoted = false;
+
+    template<class ParseContext>
+    constexpr ParseContext::iterator parse(ParseContext& ctx)
+    {
+        return ctx.end();
+    }
+
+    template<class FmtContext>
+    FmtContext::iterator format(std::string_view text, FmtContext& ctx) const
+    {
+        if(!text.empty())
+        {
+            // TODO: move this in the source file to avoid header-leaks
+            std::mbstate_t state{};
+            auto           converter = [&state](char c)
+            {
+                wchar_t wc;
+                std::mbrtowc(&wc, &c, sizeof(char), &state);
+                return wc;
+            };
+            return std::ranges::transform(text.data(), text.data() + text.size(), ctx.out(), converter).out;
         }
         return ctx.out();
     }
