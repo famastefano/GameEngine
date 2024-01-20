@@ -38,6 +38,35 @@ struct std::formatter<char const*, wchar_t>
 };
 
 template<>
+struct std::formatter<std::string, wchar_t>
+{
+    bool quoted = false;
+
+    template<class ParseContext>
+    constexpr ParseContext::iterator parse(ParseContext& ctx)
+    {
+        return ctx.end();
+    }
+
+    template<class FmtContext>
+    FmtContext::iterator format(std::string const& text, FmtContext& ctx) const
+    {
+        if(!text.empty())
+        {
+            std::mbstate_t state{};
+            auto           converter = [&state](char c)
+            {
+                wchar_t wc;
+                std::mbrtowc(&wc, &c, sizeof(char), &state);
+                return wc;
+            };
+            return std::transform(text.cbegin(), text.cend(), ctx.out(), converter);
+        }
+        return ctx.out();
+    }
+};
+
+template<>
 struct std::formatter<std::string_view, wchar_t>
 {
     bool quoted = false;
