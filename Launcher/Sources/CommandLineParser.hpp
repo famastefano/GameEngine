@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cwctype>
+#include <iterator>
 #include <set>
 #include <span>
 #include <string_view>
@@ -39,6 +40,10 @@ class CommandLineParseResults
     bool isSet(CharType flag) const noexcept
     {
         return hashedFlags.contains(std::hash<CharType>{}(flag));
+    }
+    bool isSet(ViewType flag) const noexcept
+    {
+        return hashedFlags.contains(std::hash<ViewType>{}(flag)) || flagsWithParamList.contains(flag);
     }
     bool areAllSet(ViewType flags) const noexcept
     {
@@ -100,7 +105,7 @@ class CommandLineParser
             if(len > 2 && arg[0] == prefix && arg[1] == prefix)
             {
                 std::size_t const paramListInitPos = arg.find(paramListInit);
-                ViewType          name             = arg.substr(2, paramListInitPos);
+                ViewType          name             = arg.substr(2, paramListInitPos - 2);
                 if(isValidArgName(name))
                 {
                     if(paramListInitPos == ViewType::npos)
@@ -110,17 +115,52 @@ class CommandLineParser
                     }
                     else
                     {
+                        /*
+                        
+                        --folder="C:\Program Files\",/usr/bin,"ftp://10.0.0.0/secret/"
+
+                          ^name^
+                                ^curr
+                                                    ^next
+                                                             ^next
+                                                                                      ^next=npos
+                        --LogAssert=Trace
+                          ^  name ^
+                                   ^curr
+                                         ^next=npos
+                        
+                        */
+
                         std::vector<ViewType> params;
-                        std::size_t           curr = paramListInitPos;
-                        do
+                        std::size_t           curr = paramListInitPos + 1;
+                        if(curr < arg.size())
                         {
-                            std::size_t const next  = arg.find(separator, curr);
-                            ViewType          param = arg.substr(curr, next);
-                            if(param.starts_with(quote)) param.remove_prefix(1);
-                            if(param.ends_with(quote)) param.remove_suffix(1);
-                            params.emplace_back(param);
-                            curr = next;
-                        } while(curr != ViewType::npos);
+                            do
+                            {
+                                std::size_t next;
+                                if(arg[curr] == quote)
+                                    next = arg.find(quote, curr + 1);
+                                else
+                                    next = arg.find(separator, curr);
+                                std::size_t const length = next != ViewType::npos ? next - curr : next;
+                                ViewType          param  = arg.substr(curr, length);
+                                if(param.starts_with(quote)) param.remove_prefix(1);
+                                if(param.ends_with(quote)) param.remove_suffix(1);
+                                if(!param.empty()) params.emplace_back(param);
+                                curr = next != ViewType::npos ? next + 1 : next;
+                            } while(curr < arg.size());
+                        }
+
+                        if(!params.empty())
+                        {
+                            auto& list = results.flagsWithParamList[name];
+                            std::ranges::move(params, std::back_inserter(list));
+                        }
+                        else
+                        {
+                            results.hashedFlags.emplace(std::hash<ViewType>{}(name));
+                            LOG(LogLauncher, Core::LogLevel::Warning, L"Argument has an empty parameter list: {}", arg);
+                        }
                     }
                 }
                 else
