@@ -1,6 +1,7 @@
 #include "Core/Logging.hpp"
 
 #include "Core/AssertionMacros.hpp"
+#include "Core/LoggerManager.hpp"
 
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
@@ -9,18 +10,26 @@
 
 namespace Core::Private
 {
-Logger::Logger(char const* name, LogLevel defaultLevel, LogLevel maximumLevel) noexcept
-    : file(fopen(name, "w"))
+Logger::Logger(wchar_t const* name, LogLevel defaultLevel, LogLevel maximumLevel) noexcept
+    : name(name)
     , currLevel(defaultLevel)
     , maxLevel(maximumLevel)
 {
     assertf(file != nullptr, L"Couldn't create logger {}", name);
+
+    LoggerManager::registerLogger(name, *this);
 }
 
 Logger::~Logger()
 {
+    LoggerManager::unregisterLogger(name);
     fflush(file);
     fclose(file);
+}
+
+void Logger::flush() noexcept
+{
+    fflush(file);
 }
 
 void Logger::logText(LogLevel level, wchar_t const* text, std::size_t length) const noexcept

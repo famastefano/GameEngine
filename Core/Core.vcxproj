@@ -22,12 +22,15 @@
     <ClInclude Include="AssertionMacros.hpp" />
     <ClInclude Include="BuildConfig.hpp" />
     <ClInclude Include="Core.hpp" />
+    <ClInclude Include="LoggerManager.hpp" />
     <ClInclude Include="Logging.hpp" />
+    <ClInclude Include="LoggingLevels.hpp" />
     <ClInclude Include="Sources\LogCore.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sources\AssertionMacros.cpp" />
     <ClCompile Include="Sources\LogCore.cpp" />
+    <ClCompile Include="Sources\LoggerManager.cpp" />
     <ClCompile Include="Sources\Logging.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

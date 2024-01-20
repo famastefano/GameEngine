@@ -1,7 +1,8 @@
 #pragma once
 
+#include "Core/LoggingLevels.hpp"
+
 #include <algorithm>
-#include <cstdint>
 #include <cstdio>
 #include <format>
 #include <memory>
@@ -97,28 +98,20 @@ struct std::formatter<std::string_view, wchar_t>
 
 namespace Core
 {
-enum class LogLevel : uint8_t
-{
-    Trace,
-    Debug,
-    Info,
-    Warning,
-    Error,
-    Fatal
-};
-
 namespace Private
 {
     class Logger
     {
-        FILE*    file;
-        LogLevel currLevel;
-        LogLevel maxLevel;
+        std::wstring_view name;
+        FILE*             file;
+        LogLevel          currLevel;
+        LogLevel          maxLevel;
 
         public:
-        Logger(char const* name, LogLevel defaultLevel, LogLevel maximumLevel) noexcept;
+        Logger(wchar_t const* name, LogLevel defaultLevel, LogLevel maximumLevel) noexcept;
         ~Logger();
 
+        void     flush() noexcept;
         void     logText(LogLevel level, wchar_t const* text, std::size_t length) const noexcept;
         void     changeLevel(LogLevel newLoggingLevel) noexcept;
         LogLevel currentLevel() const noexcept;
@@ -141,13 +134,13 @@ namespace Private
 #define DECLARE_LOGGER_CATEGORY_EXTERN(CategoryName, DefaultLoggingLevel, MaximumLoggingLevel)                                   \
     extern struct Logger_##CategoryName : public Core::Private::Logger                                                           \
     {                                                                                                                            \
-        Logger_##CategoryName() noexcept : Core::Private::Logger(#CategoryName, (DefaultLoggingLevel), (MaximumLoggingLevel)) {} \
+        Logger_##CategoryName() noexcept : Core::Private::Logger(L""#CategoryName, (DefaultLoggingLevel), (MaximumLoggingLevel)) {} \
     } CategoryName;
 
 #define DECLARE_LOGGER_CATEGORY(CategoryName, DefaultLoggingLevel, MaximumLoggingLevel)                                          \
     struct Logger_##CategoryName : public Core::Private::Logger                                                                  \
     {                                                                                                                            \
-        Logger_##CategoryName() noexcept : Core::Private::Logger(#CategoryName, (DefaultLoggingLevel), (MaximumLoggingLevel)) {} \
+        Logger_##CategoryName() noexcept : Core::Private::Logger(L""#CategoryName, (DefaultLoggingLevel), (MaximumLoggingLevel)) {} \
     } CategoryName;
 
 #define DEFINE_LOGGER_CATEGORY(CategoryName) struct Logger_##CategoryName CategoryName;
