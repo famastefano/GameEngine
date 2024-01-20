@@ -7,6 +7,7 @@
 #define NOMINMAX
 #include <Windows.h>
 #include <debugapi.h>
+#include <filesystem>
 
 namespace Core::Private
 {
@@ -15,6 +16,8 @@ Logger::Logger(wchar_t const* name, LogLevel defaultLevel, LogLevel maximumLevel
     , currLevel(defaultLevel)
     , maxLevel(maximumLevel)
 {
+    auto const loggerPath = LoggerManager::folder() + L"/" + name + L".log";
+    file                  = _wfopen(loggerPath.data(), L"ac, ccs=UTF-8");
     assertf(file != nullptr, L"Couldn't create logger {}", name);
 
     LoggerManager::registerLogger(name, *this);
@@ -45,7 +48,8 @@ void Logger::logText(LogLevel level, wchar_t const* text, std::size_t length) co
 
         if(file)
         {
-            fwrite(text, sizeof(*text), length, file);
+            fwprintf(file, L"%*s", static_cast<int>(length), text);
+            fwprintf(file, L"\n");
         }
     }
 }
