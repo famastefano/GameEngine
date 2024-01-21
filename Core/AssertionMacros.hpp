@@ -3,6 +3,8 @@
 #include "Core/BuildConfig.hpp"
 #include "Core/Logging.hpp"
 
+#include <chrono>
+
 #if ENABLE_LOGGING
 namespace Core::Private
 {
@@ -122,9 +124,12 @@ bool verifyfImpl(CondExpr&& cndExpr, wchar_t const* format, Args&&... args)
 #endif
 
 #if ENABLE_LOGGING
-#    define LOG(Category, Level, ...) Category.log(Level, __VA_ARGS__)
+#    define LOG(Category, Level, format, ...)                      \
+        Category.log(Level, L"{:%Y-%m-%d %T} " #Category L" {:<8} " format L"\n", \
+                     std::chrono::system_clock::now(),             \
+                     Level __VA_OPT__(, ) __VA_ARGS__)
 #else
-#    define LOG(Category, Level, ...)
+#    define LOG(Category, Level, format, ...)
 #endif
 
 #define unimplemented() assertf(false, L"Assertion failed: called unimplemented function.")
