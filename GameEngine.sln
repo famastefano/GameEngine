@@ -27,6 +27,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestHelpers", "TestHelpers"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PrecompiledMain", "PrecompiledMain\PrecompiledMain.vcxproj", "{66FA7406-0FC9-499C-A100-FA59E9E3EA5A}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestCommon", "TestCommon\TestCommon.vcxproj", "{79AFA9DA-777D-4550-B0F5-A11F78A9C345}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -85,6 +87,12 @@ Global
 		{66FA7406-0FC9-499C-A100-FA59E9E3EA5A}.Development|x64.Build.0 = Development|x64
 		{66FA7406-0FC9-499C-A100-FA59E9E3EA5A}.Shipping|x64.ActiveCfg = Shipping|x64
 		{66FA7406-0FC9-499C-A100-FA59E9E3EA5A}.Testing|x64.ActiveCfg = Testing|x64
+		{79AFA9DA-777D-4550-B0F5-A11F78A9C345}.Debug|x64.ActiveCfg = Debug|x64
+		{79AFA9DA-777D-4550-B0F5-A11F78A9C345}.Debug|x64.Build.0 = Debug|x64
+		{79AFA9DA-777D-4550-B0F5-A11F78A9C345}.Development|x64.ActiveCfg = Development|x64
+		{79AFA9DA-777D-4550-B0F5-A11F78A9C345}.Development|x64.Build.0 = Development|x64
+		{79AFA9DA-777D-4550-B0F5-A11F78A9C345}.Shipping|x64.ActiveCfg = Shipping|x64
+		{79AFA9DA-777D-4550-B0F5-A11F78A9C345}.Testing|x64.ActiveCfg = Testing|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -97,6 +105,7 @@ Global
 		{B0A90678-3C30-45FA-B457-E7D4BFAA02EE} = {233B5C2A-3B61-4642-B5B1-AE5E604011C4}
 		{EA5908E9-83A3-41B2-92FA-70ED5462EEB3} = {6BAE95A7-046F-480C-81B3-8E99FE23BCBD}
 		{66FA7406-0FC9-499C-A100-FA59E9E3EA5A} = {01C82970-0505-42B3-865C-1C24858CFAD7}
+		{79AFA9DA-777D-4550-B0F5-A11F78A9C345} = {01C82970-0505-42B3-865C-1C24858CFAD7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {01D0B71C-D6CC-448F-8DFA-8864AE771609}
