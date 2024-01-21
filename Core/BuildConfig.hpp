@@ -54,6 +54,9 @@
 #    ifndef ENABLE_LOGGING
 #        define ENABLE_LOGGING 1
 #    endif
+#    ifndef ENABLE_TESTS
+#        define ENABLE_TESTS 1
+#    endif
 #elif BUILD_CONFIG_DEVELOPMENT
 #    ifndef ENABLE_ASSERT
 #        define ENABLE_ASSERT 1
@@ -67,6 +70,9 @@
 #    ifndef ENABLE_LOGGING
 #        define ENABLE_LOGGING 1
 #    endif
+#    ifndef ENABLE_TESTS
+#        define ENABLE_TESTS 1
+#    endif
 #elif BUILD_CONFIG_TESTING
 #    ifndef ENABLE_ASSERT
 #        define ENABLE_ASSERT 1
@@ -79,6 +85,9 @@
 #    endif
 #    ifndef ENABLE_LOGGING
 #        define ENABLE_LOGGING 1
+#    endif
+#    ifndef ENABLE_TESTS
+#        define ENABLE_TESTS 0
 #    endif
 #elif BUILD_CONFIG_SHIPPING
 #    ifndef ENABLE_ASSERT_IN_SHIPPING
@@ -95,6 +104,9 @@
 #    endif
 #    ifndef ENABLE_LOGGING
 #        define ENABLE_LOGGING 0
+#    endif
+#    ifndef ENABLE_TESTS
+#        define ENABLE_TESTS 0
 #    endif
 #else
 #    error Exactly one of [BUILD_CONFIG_DEBUG BUILD_CONFIG_DEVELOPMENT BUILD_CONFIG_TESTING BUILD_CONFIG_SHIPPING] should be defined to be 1

@@ -42,4 +42,16 @@ void LoggerManager::changeLoggerLevel(std::wstring_view name, LogLevel newLevel)
     if(auto it = loggers.find(name); it != loggers.end())
         it->second->changeLevel(newLevel);
 }
+
+#if ENABLE_TESTS
+void LoggerManager::setGlobalErrorFlag() noexcept
+{
+    (void)globalErrorFlag.test_and_set();
+}
+
+bool LoggerManager::isGlobalErrorSet() noexcept
+{
+    return globalErrorFlag.test();
+}
+#endif
 }
