@@ -11,31 +11,75 @@
 #include <span>
 #include <string>
 
-template<>
-struct std::formatter<char const*, wchar_t>
+namespace Core::Private::Logging
 {
-    bool quoted = false;
+template<typename OutputIt, typename InputIt>
+[[maybe_unused]] constexpr OutputIt convertToWideString(OutputIt out, InputIt begin, InputIt end)
+{
+    std::mbstate_t state{};
+    auto           converter = [&state](char c)
+    {
+        wchar_t wc;
+        std::mbrtowc(&wc, &c, sizeof(char), &state);
+        return wc;
+    };
+    return std::transform(begin, end, out, converter);
+}
+
+template<class ParseContext>
+constexpr ParseContext::iterator extractFormat(ParseContext& ctx, std::wstring& format)
+{
+    std::wstring localFmt;
+    auto         pos = ctx.begin();
+    while(pos != ctx.end())
+    {
+        wchar_t c = wchar_t(*pos);
+        if(c == L'}')
+            break;
+        ++pos;
+        localFmt += c;
+    }
+    format = localFmt.empty() ? L"{}" : L"{:" + localFmt + L'}';
+    return pos;
+}
+}
+
+template<std::size_t N>
+struct std::formatter<char const [N], wchar_t>
+{
+    std::wstring fmt;
 
     template<class ParseContext>
-    constexpr ParseContext::iterator parse(ParseContext& ctx)
+    constexpr ParseContext::iterator parse(ParseContext & ctx)
     {
-        return ctx.end();
+        return ::Core::Private::Logging::extractFormat(ctx, fmt);
     }
 
     template<class FmtContext>
     FmtContext::iterator format(char const* text, FmtContext& ctx) const
     {
-        if(text)
-        {
-            std::mbstate_t state{};
-            auto           converter = [&state](char c)
-            {
-                wchar_t wc;
-                std::mbrtowc(&wc, &c, sizeof(char), &state);
-                return wc;
-            };
-            return std::transform(text, text + std::strlen(text), ctx.out(), converter);
-        }
+        if(!text.empty())
+            return std::vformat_to(ctx.out(), fmt, std::make_wformat_args(std::string_view{text, N}));
+        return ctx.out();
+    }
+};
+
+template<>
+struct std::formatter<char const*, wchar_t>
+{
+    std::wstring fmt;
+
+    template<class ParseContext>
+    constexpr ParseContext::iterator parse(ParseContext& ctx)
+    {
+        return ::Core::Private::Logging::extractFormat(ctx, fmt);
+    }
+
+    template<class FmtContext>
+    FmtContext::iterator format(char const* text, FmtContext& ctx) const
+    {
+        if(!text.empty())
+            return std::vformat_to(ctx.out(), fmt, std::make_wformat_args(std::string_view{text}));
         return ctx.out();
     }
 };
@@ -43,28 +87,19 @@ struct std::formatter<char const*, wchar_t>
 template<>
 struct std::formatter<std::string, wchar_t>
 {
-    bool quoted = false;
+    std::wstring fmt;
 
     template<class ParseContext>
     constexpr ParseContext::iterator parse(ParseContext& ctx)
     {
-        return ctx.end();
+        return ::Core::Private::Logging::extractFormat(ctx, fmt);
     }
 
     template<class FmtContext>
     FmtContext::iterator format(std::string const& text, FmtContext& ctx) const
     {
         if(!text.empty())
-        {
-            std::mbstate_t state{};
-            auto           converter = [&state](char c)
-            {
-                wchar_t wc;
-                std::mbrtowc(&wc, &c, sizeof(char), &state);
-                return wc;
-            };
-            return std::transform(text.cbegin(), text.cend(), ctx.out(), converter);
-        }
+            return std::vformat_to(ctx.out(), fmt, std::make_wformat_args(std::string_view{text}));
         return ctx.out();
     }
 };
@@ -72,12 +107,12 @@ struct std::formatter<std::string, wchar_t>
 template<>
 struct std::formatter<std::string_view, wchar_t>
 {
-    bool quoted = false;
+    std::wstring fmt;
 
     template<class ParseContext>
     constexpr ParseContext::iterator parse(ParseContext& ctx)
     {
-        return ctx.end();
+        return ::Core::Private::Logging::extractFormat(ctx, fmt);
     }
 
     template<class FmtContext>
@@ -85,14 +120,16 @@ struct std::formatter<std::string_view, wchar_t>
     {
         if(!text.empty())
         {
-            std::mbstate_t state{};
-            auto           converter = [&state](char c)
+            if(fmt == L"{}")
             {
-                wchar_t wc;
-                std::mbrtowc(&wc, &c, sizeof(char), &state);
-                return wc;
-            };
-            return std::ranges::transform(text.data(), text.data() + text.size(), ctx.out(), converter).out;
+                return ::Core::Private::Logging::convertToWideString(ctx.out(), text.data(), text.data() + text.size());
+            }
+            else
+            {
+                std::wstring str(text.size(), L'\0');
+                ::Core::Private::Logging::convertToWideString(str.data(), text.data(), text.data() + text.size());
+                return std::vformat_to(ctx.out(), fmt, std::make_wformat_args(str));
+            }
         }
         return ctx.out();
     }
@@ -106,18 +143,7 @@ struct std::formatter<Core::LogLevel, wchar_t>
     template<class ParseContext>
     constexpr ParseContext::iterator parse(ParseContext& ctx)
     {
-        std::wstring localFmt;
-        auto         pos = ctx.begin();
-        while(pos != ctx.end())
-        {
-            wchar_t c = wchar_t(*pos);
-            if(c == L'}')
-                break;
-            ++pos;
-            localFmt += c;
-        }
-        fmt = localFmt.empty() ? L"{}" : L"{:" + localFmt + L'}';
-        return pos;
+        return ::Core::Private::Logging::extractFormat(ctx, fmt);
     }
 
     template<class FmtContext>
