@@ -4,6 +4,7 @@
 #include "Core/LoggingLevels.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cstdio>
 #include <format>
 #include <memory>
@@ -94,6 +95,42 @@ struct std::formatter<std::string_view, wchar_t>
             return std::ranges::transform(text.data(), text.data() + text.size(), ctx.out(), converter).out;
         }
         return ctx.out();
+    }
+};
+
+template<>
+struct std::formatter<Core::LogLevel, wchar_t>
+{
+    std::wstring fmt;
+
+    template<class ParseContext>
+    constexpr ParseContext::iterator parse(ParseContext& ctx)
+    {
+        std::wstring localFmt;
+        auto         pos = ctx.begin();
+        while(pos != ctx.end())
+        {
+            wchar_t c = wchar_t(*pos);
+            if(c == L'}')
+                break;
+            ++pos;
+            localFmt += c;
+        }
+        fmt = localFmt.empty() ? L"{}" : L"{:" + localFmt + L'}';
+        return pos;
+    }
+
+    template<class FmtContext>
+    FmtContext::iterator format(Core::LogLevel level, FmtContext& ctx) const
+    {
+        constexpr std::array<std::wstring_view, 6> levelTable{
+            L"Trace",
+            L"Debug",
+            L"Info",
+            L"Warning",
+            L"Error",
+            L"Fatal"};
+        return std::vformat_to(ctx.out(), fmt, std::make_wformat_args(levelTable[static_cast<uint8_t>(level)]));
     }
 };
 
