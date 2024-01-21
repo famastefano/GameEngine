@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core/BuildConfig.hpp"
 #include "Core/LoggingLevels.hpp"
 
 #include <algorithm>
@@ -131,16 +132,22 @@ namespace Private
 }
 }
 
-#define DECLARE_LOGGER_CATEGORY_EXTERN(CategoryName, DefaultLoggingLevel, MaximumLoggingLevel)                                       \
-    extern struct Logger_##CategoryName : public Core::Private::Logger                                                               \
-    {                                                                                                                                \
-        Logger_##CategoryName() noexcept : Core::Private::Logger(L"" #CategoryName, (DefaultLoggingLevel), (MaximumLoggingLevel)) {} \
-    } CategoryName;
+#if ENABLE_LOGGING
+#    define DECLARE_LOGGER_CATEGORY_EXTERN(CategoryName, DefaultLoggingLevel, MaximumLoggingLevel)                                       \
+        extern struct Logger_##CategoryName : public Core::Private::Logger                                                               \
+        {                                                                                                                                \
+            Logger_##CategoryName() noexcept : Core::Private::Logger(L"" #CategoryName, (DefaultLoggingLevel), (MaximumLoggingLevel)) {} \
+        } CategoryName;
 
-#define DECLARE_LOGGER_CATEGORY(CategoryName, DefaultLoggingLevel, MaximumLoggingLevel)                                              \
-    struct Logger_##CategoryName : public Core::Private::Logger                                                                      \
-    {                                                                                                                                \
-        Logger_##CategoryName() noexcept : Core::Private::Logger(L"" #CategoryName, (DefaultLoggingLevel), (MaximumLoggingLevel)) {} \
-    } CategoryName;
+#    define DECLARE_LOGGER_CATEGORY(CategoryName, DefaultLoggingLevel, MaximumLoggingLevel)                                              \
+        struct Logger_##CategoryName : public Core::Private::Logger                                                                      \
+        {                                                                                                                                \
+            Logger_##CategoryName() noexcept : Core::Private::Logger(L"" #CategoryName, (DefaultLoggingLevel), (MaximumLoggingLevel)) {} \
+        } CategoryName;
 
-#define DEFINE_LOGGER_CATEGORY(CategoryName) struct Logger_##CategoryName CategoryName;
+#    define DEFINE_LOGGER_CATEGORY(CategoryName) struct Logger_##CategoryName CategoryName;
+#else
+#    define DECLARE_LOGGER_CATEGORY_EXTERN(CategoryName, DefaultLoggingLevel, MaximumLoggingLevel)
+#    define DECLARE_LOGGER_CATEGORY(CategoryName, DefaultLoggingLevel, MaximumLoggingLevel)
+#    define DEFINE_LOGGER_CATEGORY(CategoryName)
+#endif

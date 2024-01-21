@@ -3,10 +3,12 @@
 #include "Core/BuildConfig.hpp"
 #include "Core/Logging.hpp"
 
+#if ENABLE_LOGGING
 namespace Core::Private
 {
 Core::Private::Logger& LogAssertRef();
 }
+#endif
 
 #undef assert
 #undef assertf
