@@ -28,6 +28,9 @@
     <ProjectReference Include="..\PrecompiledMain\PrecompiledMain.vcxproj">
       <Project>{66fa7406-0fc9-499c-a100-fa59e9e3ea5a}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\TestCommon\TestCommon.vcxproj">
+      <Project>{79afa9da-777d-4550-b0f5-a11f78a9c345}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TestCommandLineParser.cpp" />

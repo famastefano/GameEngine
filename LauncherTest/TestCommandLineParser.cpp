@@ -1,4 +1,5 @@
 #include "Launcher/Sources/CommandLineParser.hpp"
+#include "TestCommon/CommonMacros.hpp"
 
 #include <catch2/catch_template_test_macros.hpp>
 #include <memory>
@@ -60,13 +61,13 @@ TEMPLATE_TEST_CASE("Using the Command Line Parser", "[launcher]", char, wchar_t)
         SECTION("if no arguments are provided")
         {
             Results const params = parser.parse(helper.argv());
-            REQUIRE(params.isEmpty());
+            GE_TEST_TRUE(params.isEmpty());
         }
 
         SECTION("if the only argument is the executable path")
         {
             Results const params = parser.parse(helper.append(__FILE__).argv());
-            REQUIRE(params.isEmpty());
+            GE_TEST_TRUE(params.isEmpty());
         }
 
         SECTION("if no argument starts with the proper prefix")
@@ -80,7 +81,7 @@ TEMPLATE_TEST_CASE("Using the Command Line Parser", "[launcher]", char, wchar_t)
                                                     .append("\\\\-\\=")
                                                     .append("====    ")
                                                     .argv());
-            REQUIRE(params.isEmpty());
+            GE_TEST_TRUE(params.isEmpty());
         }
 
         SECTION("if the arguments are just the prefixes")
@@ -91,7 +92,7 @@ TEMPLATE_TEST_CASE("Using the Command Line Parser", "[launcher]", char, wchar_t)
                                                     .append("- - -")
                                                     .append("-- -- --")
                                                     .argv());
-            REQUIRE(params.isEmpty());
+            GE_TEST_TRUE(params.isEmpty());
         }
     }
 
@@ -101,9 +102,9 @@ TEMPLATE_TEST_CASE("Using the Command Line Parser", "[launcher]", char, wchar_t)
         {
             Results const params = parser.parse(helper.append("-x").argv());
             auto          xstr   = makeString<TestType>("x");
-            REQUIRE(params.isSet(TestType('x')));
-            REQUIRE(params.isAnySet(xstr));
-            REQUIRE(params.areAllSet(xstr));
+            GE_TEST_TRUE(params.isSet(TestType('x')));
+            GE_TEST_TRUE(params.isAnySet(xstr));
+            GE_TEST_TRUE(params.areAllSet(xstr));
         }
 
         SECTION("if multiple flags as the same parameter are passed")
@@ -112,13 +113,13 @@ TEMPLATE_TEST_CASE("Using the Command Line Parser", "[launcher]", char, wchar_t)
             auto          xvf    = makeString<TestType>("xvf");
             auto          vf     = makeString<TestType>("vf");
             auto          fv     = makeString<TestType>("fv");
-            REQUIRE(params.isSet(TestType('x')));
-            REQUIRE(params.isSet(TestType('v')));
-            REQUIRE(params.isSet(TestType('f')));
-            REQUIRE(params.isAnySet(xvf));
-            REQUIRE(params.areAllSet(xvf));
-            REQUIRE(params.areAllSet(vf));
-            REQUIRE(params.areAllSet(fv));
+            GE_TEST_TRUE(params.isSet(TestType('x')));
+            GE_TEST_TRUE(params.isSet(TestType('v')));
+            GE_TEST_TRUE(params.isSet(TestType('f')));
+            GE_TEST_TRUE(params.isAnySet(xvf));
+            GE_TEST_TRUE(params.areAllSet(xvf));
+            GE_TEST_TRUE(params.areAllSet(vf));
+            GE_TEST_TRUE(params.areAllSet(fv));
         }
 
         SECTION("if multiple flags as different parameters are passed")
@@ -131,13 +132,13 @@ TEMPLATE_TEST_CASE("Using the Command Line Parser", "[launcher]", char, wchar_t)
             auto          xvf    = makeString<TestType>("xvf");
             auto          vf     = makeString<TestType>("vf");
             auto          fv     = makeString<TestType>("fv");
-            REQUIRE(params.isSet(TestType('x')));
-            REQUIRE(params.isSet(TestType('v')));
-            REQUIRE(params.isSet(TestType('f')));
-            REQUIRE(params.isAnySet(xvf));
-            REQUIRE(params.areAllSet(xvf));
-            REQUIRE(params.areAllSet(vf));
-            REQUIRE(params.areAllSet(fv));
+            GE_TEST_TRUE(params.isSet(TestType('x')));
+            GE_TEST_TRUE(params.isSet(TestType('v')));
+            GE_TEST_TRUE(params.isSet(TestType('f')));
+            GE_TEST_TRUE(params.isAnySet(xvf));
+            GE_TEST_TRUE(params.areAllSet(xvf));
+            GE_TEST_TRUE(params.areAllSet(vf));
+            GE_TEST_TRUE(params.areAllSet(fv));
         }
 
         SECTION("if multiple parameters are passed, and some are contiguous")
@@ -150,7 +151,7 @@ TEMPLATE_TEST_CASE("Using the Command Line Parser", "[launcher]", char, wchar_t)
                                                     .append("-nsb")
                                                     .argv());
             auto          str    = makeString<TestType>("xvfqtpq");
-            REQUIRE(params.areAllSet(str));
+            GE_TEST_TRUE(params.areAllSet(str));
         }
     }
 
@@ -160,8 +161,8 @@ TEMPLATE_TEST_CASE("Using the Command Line Parser", "[launcher]", char, wchar_t)
         {
             Results const params = parser.parse(helper.append("--help").argv());
             auto          str    = makeString<TestType>("help");
-            REQUIRE_FALSE(params.isAnySet(str));
-            REQUIRE(params.isSet(str));
+            GE_TEST_TRUE(!params.isAnySet(str));
+            GE_TEST_TRUE(params.isSet(str));
         }
 
         SECTION("if multiple unique flags are present")
@@ -174,9 +175,9 @@ TEMPLATE_TEST_CASE("Using the Command Line Parser", "[launcher]", char, wchar_t)
             auto          help    = makeString<TestType>("help");
             auto          verbose = makeString<TestType>("verbose");
             auto          flush   = makeString<TestType>("flush");
-            REQUIRE(params.isSet(help));
-            REQUIRE(params.isSet(verbose));
-            REQUIRE(params.isSet(flush));
+            GE_TEST_TRUE(params.isSet(help));
+            GE_TEST_TRUE(params.isSet(verbose));
+            GE_TEST_TRUE(params.isSet(flush));
         }
     }
 
@@ -189,11 +190,11 @@ TEMPLATE_TEST_CASE("Using the Command Line Parser", "[launcher]", char, wchar_t)
                                                            .argv());
             auto          _logAssertStr = makeString<TestType>("LogAssert");
             auto          _traceStr     = makeString<TestType>("Trace");
-            REQUIRE(params.isSet(_logAssertStr));
+            GE_TEST_TRUE(params.isSet(_logAssertStr));
             auto const* list = params.viewParamsOf(_logAssertStr);
-            REQUIRE(list != nullptr);
-            REQUIRE(list->size() == 1);
-            REQUIRE(list->front() == _traceStr);
+            GE_TEST_TRUE(list != nullptr);
+            GE_TEST_TRUE(list->size() == 1);
+            GE_TEST_TRUE(list->front() == _traceStr);
         }
 
         SECTION("if it has a single parameter with quotes, they aren't included")
@@ -203,11 +204,11 @@ TEMPLATE_TEST_CASE("Using the Command Line Parser", "[launcher]", char, wchar_t)
                                                          .argv());
             auto          _includeStr = makeString<TestType>("I");
             auto          _path       = makeString<TestType>("/usr/bin/long path name/test/strange naming convention folder");
-            REQUIRE(params.isSet(_includeStr));
+            GE_TEST_TRUE(params.isSet(_includeStr));
             auto const* list = params.viewParamsOf(_includeStr);
-            REQUIRE(list != nullptr);
-            REQUIRE(list->size() == 1);
-            REQUIRE(list->front() == _path);
+            GE_TEST_TRUE(list != nullptr);
+            GE_TEST_TRUE(list->size() == 1);
+            GE_TEST_TRUE(list->front() == _path);
         }
 
         SECTION("if a flag has multiple parameters")
@@ -221,13 +222,13 @@ TEMPLATE_TEST_CASE("Using the Command Line Parser", "[launcher]", char, wchar_t)
                 makeString<TestType>(R"(/usr/bin)"),
                 makeString<TestType>(R"(ftp://10.0.0.0/secret/)"),
             };
-            REQUIRE(params.isSet(_folder));
+            GE_TEST_TRUE(params.isSet(_folder));
             auto const* list = params.viewParamsOf(_folder);
-            REQUIRE(list != nullptr);
-            REQUIRE(list->size() == 3);
-            REQUIRE((*list)[0] == folders[0]);
-            REQUIRE((*list)[1] == folders[1]);
-            REQUIRE((*list)[2] == folders[2]);
+            GE_TEST_TRUE(list != nullptr);
+            GE_TEST_TRUE(list->size() == 3);
+            GE_TEST_TRUE((*list)[0] == folders[0]);
+            GE_TEST_TRUE((*list)[1] == folders[1]);
+            GE_TEST_TRUE((*list)[2] == folders[2]);
         }
 
         SECTION("if multiple flags are repeated, their parameters are combined")
@@ -243,13 +244,13 @@ TEMPLATE_TEST_CASE("Using the Command Line Parser", "[launcher]", char, wchar_t)
                 makeString<TestType>("/usr/bin"),
                 makeString<TestType>("/usr/share"),
             };
-            REQUIRE(params.isSet(_include));
+            GE_TEST_TRUE(params.isSet(_include));
             auto const* list = params.viewParamsOf(_include);
-            REQUIRE(list != nullptr);
-            REQUIRE(list->size() == 3);
-            REQUIRE((*list)[0] == folders[0]);
-            REQUIRE((*list)[1] == folders[1]);
-            REQUIRE((*list)[2] == folders[2]);
+            GE_TEST_TRUE(list != nullptr);
+            GE_TEST_TRUE(list->size() == 3);
+            GE_TEST_TRUE((*list)[0] == folders[0]);
+            GE_TEST_TRUE((*list)[1] == folders[1]);
+            GE_TEST_TRUE((*list)[2] == folders[2]);
         }
 
         SECTION("if multiple unique flags exists, each one has its own list")
@@ -274,46 +275,46 @@ TEMPLATE_TEST_CASE("Using the Command Line Parser", "[launcher]", char, wchar_t)
                     makeString<TestType>("/usr/share"),
                     makeString<TestType>("/usr/bin/long path name/test/strange naming convention folder"),
                 };
-                REQUIRE(params.isSet(_include));
+                GE_TEST_TRUE(params.isSet(_include));
                 auto const* list = params.viewParamsOf(_include);
-                REQUIRE(list != nullptr);
-                REQUIRE(list->size() == 4);
-                REQUIRE((*list)[0] == folders[0]);
-                REQUIRE((*list)[1] == folders[1]);
-                REQUIRE((*list)[2] == folders[2]);
-                REQUIRE((*list)[3] == folders[3]);
+                GE_TEST_TRUE(list != nullptr);
+                GE_TEST_TRUE(list->size() == 4);
+                GE_TEST_TRUE((*list)[0] == folders[0]);
+                GE_TEST_TRUE((*list)[1] == folders[1]);
+                GE_TEST_TRUE((*list)[2] == folders[2]);
+                GE_TEST_TRUE((*list)[3] == folders[3]);
             }
 
             // --help
             {
                 auto _help = makeString<TestType>("help");
-                REQUIRE(params.isSet(_help));
-                REQUIRE(params.viewParamsOf(_help) == nullptr);
+                GE_TEST_TRUE(params.isSet(_help));
+                GE_TEST_TRUE(params.viewParamsOf(_help) == nullptr);
             }
 
             // --verbose
             {
                 auto _verbose = makeString<TestType>("verbose");
-                REQUIRE(params.isSet(_verbose));
-                REQUIRE(params.viewParamsOf(_verbose) == nullptr);
+                GE_TEST_TRUE(params.isSet(_verbose));
+                GE_TEST_TRUE(params.viewParamsOf(_verbose) == nullptr);
             }
 
             // --flush
             {
                 auto _flush = makeString<TestType>("flush");
-                REQUIRE(params.isSet(_flush));
-                REQUIRE(params.viewParamsOf(_flush) == nullptr);
+                GE_TEST_TRUE(params.isSet(_flush));
+                GE_TEST_TRUE(params.viewParamsOf(_flush) == nullptr);
             }
 
             // --LogAssert
             {
                 auto _logAssertStr = makeString<TestType>("LogAssert");
                 auto _traceStr     = makeString<TestType>("Trace");
-                REQUIRE(params.isSet(_logAssertStr));
+                GE_TEST_TRUE(params.isSet(_logAssertStr));
                 auto const* list = params.viewParamsOf(_logAssertStr);
-                REQUIRE(list != nullptr);
-                REQUIRE(list->size() == 1);
-                REQUIRE(list->front() == _traceStr);
+                GE_TEST_TRUE(list != nullptr);
+                GE_TEST_TRUE(list->size() == 1);
+                GE_TEST_TRUE(list->front() == _traceStr);
             }
         }
     }
@@ -324,32 +325,32 @@ TEMPLATE_TEST_CASE("Using the Command Line Parser", "[launcher]", char, wchar_t)
         {
             Results const params = parser.parse(helper.append("--test=,,,,,,,").argv());
             auto          _test  = makeString<TestType>("test");
-            REQUIRE(params.isSet(_test));
-            REQUIRE(params.viewParamsOf(_test) == nullptr);
+            GE_TEST_TRUE(params.isSet(_test));
+            GE_TEST_TRUE(params.viewParamsOf(_test) == nullptr);
         }
 
         SECTION("an empty param list should add the flag but with an empty list")
         {
             Results const params = parser.parse(helper.append("--test=").argv());
             auto          _test  = makeString<TestType>("test");
-            REQUIRE(params.isSet(_test));
-            REQUIRE(params.viewParamsOf(_test) == nullptr);
+            GE_TEST_TRUE(params.isSet(_test));
+            GE_TEST_TRUE(params.viewParamsOf(_test) == nullptr);
         }
 
         SECTION("a long flag containing the prefix shouldn't be added")
         {
             Results const params = parser.parse(helper.append("--abcde--bc").argv());
             auto          _arg   = makeString<TestType>("abcde--bc");
-            REQUIRE_FALSE(params.isSet(_arg));
-            REQUIRE(params.viewParamsOf(_arg) == nullptr);
+            GE_TEST_TRUE(!params.isSet(_arg));
+            GE_TEST_TRUE(params.viewParamsOf(_arg) == nullptr);
         }
 
         SECTION("a long flag being just the prefix shouldn't be added")
         {
             Results const params = parser.parse(helper.append("---").argv());
             auto          _arg   = makeString<TestType>("-");
-            REQUIRE_FALSE(params.isSet(_arg));
-            REQUIRE(params.viewParamsOf(_arg) == nullptr);
+            GE_TEST_TRUE(!params.isSet(_arg));
+            GE_TEST_TRUE(params.viewParamsOf(_arg) == nullptr);
         }
 
         SECTION("a long flag with the parameter list containing the prefix should be valid")
@@ -357,19 +358,19 @@ TEMPLATE_TEST_CASE("Using the Command Line Parser", "[launcher]", char, wchar_t)
             Results const params = parser.parse(helper.append("--what=-is-it").argv());
             auto          _what  = makeString<TestType>("what");
             auto          _is_it = makeString<TestType>("-is-it");
-            REQUIRE(params.isSet(_what));
+            GE_TEST_TRUE(params.isSet(_what));
             auto const* list = params.viewParamsOf(_what);
-            REQUIRE(list != nullptr);
-            REQUIRE(list->size() == 1);
-            REQUIRE(list->front() == _is_it);
+            GE_TEST_TRUE(list != nullptr);
+            GE_TEST_TRUE(list->size() == 1);
+            GE_TEST_TRUE(list->front() == _is_it);
         }
 
         SECTION("a param list containing only empty quoted strings shall be parsed as an empty list")
         {
             Results const params = parser.parse(helper.append(R"(--arg="","","",)").argv());
             auto          _arg   = makeString<TestType>("arg");
-            REQUIRE(params.isSet(_arg));
-            REQUIRE(params.viewParamsOf(_arg) == nullptr);
+            GE_TEST_TRUE(params.isSet(_arg));
+            GE_TEST_TRUE(params.viewParamsOf(_arg) == nullptr);
         }
 
         SECTION("a param list where the separator is quoted shall add the separators to the list")
@@ -377,13 +378,13 @@ TEMPLATE_TEST_CASE("Using the Command Line Parser", "[launcher]", char, wchar_t)
             Results const params = parser.parse(helper.append(R"(--arg=",",",",",",)").argv());
             auto          _arg   = makeString<TestType>("arg");
             auto          _sep   = makeString<TestType>(",");
-            REQUIRE(params.isSet(_arg));
+            GE_TEST_TRUE(params.isSet(_arg));
             auto const* list = params.viewParamsOf(_arg);
-            REQUIRE(list != nullptr);
-            REQUIRE(list->size() == 3);
-            REQUIRE((*list)[0] == _sep);
-            REQUIRE((*list)[1] == _sep);
-            REQUIRE((*list)[2] == _sep);
+            GE_TEST_TRUE(list != nullptr);
+            GE_TEST_TRUE(list->size() == 3);
+            GE_TEST_TRUE((*list)[0] == _sep);
+            GE_TEST_TRUE((*list)[1] == _sep);
+            GE_TEST_TRUE((*list)[2] == _sep);
         }
     }
 }
