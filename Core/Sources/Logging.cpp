@@ -39,6 +39,11 @@ void Logger::logText(LogLevel level, wchar_t const* text, std::size_t length) co
 {
     if(canLog(level))
     {
+#if ENABLE_TESTS
+        if(level == LogLevel::Error || level == LogLevel::Fatal)
+            LoggerManager::setGlobalErrorFlag();
+#endif
+
         if(IsDebuggerPresent())
         {
             OutputDebugStringW(text);
