@@ -54,7 +54,6 @@ void Logger::logText(LogLevel level, wchar_t const* text, std::size_t length) co
         if(file)
         {
             fwprintf(file, L"%*s", static_cast<int>(length), text);
-            fwprintf(file, L"\n");
         }
     }
 }
