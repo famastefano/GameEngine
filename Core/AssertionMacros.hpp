@@ -65,8 +65,10 @@ struct RecursiveScopeCounter
         assertf((counterName) == 0, L"Assertion failed: entered code path recursively."); \
         Private::RecursiveScopeCounter recCounter_##counterName{counterName};
 
-#    define assert(condition)   assertf((condition), L"Assertion failed: " #condition)
-#    define assertNoEntry()     assertf(false, L"Assertion failed: entered forbidden code path.")
+#    define assert(condition) assertf((condition), L"Assertion failed: " #condition)
+#    define assertNoEntry()                                                \
+        assertf(false, L"Assertion failed: entered forbidden code path."); \
+        __assume(0)
 #    define assertNoReentry()   IMPL_assertNoReentry(IMPL_GENERATE_UNIQUE_NAME())
 #    define assertNoRecursion() IMPL_assertNoRecursion(IMPL_GENERATE_UNIQUE_NAME())
 #else
