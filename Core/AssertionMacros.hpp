@@ -84,7 +84,7 @@ struct RecursiveScopeCounter
         {                                                                                                 \
             static bool checkName = false;                                                                \
             if(!checkName && !(condition))                                                                \
-                ::Core::Private::LogAssertRef().log(Core::LogLevel::Warning, __VA_OPT__(, ) __VA_ARGS__); \
+                ::Core::Private::LogAssertRef().log(Core::LogLevel::Warning __VA_OPT__(, ) __VA_ARGS__); \
             checkName = true;                                                                             \
         }
 
@@ -93,7 +93,7 @@ struct RecursiveScopeCounter
 #    define expectAlwaysf(condition, ...)                                                                 \
         {                                                                                                 \
             if(!(condition))                                                                              \
-                ::Core::Private::LogAssertRef().log(Core::LogLevel::Warning, __VA_OPT__(, ) __VA_ARGS__); \
+                ::Core::Private::LogAssertRef().log(Core::LogLevel::Warning __VA_OPT__(, ) __VA_ARGS__); \
         }
 #    define expectAlways(condition) expectAlwaysf((condition), L"Expectation failed: " #condition)
 #else
