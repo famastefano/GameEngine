@@ -26,7 +26,9 @@ Core::Private::Logger& LogAssertRef();
 #undef LOG
 #undef unimplemented
 
-#define IMPL_GENERATE_UNIQUE_NAME() uniqueVariableName##__COUNTER__
+#define IMPL_GENERATE_UNIQUE_NAME_COUNTER2(name, line) name##line
+#define IMPL_GENERATE_UNIQUE_NAME_COUNTER(name, line)  IMPL_GENERATE_UNIQUE_NAME_COUNTER2(name, line)
+#define IMPL_GENERATE_UNIQUE_NAME()                    IMPL_GENERATE_UNIQUE_NAME_COUNTER(uniqueVariableName, __COUNTER__)
 
 #if ENABLE_ASSERT
 namespace Private
