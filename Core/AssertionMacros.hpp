@@ -118,7 +118,7 @@ bool verifyfImpl(CondExpr&& cndExpr, wchar_t const* format, Args&&... args)
     return condition;
 }
 }
-#    define verifyf(condition, format, ...) Private::verifyfImpl((condition), __VA_OPT__(, ) __VA_ARGS__)
+#    define verifyf(condition, format, ...) Private::verifyfImpl((condition), format __VA_OPT__(, ) __VA_ARGS__)
 #    define verify(condition)               verifyf((condition), L"Verification failed: " #condition)
 #else
 #    define verify(condition)               condition
