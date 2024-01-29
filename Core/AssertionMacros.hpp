@@ -12,6 +12,12 @@ Core::Private::Logger& LogAssertRef();
 }
 #endif
 
+#undef IMPL_GENERATE_UNIQUE_NAME_COUNTER2
+#undef IMPL_GENERATE_UNIQUE_NAME_COUNTER
+#undef IMPL_GENERATE_UNIQUE_NAME
+#undef IMPL_assertNoReentry
+#undef IMPL_assertNoRecursion
+#undef IMPL_expectf
 #undef assert
 #undef assertf
 #undef assertNoEntry
