@@ -11,6 +11,8 @@
 #include <DbgHelp.h>
 // clang-format on
 
+#include "Core/Platform.hpp"
+
 #include <ctime>
 #include <fileapi.h>
 #include <memory>
@@ -19,7 +21,6 @@
 #include <string>
 
 void         ShowError(std::wstring const& msg) noexcept;
-std::wstring FormatWin32ErrorMessage() noexcept;
 std::wstring GetProcessName(HANDLE hnd) noexcept;
 std::wstring CreateMiniDump(HANDLE procHnd, DWORD procId, MINIDUMP_EXCEPTION_INFORMATION ex, MINIDUMP_TYPE type) noexcept;
 void         StartExternalProcess(std::wstring const& cli, std::wstring const& minidumpPath) noexcept;
@@ -90,14 +91,14 @@ int WINAPI wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ PWSTR pCmdLine, _In
     RAIIHandle hndToMonitor = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | THREAD_ALL_ACCESS, FALSE, procId);
     if(hndToMonitor.hnd == NULL)
     {
-        ShowError(FormatWin32ErrorMessage());
+        ShowError(Core::getLastPlatformError());
         return -2;
     }
 
     RAIIHandle crashEventHnd = OpenEventW(SYNCHRONIZE, FALSE, argv[EVENT_NAME]);
     if(crashEventHnd.hnd == NULL)
     {
-        ShowError(FormatWin32ErrorMessage());
+        ShowError(Core::getLastPlatformError());
         return -3;
     }
 
@@ -113,7 +114,7 @@ int WINAPI wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ PWSTR pCmdLine, _In
     CrashHandlerDumpType           type;
     if(!CrashHandlerReadData(argv[MMIO_FILE_PATH], &ex, &type))
     {
-        ShowError(FormatWin32ErrorMessage());
+        ShowError(Core::getLastPlatformError());
         return -4;
     }
 
@@ -142,19 +143,12 @@ void ShowError(std::wstring const& msg) noexcept
     MessageBoxW(NULL, msg.data(), L"Error", MB_ICONERROR | MB_OK);
 #endif
 }
-std::wstring FormatWin32ErrorMessage() noexcept
-{
-    std::wstring err(4096, L'\0');
-    FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(),
-                  MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), err.data(), (DWORD)err.size(), NULL);
-    return err;
-}
 std::wstring GetProcessName(HANDLE hnd) noexcept
 {
     std::wstring name(256, L'\0');
     DWORD        sz = GetProcessImageFileNameW(hnd, name.data(), (DWORD)name.size());
     if(sz == 0)
-        ShowError(L"Couldn't retrieve process name\n" + FormatWin32ErrorMessage()), std::exit(-1);
+        ShowError(L"Couldn't retrieve process name\n" + Core::getLastPlatformError()), std::exit(-1);
 
     name.resize(sz);
     auto sep = name.find_last_of(L'\\');
@@ -181,7 +175,7 @@ std::wstring CreateMiniDump(HANDLE procHnd, DWORD procId, MINIDUMP_EXCEPTION_INF
     RAIIHandle dmphnd = CreateFile(minidumpname.data(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
     if(dmphnd == INVALID_HANDLE_VALUE || !MiniDumpWriteDump(procHnd, procId, dmphnd, type, ex.ExceptionPointers ? &ex : nullptr, NULL, NULL))
     {
-        ShowError(L"Couldn't create minidump file\n" + minidumpname + L"\n" + FormatWin32ErrorMessage());
+        ShowError(L"Couldn't create minidump file\n" + minidumpname + L"\n" + Core::getLastPlatformError());
         return {};
     }
     return minidumpname;
