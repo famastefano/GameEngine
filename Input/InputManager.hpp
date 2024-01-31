@@ -36,7 +36,7 @@ class InputManager
     HandlerCollection::const_iterator findHandler(EventTypes events, InputHandler& handler) const noexcept;
 
     public:
-    InputManager& instance() noexcept;
+    static InputManager& instance() noexcept;
 
     void registerHandler(EventTypes events, InputHandler& handler, HandlerPriority priority = HandlerPriority::Normal) noexcept;
     void unregisterHandler(EventTypes events, InputHandler& handler) noexcept;
