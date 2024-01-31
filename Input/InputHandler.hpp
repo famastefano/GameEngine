@@ -17,33 +17,33 @@ class InputHandler
 // `unreferenced formal parameter`, keeps the parameter names in the API
 #pragma warning(disable : 4100)
 
-    virtual bool OnKeyUp(double timestamp, uint16_t scanCode)
+    virtual bool OnKeyUp(double timestamp, uint16_t scanCode) noexcept
     {
         return false;
     }
-    virtual bool OnKeyDown(double timestamp, uint16_t scanCode)
-    {
-        return false;
-    }
-
-    virtual bool OnMouseUp(double timestamp, uint8_t button)
-    {
-        return false;
-    }
-    virtual bool OnMouseDown(double timestamp, uint8_t button)
-    {
-        return false;
-    }
-    virtual bool OnMouseMove(double timestamp, int16_t dx, int16_t dy)
-    {
-        return false;
-    }
-    virtual bool OnMouseWheel(double timestamp, bool isVerticalScroll, float ticks)
+    virtual bool OnKeyDown(double timestamp, uint16_t scanCode) noexcept
     {
         return false;
     }
 
-    virtual bool OnCharacter(double timestamp, wchar_t character)
+    virtual bool OnMouseUp(double timestamp, uint8_t button) noexcept
+    {
+        return false;
+    }
+    virtual bool OnMouseDown(double timestamp, uint8_t button) noexcept
+    {
+        return false;
+    }
+    virtual bool OnMouseMove(double timestamp, int16_t dx, int16_t dy) noexcept
+    {
+        return false;
+    }
+    virtual bool OnMouseWheel(double timestamp, bool isVerticalScroll, float ticks) noexcept
+    {
+        return false;
+    }
+
+    virtual bool OnCharacter(double timestamp, wchar_t character) noexcept
     {
         return false;
     }
