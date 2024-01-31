@@ -59,6 +59,14 @@ class CommandLineParseResults
                 return true;
         return false;
     }
+    decltype(auto) begin() const
+    {
+        return flagsWithParamList.cbegin();
+    }
+    decltype(auto) end() const
+    {
+        return flagsWithParamList.cend();
+    }
 };
 
 template<typename CharType>
