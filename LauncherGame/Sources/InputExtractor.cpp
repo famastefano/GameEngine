@@ -69,7 +69,7 @@ InputData extractInput(tagRAWINPUT& raw, Input::EventTypes typeToExtract)
             };
             // clang-format on
 
-            int const index    = std::countl_zero(ms.usButtonFlags);
+            int const index    = std::countr_zero(ms.usButtonFlags);
             input.mouse.type   = MouseType::Button;
             input.mouse.button = buttonId[index];
             input.mouse.action = buttonAction[index];
