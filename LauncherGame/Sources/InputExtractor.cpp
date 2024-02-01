@@ -35,7 +35,7 @@ InputData extractInput(tagRAWINPUT& raw, Input::EventTypes typeToExtract)
             input.keyboard.scanCode = kbd.MakeCode;
         }
 
-        if(typeToExtract & Character)
+        if(typeToExtract & Character && kbd.Flags == 0) // Character is valid on on Key Press, not release
         {
             BYTE kbdstate[256] = {};
             if(GetKeyboardState(kbdstate) && ToUnicode(kbd.VKey, kbd.MakeCode, kbdstate, &input.keyboard.character, 1, 0x2) > 0)
@@ -44,13 +44,23 @@ InputData extractInput(tagRAWINPUT& raw, Input::EventTypes typeToExtract)
     }
     else if(typeToExtract & Mouse && raw.header.dwType == RIM_TYPEMOUSE)
     {
-        input.mouse  = {};
         RAWMOUSE& ms = raw.data.mouse;
+        input.mouse  = {};
+        input.type   = Mouse;
 
-        if(ms.usButtonFlags & (RI_MOUSE_WHEEL | RI_MOUSE_HWHEEL))
+        if(ms.lLastX != 0 || ms.lLastY != 0)
         {
+            input.mouse.type = MouseType::Movement;
+            input.mouse.dx   = int16_t(ms.lLastX);
+            input.mouse.dy   = int16_t(ms.lLastY);
         }
-        else
+        else if(ms.usButtonFlags & (RI_MOUSE_WHEEL | RI_MOUSE_HWHEEL))
+        {
+            input.mouse.type             = MouseType::Wheel;
+            input.mouse.isVerticalScroll = ms.usButtonFlags & RI_MOUSE_WHEEL;
+            input.mouse.ticks            = float(int16_t(ms.usButtonData)) / WHEEL_DELTA;
+        }
+        else if(ms.usButtonFlags)
         {
             // clang-format off
             constexpr uint8_t buttonId[10]{
