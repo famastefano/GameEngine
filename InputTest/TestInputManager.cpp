@@ -20,39 +20,39 @@ struct CountHandler : public InputHandler
     int OnMouseWheelCounter = 0;
     int OnCharacterCounter  = 0;
 
-    virtual bool OnKeyUp(double, uint16_t)
+    virtual bool OnKeyUp(double, uint16_t) noexcept
     {
         ++OnKeyUpCounter;
         return false;
     }
-    virtual bool OnKeyDown(double, uint16_t)
+    virtual bool OnKeyDown(double, uint16_t) noexcept
     {
         ++OnKeyDownCounter;
         return false;
     }
 
-    virtual bool OnMouseUp(double, uint8_t)
+    virtual bool OnMouseUp(double, uint8_t) noexcept
     {
         ++OnMouseUpCounter;
         return false;
     }
-    virtual bool OnMouseDown(double, uint8_t)
+    virtual bool OnMouseDown(double, uint8_t) noexcept
     {
         ++OnMouseDownCounter;
         return false;
     }
-    virtual bool OnMouseMove(double, int16_t, int16_t)
+    virtual bool OnMouseMove(double, int16_t, int16_t) noexcept
     {
         ++OnMouseMoveCounter;
         return false;
     }
-    virtual bool OnMouseWheel(double, bool, float)
+    virtual bool OnMouseWheel(double, bool, float) noexcept
     {
         ++OnMouseWheelCounter;
         return false;
     }
 
-    virtual bool OnCharacter(double, wchar_t)
+    virtual bool OnCharacter(double, wchar_t) noexcept
     {
         ++OnCharacterCounter;
         return false;
@@ -66,33 +66,33 @@ struct ToggleHandler : public InputHandler
     bool handlesMouse     = false;
     bool handlesCharacter = false;
 
-    virtual bool OnKeyUp(double, uint16_t)
+    virtual bool OnKeyUp(double, uint16_t) noexcept
     {
         return handlesAll || handlesKeyboard;
     }
-    virtual bool OnKeyDown(double, uint16_t)
+    virtual bool OnKeyDown(double, uint16_t) noexcept
     {
         return handlesAll || handlesKeyboard;
     }
+    
+    virtual bool OnMouseUp(double, uint8_t) noexcept
+    {
+        return handlesAll || handlesMouse;
+    }
+    virtual bool OnMouseDown(double, uint8_t) noexcept
+    {
+        return handlesAll || handlesMouse;
+    }
+    virtual bool OnMouseMove(double, int16_t, int16_t) noexcept
+    {
+        return handlesAll || handlesMouse;
+    }
+    virtual bool OnMouseWheel(double, bool, float) noexcept
+    {
+        return handlesAll || handlesMouse;
+    }
 
-    virtual bool OnMouseUp(double, uint8_t)
-    {
-        return handlesAll || handlesMouse;
-    }
-    virtual bool OnMouseDown(double, uint8_t)
-    {
-        return handlesAll || handlesMouse;
-    }
-    virtual bool OnMouseMove(double, int16_t, int16_t)
-    {
-        return handlesAll || handlesMouse;
-    }
-    virtual bool OnMouseWheel(double, bool, float)
-    {
-        return handlesAll || handlesMouse;
-    }
-
-    virtual bool OnCharacter(double, wchar_t)
+    virtual bool OnCharacter(double, wchar_t) noexcept
     {
         return handlesAll || handlesCharacter;
     }
@@ -100,33 +100,33 @@ struct ToggleHandler : public InputHandler
 
 struct BlackHoleHandler : public InputHandler
 {
-    virtual bool OnKeyUp(double, uint16_t)
+    virtual bool OnKeyUp(double, uint16_t) noexcept
     {
         return true;
     }
-    virtual bool OnKeyDown(double, uint16_t)
-    {
-        return true;
-    }
-
-    virtual bool OnMouseUp(double, uint8_t)
-    {
-        return true;
-    }
-    virtual bool OnMouseDown(double, uint8_t)
-    {
-        return true;
-    }
-    virtual bool OnMouseMove(double, int16_t, int16_t)
-    {
-        return true;
-    }
-    virtual bool OnMouseWheel(double, bool, float)
+    virtual bool OnKeyDown(double, uint16_t) noexcept
     {
         return true;
     }
 
-    virtual bool OnCharacter(double, wchar_t)
+    virtual bool OnMouseUp(double, uint8_t) noexcept
+    {
+        return true;
+    }
+    virtual bool OnMouseDown(double, uint8_t) noexcept
+    {
+        return true;
+    }
+    virtual bool OnMouseMove(double, int16_t, int16_t) noexcept
+    {
+        return true;
+    }
+    virtual bool OnMouseWheel(double, bool, float) noexcept
+    {
+        return true;
+    }
+
+    virtual bool OnCharacter(double, wchar_t) noexcept
     {
         return true;
     }
