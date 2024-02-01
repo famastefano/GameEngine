@@ -12,26 +12,6 @@ Core::Private::Logger& LogAssertRef();
 }
 #endif
 
-#undef IMPL_GENERATE_UNIQUE_NAME_COUNTER2
-#undef IMPL_GENERATE_UNIQUE_NAME_COUNTER
-#undef IMPL_GENERATE_UNIQUE_NAME
-#undef IMPL_assertNoReentry
-#undef IMPL_assertNoRecursion
-#undef IMPL_expectf
-#undef assert
-#undef assertf
-#undef assertNoEntry
-#undef assertNoReentry
-#undef assertNoRecursion
-#undef expect
-#undef expectf
-#undef expectAlways
-#undef expectAlwaysf
-#undef verify
-#undef verifyf
-#undef LOG
-#undef unimplemented
-
 #define IMPL_GENERATE_UNIQUE_NAME_COUNTER2(name, line) name##line
 #define IMPL_GENERATE_UNIQUE_NAME_COUNTER(name, line)  IMPL_GENERATE_UNIQUE_NAME_COUNTER2(name, line)
 #define IMPL_GENERATE_UNIQUE_NAME()                    IMPL_GENERATE_UNIQUE_NAME_COUNTER(uniqueVariableName, __COUNTER__)
