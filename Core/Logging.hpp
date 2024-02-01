@@ -11,6 +11,15 @@
 #include <span>
 #include <string>
 
+#if ENABLE_LOGGING
+#    define LOG(Category, Level, format, ...)                                         \
+        Category.log(Level, L"{:%Y-%m-%d %T} {:<8} " L## #Category L" " format L"\n", \
+                     std::chrono::system_clock::now(),                                \
+                     Level __VA_OPT__(, ) __VA_ARGS__)
+#else
+#    define LOG(Category, Level, format, ...)
+#endif
+
 namespace Core::Private::Logging
 {
 template<typename OutputIt, typename InputIt>

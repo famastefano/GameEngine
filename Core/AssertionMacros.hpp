@@ -37,16 +37,12 @@ Core::Private::Logger& LogAssertRef();
 #define IMPL_GENERATE_UNIQUE_NAME()                    IMPL_GENERATE_UNIQUE_NAME_COUNTER(uniqueVariableName, __COUNTER__)
 
 #if ENABLE_LOGGING
-#    define LOG(Category, Level, format, ...)                                         \
-        Category.log(Level, L"{:%Y-%m-%d %T} {:<8} " L## #Category L" " format L"\n", \
-                     std::chrono::system_clock::now(),                                \
-                     Level __VA_OPT__(, ) __VA_ARGS__)
 #    define IMPL_LOG_ASSERT(Category, Level, format, ...)                    \
         Category.log(Level, L"{:%Y-%m-%d %T} {:<8} LogAssert " format L"\n", \
                      std::chrono::system_clock::now(),                       \
                      Level __VA_OPT__(, ) __VA_ARGS__)
 #else
-#    define LOG(Category, Level, format, ...)
+#    define IMPL_LOG_ASSERT(Category, Level, format, ...)
 #endif
 
 #if ENABLE_ASSERT
