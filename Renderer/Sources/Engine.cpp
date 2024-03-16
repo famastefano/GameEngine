@@ -139,12 +139,17 @@ void Engine::destroySwapChain()
 Engine::Engine() noexcept
 {
 #ifdef BUILD_CONFIG_DEBUG
-    HRESULT hr = CreateDXGIFactory2(DXGI_CREATE_FACTORY_DEBUG, IID_PPV_ARGS(&factory));
-    assert(hr == S_OK);
+    constexpr UINT factoryFlags = DXGI_CREATE_FACTORY_DEBUG;
 #else
-    HRESULT hr = CreateDXGIFactory1(IID_PPV_ARGS(&factory));
-    assert(hr == S_OK);
+    constexpr UINT factoryFlags = 0;
 #endif
+
+    ComPtr<IDXGIFactory2> factory2;
+    HRESULT               hr = CreateDXGIFactory2(factoryFlags, IID_PPV_ARGS(&factory2));
+    assertf(hr == S_OK, L"Failed to create the IDXGIFactory2 object.");
+    if(SUCCEEDED(hr))
+        hr = factory2->QueryInterface(&factory);
+    assertf(hr == S_OK, L"Failed to obtain the latest IDXGIFactory interface version.");
 }
 
 Engine::~Engine()
