@@ -25,11 +25,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Adapter.hpp" />
+    <ClInclude Include="Engine.hpp" />
     <ClInclude Include="Output.hpp" />
+    <ClInclude Include="RHI.hpp" />
     <ClInclude Include="Sources\LogRenderer.hpp" />
     <ClInclude Include="Vendor.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Sources\Engine.cpp" />
     <ClCompile Include="Sources\Output.cpp" />
     <ClCompile Include="Sources\Adapter.cpp" />
     <ClCompile Include="Sources\LogRenderer.cpp" />
@@ -153,6 +156,7 @@
       <ErrorReporting>None</ErrorReporting>
       <DisableSpecificWarnings>4505;4530</DisableSpecificWarnings>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>NotSet</SubSystem>
@@ -164,6 +168,7 @@
     </Link>
     <Lib>
       <AdditionalDependencies>d3d11.lib;dxgi.lib;D3DCompiler.lib</AdditionalDependencies>
+      <AdditionalOptions>/IGNORE:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Development|x64'">
@@ -196,6 +201,7 @@
       <DisableSpecificWarnings>4505;4530</DisableSpecificWarnings>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>NotSet</SubSystem>
@@ -208,6 +214,7 @@
     </Link>
     <Lib>
       <AdditionalDependencies>d3d11.lib;dxgi.lib;D3DCompiler.lib</AdditionalDependencies>
+      <AdditionalOptions>/IGNORE:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Testing|x64'">
@@ -238,6 +245,7 @@
       <DisableSpecificWarnings>4505;4530</DisableSpecificWarnings>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>NotSet</SubSystem>
@@ -249,6 +257,7 @@
     </Link>
     <Lib>
       <AdditionalDependencies>d3d11.lib;dxgi.lib;D3DCompiler.lib</AdditionalDependencies>
+      <AdditionalOptions>/IGNORE:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">
@@ -279,6 +288,7 @@
       <DisableSpecificWarnings>4505;4530</DisableSpecificWarnings>
       <DebugInformationFormat>None</DebugInformationFormat>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>NotSet</SubSystem>
@@ -290,6 +300,7 @@
     </Link>
     <Lib>
       <AdditionalDependencies>d3d11.lib;dxgi.lib;D3DCompiler.lib</AdditionalDependencies>
+      <AdditionalOptions>/IGNORE:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

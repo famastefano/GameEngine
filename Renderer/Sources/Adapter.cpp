@@ -7,32 +7,34 @@
 
 namespace Renderer
 {
-Adapter::Adapter(void* nativeHandle, std::wstring description, Vendor vendor, uint64_t dedicatedVideoMemory, uint64_t dedicatedSystemMemory, uint64_t sharedSystemMemory) noexcept
-    : nativeHandle(nativeHandle)
+Adapter::Adapter(Private::AdapterInterface* adapter, std::wstring description, Vendor vendor, uint64_t dedicatedVideoMemory, uint64_t dedicatedSystemMemory, uint64_t sharedSystemMemory) noexcept
+    : adapter(adapter)
     , description(std::move(description))
     , vendor(vendor)
     , dedicatedVideoMemory(dedicatedVideoMemory)
     , dedicatedSystemMemory(dedicatedSystemMemory)
     , sharedSystemMemory(sharedSystemMemory)
 {
-    assertf(nativeHandle != nullptr, L"Invalid Adapter handle.");
+    assertf(adapter != nullptr, L"Invalid Adapter handle.");
 }
 Adapter::Adapter(Adapter const& other) noexcept
-    : Adapter(other.nativeHandle,
+    : Adapter(other.adapter,
               other.description,
               other.vendor,
               other.dedicatedVideoMemory,
               other.dedicatedSystemMemory,
               other.sharedSystemMemory)
 {
+    if(adapter)
+        adapter->AddRef();
 }
 Adapter::~Adapter()
 {
-    IDXGIAdapter4* p = static_cast<IDXGIAdapter4*>(nativeHandle);
-    p->Release();
+    if(adapter)
+        adapter->Release();
 }
-void* Adapter::handle() noexcept
+Private::AdapterInterface* Adapter::handle() noexcept
 {
-    return nativeHandle;
+    return adapter;
 }
 }

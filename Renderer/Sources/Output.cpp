@@ -7,26 +7,28 @@
 
 namespace Renderer
 {
-Output::Output(void* nativeHandle, std::wstring description) noexcept
-    : nativeHandle(nativeHandle)
+Output::Output(Private::OutputInterface* output, std::wstring description) noexcept
+    : output(output)
     , description(std::move(description))
 {
-    assertf(nativeHandle != nullptr, L"Invalid Output handle.");
+    assertf(output != nullptr, L"Invalid Output.");
 }
 
 Output::Output(Output const& other) noexcept
-    : Output(other.nativeHandle, other.description)
+    : Output(other.output, other.description)
 {
+    if(output)
+        output->AddRef();
 }
 
 Output::~Output()
 {
-    IDXGIOutput6* p = static_cast<IDXGIOutput6*>(nativeHandle);
-    p->Release();
+    if(output)
+        output->Release();
 }
 
-void* Output::handle() noexcept
+Private::OutputInterface* Output::handle() noexcept
 {
-    return nativeHandle;
+    return output;
 }
 }

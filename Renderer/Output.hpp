@@ -1,19 +1,21 @@
 #pragma once
 
+#include "Renderer/RHI.hpp"
+
 #include <string>
 
 namespace Renderer
 {
 class Output
 {
-    void* nativeHandle;
+    Private::OutputInterface* output;
 
     public:
-    Output(void* nativeHandle, std::wstring description) noexcept;
+    Output(Private::OutputInterface* output, std::wstring description) noexcept;
     Output(Output const& other) noexcept;
     ~Output();
 
-    void* handle() noexcept;
+    Private::OutputInterface* handle() noexcept;
 
     std::wstring const description;
 };
