@@ -80,5 +80,7 @@ class Engine
     bool init(Adapter& adapter, Output& output, SwapChainOptions const& options) noexcept;
 
     bool resizeOutput(unsigned int width, unsigned int height) noexcept;
+
+    void tick() noexcept;
 };
 }

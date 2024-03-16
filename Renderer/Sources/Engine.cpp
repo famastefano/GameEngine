@@ -330,6 +330,24 @@ bool Engine::resizeOutput(unsigned int width, unsigned int height) noexcept
     }
     return true;
 }
+
+void Engine::tick() noexcept
+{
+#if BUILD_CONFIG_DEBUG
+    assertf(renderThreadId == GetCurrentThreadId(), L"Renderer::Engine::tick() can only be called from the thread that initialized the engine (ID: {}), but thread with ID {} did instead.", renderThreadId, GetCurrentThreadId());
+#endif
+
+    constexpr float black[4]{};
+    context->ClearRenderTargetView(swapChainRTV, black);
+    context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+    if(swapChain)
+    {
+        HRESULT r = swapChain->Present(static_cast<UINT>(syncInterval), presentFlags);
+        if(SUCCEEDED(r))
+            return;
+    }
+}
 }
 
 #pragma warning(default : 6387) // assertion at the function entrance
