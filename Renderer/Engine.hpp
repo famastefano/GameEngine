@@ -12,7 +12,7 @@ namespace Renderer
 class Engine
 {
 #if BUILD_CONFIG_DEBUG
-    unsigned long long renderThreadId{};
+    DWORD renderThreadId{};
 #endif
 
     Private::FactoryInterface*          factory{};
@@ -25,7 +25,7 @@ class Engine
 
     UINT presentFlags{};
 
-    Private::DeviceInterface* createDevice(Adapter& adapter) noexcept;
+    bool createDevice(Adapter& adapter) noexcept;
 
     bool resizeSwapChain() noexcept;
 

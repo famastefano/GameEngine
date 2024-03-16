@@ -12,7 +12,7 @@ using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 namespace Renderer
 {
-Private::DeviceInterface* Engine::createDevice(Adapter& adapter) noexcept
+bool Engine::createDevice(Adapter& adapter) noexcept
 {
     assert(!device && adapter.handle());
 
@@ -28,6 +28,7 @@ Private::DeviceInterface* Engine::createDevice(Adapter& adapter) noexcept
 
     constexpr D3D_FEATURE_LEVEL requestedLevels[2] = {D3D_FEATURE_LEVEL_11_1};
     ComPtr<ID3D11Device>        deviceV0;
+    ComPtr<ID3D11DeviceContext> contextV0;
 
     HRESULT creationResult = D3D11CreateDevice(
         adapter.handle(),
@@ -39,14 +40,16 @@ Private::DeviceInterface* Engine::createDevice(Adapter& adapter) noexcept
         D3D11_SDK_VERSION,
         &deviceV0,
         NULL,
-        NULL);
+        &contextV0);
 
-    ComPtr<Private::DeviceInterface> _device;
-    if(FAILED(creationResult) || FAILED(deviceV0.As(&_device)))
-        return nullptr;
+    ComPtr<Private::DeviceInterface>           _device;
+    ComPtr<Private::ImmediateContextInterface> _context;
+    if(FAILED(creationResult) || FAILED(deviceV0.As(&_device)) || FAILED(contextV0.As(&_context)))
+        return false;
 
-    deviceV0.Detach();
-    return _device.Detach();
+    device  = _device.Detach();
+    context = _context.Detach();
+    return true;
 }
 
 bool Engine::resizeSwapChain() noexcept
@@ -220,7 +223,8 @@ bool Engine::init(Adapter& adapter, Output& output, SwapChainOptions const& opti
     if(swapChain)
         destroySwapChain();
 
-    device = createDevice(adapter);
+    if(!createDevice(adapter))
+        return false;
 
     assert(output.handle() != nullptr);
     assert(options.windowHandle != nullptr);
