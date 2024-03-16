@@ -11,6 +11,15 @@ namespace Renderer
 {
 class Engine
 {
+    public:
+    enum class SyncInterval : int
+    {
+        VariableRefreshRate = 0,
+        EveryVBlank         = 1,
+        EveryHalfVBlank     = 2,
+    };
+
+    private:
 #if BUILD_CONFIG_DEBUG
     DWORD renderThreadId{};
 #endif
@@ -23,7 +32,8 @@ class Engine
     Private::Texture2DInterface*        depthStencilResource{};
     Private::DepthStencilViewInterface* depthStencilView{};
 
-    UINT presentFlags{};
+    UINT         presentFlags{};
+    SyncInterval syncInterval;
 
     bool createDevice(Adapter& adapter) noexcept;
 
@@ -32,13 +42,6 @@ class Engine
     void destroySwapChain();
 
     public:
-    enum class SyncInterval : int
-    {
-        VariableRefreshRate = 0,
-        EveryVBlank         = 1,
-        EveryHalfVBlank     = 2,
-    };
-
     enum class PresentMode
     {
         Windowed,

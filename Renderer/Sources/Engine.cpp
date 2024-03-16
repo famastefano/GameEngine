@@ -226,6 +226,8 @@ bool Engine::init(Adapter& adapter, Output& output, SwapChainOptions const& opti
     if(!createDevice(adapter))
         return false;
 
+    syncInterval = options.syncInterval;
+
     assert(output.handle() != nullptr);
     assert(options.windowHandle != nullptr);
 
@@ -234,7 +236,7 @@ bool Engine::init(Adapter& adapter, Output& output, SwapChainOptions const& opti
     assert(options.format == OutputFormat::RGBA8_UNORM || options.format == OutputFormat::RGBA16_FLOAT);
     assertf(options.width > 0 && options.height > 0, L"The minimum size to create a swap chain is 1x1.");
 
-    UINT swapChainFlags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+    UINT swapChainFlags = 0;
 
     BOOL allowTearing = false;
     if(SUCCEEDED(factory->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof(allowTearing))) && allowTearing)
@@ -306,7 +308,6 @@ bool Engine::init(Adapter& adapter, Output& output, SwapChainOptions const& opti
     if(FAILED(creationResult) || FAILED(swapChainV1.As(&_swapChain)))
         return false;
 
-    swapChainV1.Detach();
     swapChain = _swapChain.Detach();
 
     if(!resizeSwapChain())
