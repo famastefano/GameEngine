@@ -154,7 +154,8 @@ Engine::Engine() noexcept
 
 Engine::~Engine()
 {
-    factory->Release();
+    if(swapChain)
+        destroySwapChain();
 
     if(context)
     {
@@ -164,6 +165,9 @@ Engine::~Engine()
 
     if(device)
         device->Release();
+
+    if(factory)
+        factory->Release();
 }
 
 std::vector<Adapter> Engine::adapters() const noexcept
