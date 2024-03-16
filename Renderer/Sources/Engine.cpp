@@ -209,7 +209,7 @@ std::vector<Output> Engine::outputs(Adapter& adapter) const noexcept
     assert(adapter.handle() != nullptr);
 
     std::vector<Output> outputs;
-    IDXGIOutput*        currOutput{};
+    ComPtr<IDXGIOutput> currOutput;
     DXGI_OUTPUT_DESC1   desc{};
     for(int i = 0;
         adapter.handle()->EnumOutputs(i, &currOutput) != DXGI_ERROR_NOT_FOUND;
