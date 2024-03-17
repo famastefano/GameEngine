@@ -16,6 +16,8 @@ namespace Renderer
 {
 bool Engine::createDevice(Adapter& adapter) noexcept
 {
+    LOG(LogRenderer, Core::LogLevel::Debug, L"Creating ID3D11Device on thread {:X} for adapter {}.", GetCurrentThreadId(), adapter.description);
+
     assert(!device && adapter.handle());
 
 #if BUILD_CONFIG_DEBUG
@@ -44,7 +46,10 @@ bool Engine::createDevice(Adapter& adapter) noexcept
     ComPtr<Private::DeviceInterface>           _device;
     ComPtr<Private::ImmediateContextInterface> _context;
     if(FAILED(creationResult) || FAILED(deviceV0.As(&_device)) || FAILED(contextV0.As(&_context)))
+    {
+        LOG(LogRenderer, Core::LogLevel::Error, L"Failed to create the ID3D11Device: {:X}.", creationResult);
         return false;
+    }
 
     device  = _device.Detach();
     context = _context.Detach();
@@ -53,6 +58,8 @@ bool Engine::createDevice(Adapter& adapter) noexcept
 
 bool Engine::resizeSwapChain(UINT width, UINT height) noexcept
 {
+    LOG(LogRenderer, Core::LogLevel::Debug, L"Resizing swap chain to {}x{}.", width, height);
+
     if(swapChainRTV)
     {
         swapChainRTV->Release();
@@ -72,17 +79,23 @@ bool Engine::resizeSwapChain(UINT width, UINT height) noexcept
     DXGI_SWAP_CHAIN_DESC1 scDesc;
     swapChain->GetDesc1(&scDesc);
 
-    HRESULT r   = swapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, scDesc.Flags);
+    HRESULT r = swapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, scDesc.Flags);
     if(S_OK != r)
     {
+        LOG(LogRenderer, Core::LogLevel::Error, L"Failed to resize the swap chain: {}.", r);
         return false;
     }
 
     swapChain->GetDesc1(&scDesc);
 
+    LOG(LogRenderer, Core::LogLevel::Debug, L"New swap chain size: {}x{}.", scDesc.Width, scDesc.Height);
+
     ComPtr<ID3D11Texture2D> backBuffer;
     if(S_OK != swapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer)) || S_OK != device->CreateRenderTargetView(backBuffer.Get(), 0, &swapChainRTV))
+    {
+        LOG(LogRenderer, Core::LogLevel::Error, L"Failed to create the swap chain render target.");
         return false;
+    }
 
     D3D11_TEXTURE2D_DESC1 depthStencilDesc{};
     depthStencilDesc.Width          = scDesc.Width;
@@ -101,7 +114,10 @@ bool Engine::resizeSwapChain(UINT width, UINT height) noexcept
     ComPtr<ID3D11DepthStencilView> dsView;
     if(S_OK != device->CreateTexture2D1(&depthStencilDesc, NULL, dsRes.GetAddressOf()) ||
        S_OK != device->CreateDepthStencilView(dsRes.Get(), 0, dsView.GetAddressOf()))
+    {
+        LOG(LogRenderer, Core::LogLevel::Error, L"Failed to create depth stencil buffer.");
         return false;
+    }
 
     context->OMSetRenderTargets(1, &swapChainRTV, dsView.Get());
 
@@ -121,6 +137,8 @@ bool Engine::resizeSwapChain(UINT width, UINT height) noexcept
 
 void Engine::destroySwapChain()
 {
+    LOG(LogRenderer, Core::LogLevel::Info, L"Destroying swap chain...");
+
     // https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-flush#remarks
     context->ClearState();
     swapChain->Release();
@@ -133,6 +151,8 @@ void Engine::destroySwapChain()
     swapChainRTV         = nullptr;
     depthStencilResource = nullptr;
     depthStencilView     = nullptr;
+
+    LOG(LogRenderer, Core::LogLevel::Info, L"Swap chain destroyed.");
 }
 
 Engine::Engine() noexcept
@@ -149,10 +169,14 @@ Engine::Engine() noexcept
     if(S_OK == hr)
         hr = factory2->QueryInterface(&factory);
     assertf(hr == S_OK, L"Failed to obtain the latest IDXGIFactory interface version.");
+
+    LOG(LogRenderer, Core::LogLevel::Info, L"Constructed engine.");
 }
 
 Engine::~Engine()
 {
+    LOG(LogRenderer, Core::LogLevel::Info, L"Destroying engine...");
+
     if(swapChain)
         destroySwapChain();
 
@@ -167,6 +191,8 @@ Engine::~Engine()
 
     if(factory)
         factory->Release();
+
+    LOG(LogRenderer, Core::LogLevel::Info, L"Destroyed engine.");
 }
 
 std::vector<Adapter> Engine::adapters() const noexcept
@@ -226,6 +252,8 @@ std::vector<Output> Engine::outputs(Adapter& adapter) const noexcept
 
 bool Engine::init(Adapter& adapter, Output& output, SwapChainOptions const& options) noexcept
 {
+    LOG(LogRenderer, Core::LogLevel::Info, L"Initializing swap chain. Adapter({}), Output({}).", adapter.description, output.description);
+
     // TODO: destroy offscreen render target if any
 
     if(swapChain)
@@ -308,6 +336,8 @@ bool Engine::init(Adapter& adapter, Output& output, SwapChainOptions const& opti
         creationResult = factory->CreateSwapChainForHwnd(device, static_cast<HWND>(options.windowHandle), &swapChainDesc, &fullscreenDesc, NULL, swapChainV1.GetAddressOf());
     }
 
+    LOG(LogRenderer, creationResult != S_OK ? Core::LogLevel::Error : Core::LogLevel::Info, L"Swap chain creation result: {}.", creationResult);
+
     // The swap chain needs to be created to be associated to the factory
     if(S_OK == creationResult && (presentFlags & DXGI_PRESENT_ALLOW_TEARING))
     {
@@ -320,7 +350,6 @@ bool Engine::init(Adapter& adapter, Output& output, SwapChainOptions const& opti
         return false;
 
     swapChain = _swapChain.Detach();
-
     return resizeSwapChain(options.width, options.height);
 }
 
@@ -345,12 +374,12 @@ void Engine::tick() noexcept
     assertf(renderThreadId == GetCurrentThreadId(), L"Renderer::Engine::tick() can only be called from the thread that initialized the engine (ID: {}), but thread with ID {} did instead.", renderThreadId, GetCurrentThreadId());
 #endif
 
-    constexpr float black[4]{};
-    context->ClearRenderTargetView(swapChainRTV, black);
-    context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
     if(swapChain)
     {
+        constexpr float black[4]{};
+        context->ClearRenderTargetView(swapChainRTV, black);
+        context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
         // TODO: handle case where Present fails
         swapChain->Present(static_cast<UINT>(syncInterval), presentFlags);
     }
