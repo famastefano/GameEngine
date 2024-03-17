@@ -41,6 +41,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Renderer", "Renderer", "{EE
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Renderer", "Renderer\Renderer.vcxproj", "{540EA0C5-E45A-4B6B-A174-5E6D9EEB2DAE}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RendererExperiment", "RendererExperiment\RendererExperiment.vcxproj", "{AE550412-2619-4F5C-80DE-22C629F9FEA9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -135,6 +137,12 @@ Global
 		{540EA0C5-E45A-4B6B-A174-5E6D9EEB2DAE}.Shipping|x64.Build.0 = Shipping|x64
 		{540EA0C5-E45A-4B6B-A174-5E6D9EEB2DAE}.Testing|x64.ActiveCfg = Testing|x64
 		{540EA0C5-E45A-4B6B-A174-5E6D9EEB2DAE}.Testing|x64.Build.0 = Testing|x64
+		{AE550412-2619-4F5C-80DE-22C629F9FEA9}.Debug|x64.ActiveCfg = Debug|x64
+		{AE550412-2619-4F5C-80DE-22C629F9FEA9}.Debug|x64.Build.0 = Debug|x64
+		{AE550412-2619-4F5C-80DE-22C629F9FEA9}.Development|x64.ActiveCfg = Development|x64
+		{AE550412-2619-4F5C-80DE-22C629F9FEA9}.Development|x64.Build.0 = Development|x64
+		{AE550412-2619-4F5C-80DE-22C629F9FEA9}.Shipping|x64.ActiveCfg = Shipping|x64
+		{AE550412-2619-4F5C-80DE-22C629F9FEA9}.Testing|x64.ActiveCfg = Testing|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -152,6 +160,7 @@ Global
 		{BF4BEE43-C875-447F-86DA-20852EDB6BF8} = {94520825-63FA-48B6-9C8A-2AD09413F5CA}
 		{0329337A-AB56-4EF7-AE46-6D83A4644198} = {233B5C2A-3B61-4642-B5B1-AE5E604011C4}
 		{540EA0C5-E45A-4B6B-A174-5E6D9EEB2DAE} = {EEE11A85-6FBA-4D59-A05B-0A64CF888483}
+		{AE550412-2619-4F5C-80DE-22C629F9FEA9} = {EEE11A85-6FBA-4D59-A05B-0A64CF888483}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {01D0B71C-D6CC-448F-8DFA-8864AE771609}
