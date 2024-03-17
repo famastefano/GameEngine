@@ -10,6 +10,8 @@
 template<typename T>
 using ComPtr = Microsoft::WRL::ComPtr<T>;
 
+// TODO: How do we handle all DXGI/D3D errors? We need to properly format and output them via the LOG macro
+
 namespace Renderer
 {
 bool Engine::createDevice(Adapter& adapter) noexcept
@@ -17,16 +19,13 @@ bool Engine::createDevice(Adapter& adapter) noexcept
     assert(!device && adapter.handle());
 
 #if BUILD_CONFIG_DEBUG
-    renderThreadId = GetCurrentThreadId();
-#endif
-
-#if BUILD_CONFIG_DEBUG
+    renderThreadId       = GetCurrentThreadId();
     constexpr UINT flags = D3D11_CREATE_DEVICE_DEBUG;
 #else
     constexpr UINT flags = 0;
 #endif
 
-    constexpr D3D_FEATURE_LEVEL requestedLevels[2] = {D3D_FEATURE_LEVEL_11_1};
+    constexpr D3D_FEATURE_LEVEL requestedLevels[1] = {D3D_FEATURE_LEVEL_11_1};
     ComPtr<ID3D11Device>        deviceV0;
     ComPtr<ID3D11DeviceContext> contextV0;
 
@@ -52,20 +51,18 @@ bool Engine::createDevice(Adapter& adapter) noexcept
     return true;
 }
 
-bool Engine::resizeSwapChain() noexcept
+bool Engine::resizeSwapChain(UINT width, UINT height) noexcept
 {
     if(swapChainRTV)
     {
         swapChainRTV->Release();
         swapChainRTV = nullptr;
     }
-
     if(depthStencilResource)
     {
         depthStencilResource->Release();
         depthStencilResource = nullptr;
     }
-
     if(depthStencilView)
     {
         depthStencilView->Release();
@@ -75,14 +72,16 @@ bool Engine::resizeSwapChain() noexcept
     DXGI_SWAP_CHAIN_DESC1 scDesc;
     swapChain->GetDesc1(&scDesc);
 
-    if(FAILED(swapChain->ResizeBuffers(scDesc.BufferCount, 0, 0, DXGI_FORMAT_UNKNOWN, scDesc.Flags)))
+    HRESULT r   = swapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, scDesc.Flags);
+    if(S_OK != r)
+    {
         return false;
+    }
 
     swapChain->GetDesc1(&scDesc);
 
     ComPtr<ID3D11Texture2D> backBuffer;
-    if(FAILED(swapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer))) ||
-       FAILED(device->CreateRenderTargetView(backBuffer.Get(), 0, &swapChainRTV)))
+    if(S_OK != swapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer)) || S_OK != device->CreateRenderTargetView(backBuffer.Get(), 0, &swapChainRTV))
         return false;
 
     D3D11_TEXTURE2D_DESC1 depthStencilDesc{};
@@ -100,8 +99,8 @@ bool Engine::resizeSwapChain() noexcept
 
     ComPtr<ID3D11Texture2D1>       dsRes;
     ComPtr<ID3D11DepthStencilView> dsView;
-    if(FAILED(device->CreateTexture2D1(&depthStencilDesc, NULL, dsRes.GetAddressOf())) ||
-       FAILED(device->CreateDepthStencilView(dsRes.Get(), 0, dsView.GetAddressOf())))
+    if(S_OK != device->CreateTexture2D1(&depthStencilDesc, NULL, dsRes.GetAddressOf()) ||
+       S_OK != device->CreateDepthStencilView(dsRes.Get(), 0, dsView.GetAddressOf()))
         return false;
 
     context->OMSetRenderTargets(1, &swapChainRTV, dsView.Get());
@@ -147,7 +146,7 @@ Engine::Engine() noexcept
     ComPtr<IDXGIFactory2> factory2;
     HRESULT               hr = CreateDXGIFactory2(factoryFlags, IID_PPV_ARGS(&factory2));
     assertf(hr == S_OK, L"Failed to create the IDXGIFactory2 object.");
-    if(SUCCEEDED(hr))
+    if(S_OK == hr)
         hr = factory2->QueryInterface(&factory);
     assertf(hr == S_OK, L"Failed to obtain the latest IDXGIFactory interface version.");
 }
@@ -248,13 +247,10 @@ bool Engine::init(Adapter& adapter, Output& output, SwapChainOptions const& opti
     UINT swapChainFlags = 0;
 
     BOOL allowTearing = false;
-    if(SUCCEEDED(factory->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof(allowTearing))) && allowTearing)
+    if(S_OK == factory->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof(allowTearing)) && allowTearing)
     {
         swapChainFlags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
         presentFlags = DXGI_PRESENT_ALLOW_TEARING;
-
-        // See https://learn.microsoft.com/en-us/windows/win32/direct3ddxgi/dxgi-present regarding DXGI_PRESENT_ALLOW_TEARING
-        factory->MakeWindowAssociation(static_cast<HWND>(options.windowHandle), DXGI_MWA_NO_ALT_ENTER);
     }
 
     DXGI_MODE_DESC1 preferredMode, closestMode{};
@@ -296,7 +292,6 @@ bool Engine::init(Adapter& adapter, Output& output, SwapChainOptions const& opti
 
     ComPtr<IDXGISwapChain1> swapChainV1;
     HRESULT                 creationResult = E_FAIL;
-    presentFlags                           = 0;
 
     if(options.presentMode == PresentMode::Windowed)
     {
@@ -313,16 +308,20 @@ bool Engine::init(Adapter& adapter, Output& output, SwapChainOptions const& opti
         creationResult = factory->CreateSwapChainForHwnd(device, static_cast<HWND>(options.windowHandle), &swapChainDesc, &fullscreenDesc, NULL, swapChainV1.GetAddressOf());
     }
 
+    // The swap chain needs to be created to be associated to the factory
+    if(S_OK == creationResult && (presentFlags & DXGI_PRESENT_ALLOW_TEARING))
+    {
+        // See https://learn.microsoft.com/en-us/windows/win32/direct3ddxgi/dxgi-present regarding DXGI_PRESENT_ALLOW_TEARING
+        factory->MakeWindowAssociation(static_cast<HWND>(options.windowHandle), DXGI_MWA_NO_ALT_ENTER);
+    }
+
     ComPtr<Private::SwapChainInterface> _swapChain;
-    if(FAILED(creationResult) || FAILED(swapChainV1.As(&_swapChain)))
+    if(S_OK != creationResult || S_OK != swapChainV1.As(&_swapChain))
         return false;
 
     swapChain = _swapChain.Detach();
 
-    if(!resizeSwapChain())
-        return false;
-
-    return true;
+    return resizeSwapChain(options.width, options.height);
 }
 
 bool Engine::resizeOutput(unsigned int width, unsigned int height) noexcept
@@ -333,7 +332,7 @@ bool Engine::resizeOutput(unsigned int width, unsigned int height) noexcept
         (void)width;
         (void)height;
         if(swapChain)
-            return resizeSwapChain(); // swap chain gets the new size directly from the client area
+            return resizeSwapChain(0, 0); // swap chain gets the new size directly from the client area
         // TODO: resize offscreen render target
         return false;
     }
@@ -352,9 +351,8 @@ void Engine::tick() noexcept
 
     if(swapChain)
     {
-        HRESULT r = swapChain->Present(static_cast<UINT>(syncInterval), presentFlags);
-        if(SUCCEEDED(r))
-            return;
+        // TODO: handle case where Present fails
+        swapChain->Present(static_cast<UINT>(syncInterval), presentFlags);
     }
 }
 }

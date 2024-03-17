@@ -37,7 +37,7 @@ class Engine
 
     bool createDevice(Adapter& adapter) noexcept;
 
-    bool resizeSwapChain() noexcept;
+    bool resizeSwapChain(UINT width, UINT height) noexcept;
 
     void destroySwapChain();
 
@@ -62,11 +62,12 @@ class Engine
         unsigned int height = 1;
         unsigned int refreshRate{};       // Output Hz
         unsigned int backBufferCount = 2; // Minimum supported mode: Double Buffering
-        SyncInterval syncInterval{};
-        PresentMode  presentMode{};
+        SyncInterval syncInterval = SyncInterval::VariableRefreshRate;
+        PresentMode  presentMode = PresentMode::Windowed;
         OutputFormat format = OutputFormat::RGBA8_UNORM;
     };
 
+    // TODO: how can another thread access the Engine?
     Engine() noexcept;
     Engine(Engine const&)            = delete;
     Engine(Engine&&)                 = delete;
