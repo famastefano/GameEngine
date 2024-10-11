@@ -1,7 +1,10 @@
-#include <Windows.h>
-#include <new>
 #include <Core/Allocator/GlobalAllocator.h>
 #include <Core/Assert/Assert.h>
+#include <Windows.h>
+#include <intrin.h>
+#include <mutex>
+#include <new>
+#include <unordered_map>
 
 static Core::GlobalAllocator globalAllocatorInstance;
 
@@ -9,15 +12,40 @@ namespace Core
 {
 IAllocator* globalAllocator = &globalAllocatorInstance;
 
+static HANDLE                           MemHandle = GetProcessHeap() ? GetProcessHeap() : HeapCreate(0, 0, 0);
+static std::mutex                       GlobalAllocatorMutex;
+
+// TODO: refactor to use a flat map as we expect very specific optimized use-cases for data aligned over 16B
+static std::unordered_map<void*, void*> OverAlignedPointers;
+
 void* GlobalAllocator::Alloc(i64 size, i32 const alignment)
 {
-  check((alignment == 1 || !(alignment & 0x1)) && alignment <= MEMORY_ALLOCATION_ALIGNMENT, "Alignment must be a power of 2 and up to 16-byte aligned.");
-  return HeapAlloc(MemHandle, HEAP_ZERO_MEMORY, size);
+  check((alignment == 1 || !(alignment & 0x1)), "Alignment must be a power of 2.");
+
+  if (alignment <= MEMORY_ALLOCATION_ALIGNMENT)
+    return HeapAlloc(MemHandle, HEAP_ZERO_MEMORY, size);
+
+  size             += alignment;
+  void* const p     = HeapAlloc(MemHandle, HEAP_ZERO_MEMORY, size);
+  u64         addr  = (u64)p;
+  if (addr & (alignment - 1)) // Sometimes the memory is already aligned over than 16-byte for pure coincidence
+    return p;
+
+  unsigned long index;
+  _BitScanForward(&index, alignment);
+  addr <<= index - 4; // already aligned to 16-bytes, so we only shift by the delta
+  check(addr & (alignment - 1), "Invalid alignment!");
+
+  std::scoped_lock lck{GlobalAllocatorMutex};
+  OverAlignedPointers[(void*)addr] = p;
+  return (void*)addr;
 }
 
-void GlobalAllocator::Free(void const* p)
+void GlobalAllocator::Free(void* p)
 {
-  HeapFree(MemHandle, 0, (void*)p);
+  if (auto it = OverAlignedPointers.find(p); it != OverAlignedPointers.end())
+    HeapFree(MemHandle, 0, it->second);
+  HeapFree(MemHandle, 0, p);
 }
 
 bool GlobalAllocator::FollowsContainerDuringMove()
@@ -28,16 +56,6 @@ bool GlobalAllocator::FollowsContainerDuringMove()
 bool GlobalAllocator::OwnedByContainer()
 {
   return false;
-}
-
-GlobalAllocator::GlobalAllocator()
-{
-  if (MemHandle)
-    return;
-
-  MemHandle = GetProcessHeap();
-  if (!MemHandle)
-    MemHandle = HeapCreate(0, 0, 0);
 }
 } // namespace Core
 

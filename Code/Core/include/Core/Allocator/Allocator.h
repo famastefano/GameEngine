@@ -21,7 +21,7 @@ public:
 
   // Frees the block of memory previously allocated via a call to Alloc()
   // WARNING: `p` shall be the exact same pointer returned by Alloc()
-  virtual void Free(void const* p) = 0;
+  virtual void Free(void* p) = 0;
 
   // If the allocator is also "moved into" the new container
   // when a move operation is performed.
