@@ -48,7 +48,12 @@ void GlobalAllocator::Free(void* p)
   HeapFree(MemHandle, 0, p);
 }
 
-bool GlobalAllocator::FollowsContainerDuringMove()
+bool GlobalAllocator::IsMovable()
+{
+  return true;
+}
+
+bool GlobalAllocator::IsCopyable()
 {
   return true;
 }

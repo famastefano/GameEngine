@@ -21,13 +21,14 @@ public:
 
   // Frees the block of memory previously allocated via a call to Alloc()
   // WARNING: `p` shall be the exact same pointer returned by Alloc()
-  virtual void Free(void* p) = 0;
+  virtual void Free(__declspec(noalias) void* p) = 0;
 
-  // If the allocator is also "moved into" the new container
-  // when a move operation is performed.
-  // If not, the memory needs to be taken over by the other allocator,
-  // usually by copying everything.
-  virtual bool FollowsContainerDuringMove() = 0;
+  // If the allocator is also "moved into" the new container when a move operation is performed.
+  // WARNING: if this is false, a copy will be made.
+  virtual bool IsMovable() = 0;
+
+  // If the allocator can be reused when copying a container, otherwise it fallbacks to the global allocator.
+  virtual bool IsCopyable() = 0;
 
   // The container this allocator is passed to, will automatically destroy it
   // depending on the operations performed on the container itself (destructor, changing allocator etc.)

@@ -1,5 +1,7 @@
 #pragma once
 
+// TODO: Add proper configurable logging macros + minidump + msg fmt
+
 #undef assert
 
 #define check(cnd, ...) if(!(cnd)) __debugbreak()
