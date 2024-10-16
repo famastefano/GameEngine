@@ -12,8 +12,8 @@ namespace Core
 {
 IAllocator* globalAllocator = &globalAllocatorInstance;
 
-static HANDLE                           MemHandle = GetProcessHeap() ? GetProcessHeap() : HeapCreate(0, 0, 0);
-static std::mutex                       GlobalAllocatorMutex;
+static HANDLE     MemHandle = GetProcessHeap() ? GetProcessHeap() : HeapCreate(0, 0, 0);
+static std::mutex GlobalAllocatorMutex;
 
 // TODO: refactor to use a flat map as we expect very specific optimized use-cases for data aligned over 16B
 static std::unordered_map<void*, void*> OverAlignedPointers;
@@ -25,11 +25,42 @@ void* GlobalAllocator::Alloc(i64 size, i32 const alignment)
   if (alignment <= MEMORY_ALLOCATION_ALIGNMENT)
     return HeapAlloc(MemHandle, HEAP_ZERO_MEMORY, size);
 
-  size             += alignment;
-  void* const p     = HeapAlloc(MemHandle, HEAP_ZERO_MEMORY, size);
-  u64         addr  = (u64)p;
+  size          += alignment;
+  void* const p  = HeapAlloc(MemHandle, HEAP_ZERO_MEMORY, size);
+  if (!p)
+    return p;
+
+  u64 addr = (u64)p;
   if (addr & (alignment - 1)) // Sometimes the memory is already aligned over than 16-byte for pure coincidence
     return p;
+
+  unsigned long index;
+  _BitScanForward(&index, alignment);
+  addr <<= index - 4; // already aligned to 16-bytes, so we only shift by the delta
+  check(addr & (alignment - 1), "Invalid alignment!");
+
+  std::scoped_lock lck{GlobalAllocatorMutex};
+  OverAlignedPointers[(void*)addr] = p;
+  return (void*)addr;
+}
+
+void* GlobalAllocator::Realloc(void* p, i64 size, i32 const alignment)
+{
+  check((alignment == 1 || !(alignment & 0x1)), "Alignment must be a power of 2.");
+
+  if (alignment > MEMORY_ALLOCATION_ALIGNMENT)
+    size += alignment;
+
+  void* newP = HeapReAlloc(MemHandle, HEAP_REALLOC_IN_PLACE_ONLY | HEAP_ZERO_MEMORY, p, size);
+  if (!newP)
+    newP = HeapReAlloc(MemHandle, HEAP_ZERO_MEMORY, p, size);
+
+  if (alignment <= MEMORY_ALLOCATION_ALIGNMENT)
+    return newP;
+
+  u64 addr = (u64)newP;
+  if (addr & (alignment - 1)) // Sometimes the memory is already aligned over than 16-byte for pure coincidence
+    return newP;
 
   unsigned long index;
   _BitScanForward(&index, alignment);

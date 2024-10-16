@@ -19,6 +19,14 @@ public:
   //   fail, nullptr
   __declspec(allocator) __declspec(restrict) virtual void* Alloc(i64 const size, i32 const alignment) = 0;
 
+  // Reallocates a contiguous block of memory with at least `size` capacity.
+  // Returns:
+  //   success, a valid pointer
+  //   fail, nullptr
+  // 
+  // Remarks: fail means reallocation didn't succeed, so you can try again with Alloc.
+  __declspec(allocator) __declspec(restrict) virtual void* Realloc(__declspec(noalias) void* p, i64 const size, i32 const alignment) = 0;
+
   // Frees the block of memory previously allocated via a call to Alloc()
   // WARNING: `p` shall be the exact same pointer returned by Alloc()
   virtual void Free(__declspec(noalias) void* p) = 0;
