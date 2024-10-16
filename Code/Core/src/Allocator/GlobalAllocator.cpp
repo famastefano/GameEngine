@@ -55,7 +55,7 @@ void* GlobalAllocator::Realloc(void* p, i64 size, i32 const alignment)
   if (!newP)
     newP = HeapReAlloc(MemHandle, HEAP_ZERO_MEMORY, p, size);
 
-  if (alignment <= MEMORY_ALLOCATION_ALIGNMENT)
+  if (!newP || alignment <= MEMORY_ALLOCATION_ALIGNMENT)
     return newP;
 
   u64 addr = (u64)newP;
@@ -68,14 +68,17 @@ void* GlobalAllocator::Realloc(void* p, i64 size, i32 const alignment)
   check(addr & (alignment - 1), "Invalid alignment!");
 
   std::scoped_lock lck{GlobalAllocatorMutex};
-  OverAlignedPointers[(void*)addr] = p;
+  OverAlignedPointers[(void*)addr] = newP;
   return (void*)addr;
 }
 
 void GlobalAllocator::Free(void* p)
 {
-  if (auto it = OverAlignedPointers.find(p); it != OverAlignedPointers.end())
-    HeapFree(MemHandle, 0, it->second);
+  {
+    std::scoped_lock lck{GlobalAllocatorMutex};
+    if (auto it = OverAlignedPointers.find(p); it != OverAlignedPointers.end())
+      p = it->second;
+  }
   HeapFree(MemHandle, 0, p);
 }
 

@@ -165,9 +165,21 @@ template <typename T>
 inline void Vector<T>::Realloc(i32 const newCapacity)
 {
   check(newCapacity > 0, "Invalid capacity");
-
   i32 const currSize = Size();
-  T*        newMem   = Allocator_->Alloc(newCapacity * sizeof(T), alignof(T));
+
+  if (Mem_)
+  {
+    newMem = Allocator_->Realloc(Mem_, newCapacity * sizeof(T), alignof(T));
+    if (newMem)
+    {
+      Mem_      = newMem;
+      Size_     = Mem_ + currSize;
+      Capacity_ = Mem_ + newCapacity;
+      return;
+    }
+  }
+
+  T* newMem = Allocator_->Alloc(newCapacity * sizeof(T), alignof(T));
   check(newMem, "Couldn't allocate Vector memory.");
 
   if (newCapacity >= currSize)
@@ -186,6 +198,7 @@ inline void Vector<T>::Realloc(i32 const newCapacity)
 template <typename T>
 inline void Vector<T>::Destroy(T* from, T* to)
 {
+  check(from <= to, "Vector Destroy called with invalid range.");
   if constexpr (!std::is_trivially_destructible_v<T>)
   {
     while (from != to)
@@ -196,7 +209,6 @@ inline void Vector<T>::Destroy(T* from, T* to)
 template <typename T>
 inline i32 Vector<T>::CalculateCapacity(i32 const currCapacity, i32 const desiredSize)
 {
-  
 }
 
 template <typename T>
@@ -328,8 +340,7 @@ inline Vector<T>::~Vector()
 template <typename T>
 inline Vector<T>& Vector<T>::operator=(Vector const& other)
 {
-  Destroy(Mem_, Size_);
-  Allocator_->Free(Mem_);
+  Reset();
   Allocator_ = other.Allocator_->IsCopyable() ? other.Allocator_ : globalAllocator;
   Realloc(other.Capacity_);
   Algorithm::Copy(other.Mem_, other.Size_, Mem_);
@@ -338,13 +349,12 @@ inline Vector<T>& Vector<T>::operator=(Vector const& other)
 template <typename T>
 inline Vector<T>& Vector<T>::operator=(Vector&& other)
 {
-  Destroy(Mem_, Size_);
-  Allocator_->Free(Mem_);
+  Reset();
   if (other.Allocator_->IsMovable())
   {
-    Mem_       = std::exchange(other.Mem_, nullptr);
-    Capacity_  = std::exchange(other.Capacity_, nullptr);
-    Size_      = std::exchange(other.Size_, nullptr);
+    Mem_       = std::swap(other.Mem_);
+    Capacity_  = std::swap(other.Capacity_);
+    Size_      = std::swap(other.Size_);
     Allocator_ = std::exchange(other.Allocator_, globalAllocator);
   }
   else
@@ -372,7 +382,7 @@ inline void Vector<T>::Assign(i32 const newSize, U const& newValue)
   i32 const currCap = Capacity();
   Clear();
   if (newSize > currCap)
-    Realloc(currCap * ReallocRatio);
+    Realloc(CalculateCapacity(currCap, newSize));
   for (T* item = Mem_; item < Mem_ + newSize; ++item)
     new (item) T(newValue);
   Size_ = Mem_ + newSize;
@@ -387,7 +397,7 @@ inline void Vector<T>::Assign(Iterator begin, Iterator end)
   i32 const newSize = std::distance(begin, end);
   i32 const currCap = Capacity();
   if (newSize >= currCap)
-    Realloc(currCap * ReallocRatio);
+    Realloc(CalculateCapacity(currCap, newSize));
   for (T* item = Mem_; item < Mem_ + newSize; ++item)
     new (item) T(*begin++);
   Size_ = Mem_ + newSize;
@@ -523,7 +533,7 @@ template <typename T>
 template <typename U>
 inline void Vector<T>::Resize(i32 const newSize, U const& value)
 {
-  static_assert(std::is_constructible_v<T, decltype(value)>, "Vector Resize(newSize, value) requires T to be constructible from the value.");
+  static_assert(std::constructible_from<T, decltype(value)>, "Vector Resize(newSize, value) requires T to be constructible from value.");
   i32 const currSize = Size();
   i32 const currCap  = Capacity();
   if (currCap < newSize)
@@ -581,17 +591,22 @@ template <typename U>
 inline T* Vector<T>::Insert(T const* position, i32 const count, U const& value)
 {
   static_cast(std::constructible_from<T, decltype(value)>, "Vector Insert(position, count, value) cannot construct T from value.");
-
+  check(Mem_ <= position && position <= Size_, "Vector Insert(position, count, value) has an invalid position.");
   if (position == end())
   {
     Assign(count, value);
     return begin();
   }
-
-  i32 const currCap = Capacity();
-  i32 const newSize = Size() + count;
+  i32 const posIndex = position - Mem_;
+  i32 const currCap  = Capacity();
+  i32 const currSize = Size();
+  i32 const newSize  = currSize + count;
   if (currCap < newSize)
-  {
-  }
+    Realloc(CalculateCapacity(currCap, newSize));
+  Algorithm::Move(Mem_ + posIndex, Size_, Size_);
+  for (T* item = Mem_ + posIndex; item < Mem_ + posIndex + count; ++item)
+    new (item) T(value);
+  Size_ = Mem_ + newSize;
+  return Mem_ + posIndex;
 }
 } // namespace Core

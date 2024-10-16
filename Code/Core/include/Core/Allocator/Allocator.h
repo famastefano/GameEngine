@@ -23,8 +23,6 @@ public:
   // Returns:
   //   success, a valid pointer
   //   fail, nullptr
-  // 
-  // Remarks: fail means reallocation didn't succeed, so you can try again with Alloc.
   __declspec(allocator) __declspec(restrict) virtual void* Realloc(__declspec(noalias) void* p, i64 const size, i32 const alignment) = 0;
 
   // Frees the block of memory previously allocated via a call to Alloc()
