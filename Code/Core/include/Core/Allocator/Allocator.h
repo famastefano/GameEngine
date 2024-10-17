@@ -23,11 +23,11 @@ public:
   // Returns:
   //   success, a valid pointer
   //   fail, nullptr
-  __declspec(allocator) __declspec(restrict) virtual void* Realloc(__declspec(noalias) void* p, i64 const size, i32 const alignment) = 0;
+  __declspec(allocator) __declspec(restrict) __declspec(noalias) virtual void* Realloc(void* p, i64 const size, i32 const alignment) = 0;
 
   // Frees the block of memory previously allocated via a call to Alloc()
   // WARNING: `p` shall be the exact same pointer returned by Alloc()
-  virtual void Free(__declspec(noalias) void* p) = 0;
+  __declspec(noalias) virtual void Free(void* p) = 0;
 
   // If the allocator is also "moved into" the new container when a move operation is performed.
   // WARNING: if this is false, a copy will be made.

@@ -44,7 +44,7 @@ void* GlobalAllocator::Alloc(i64 size, i32 const alignment)
   return (void*)addr;
 }
 
-void* GlobalAllocator::Realloc(void* p, i64 size, i32 const alignment)
+ void* GlobalAllocator::Realloc(void* p, i64 size, i32 const alignment)
 {
   check((alignment == 1 || !(alignment & 0x1)), "Alignment must be a power of 2.");
 

@@ -7,12 +7,14 @@ namespace Core
 class CORE_API GlobalAllocator final : public IAllocator
 {
 public:
+  // clang-format off
   // Inherited via IAllocator
   __declspec(allocator) __declspec(restrict) void* Alloc(i64 const size, i32 const alignment) override;
-  __declspec(allocator) __declspec(restrict) virtual void* Realloc(__declspec(noalias) void* p, i64 const size, i32 const alignment) override;
-  void Free(__declspec(noalias) void* p) override;
+  __declspec(allocator) __declspec(restrict) __declspec(noalias) void* Realloc(void* p, i64 const size, i32 const alignment) override;
+  __declspec(noalias) void Free(void* p) override;
   bool IsMovable() override;
   bool IsCopyable() override;
   bool OwnedByContainer() override;
+  //clang-format on
 };
 } // namespace Core

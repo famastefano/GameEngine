@@ -128,29 +128,20 @@ public:
   template <typename U = T>
   bool Contains(U&& value);
 
-  template <typename Comparer>
+  template <std::predicate<T const&> Comparer>
   bool Contains(Comparer&& comparer);
 
   template <typename U = T>
   T* Find(U&& value);
+
+  template <std::predicate<T const&> Comparer>
+  T* Find(Comparer&& comparer);
 
   template <typename U = T>
   bool operator==(Vector<U> const& other);
 
   template <typename U = T>
   bool operator!=(Vector<U> const& other);
-
-  template <typename U = T>
-  bool operator<(Vector<U> const& other);
-
-  template <typename U = T>
-  bool operator>(Vector<U> const& other);
-
-  template <typename U = T>
-  bool operator<=(Vector<U> const& other);
-
-  template <typename U = T>
-  bool operator>=(Vector<U> const& other);
 };
 
 template <typename T>
@@ -207,8 +198,11 @@ inline void Vector<T>::Destroy(T* from, T* to)
 }
 
 template <typename T>
-inline i32 Vector<T>::CalculateCapacity(i32 const currCapacity, i32 const desiredSize)
+inline i32 Vector<T>::CalculateCapacity(i32 currCapacity, i32 const desiredSize)
 {
+  while(currCapacity < desiredSize)
+    currCapacity *= ReallocRatio;
+  return currCapacity;
 }
 
 template <typename T>
@@ -231,7 +225,7 @@ inline Vector<T>::Vector(i32 const initialSize, IAllocator* allocator)
     Realloc(initialSize);
     if constexpr (std::is_trivially_default_constructible_v<T>)
     {
-      std::memset(Mem_, 0, Size_ * sizeof(T));
+      std::memset(Mem_, 0, Size() * sizeof(T));
     }
     else
     {
@@ -246,13 +240,13 @@ template <typename U>
 inline Vector<T>::Vector(std::initializer_list<U> init, IAllocator* allocator)
     : Vector(allocator)
 {
-  static_assert(std::constructible_from<T, U>, "Cannot construct T from U.");
+  static_assert(std::constructible_from<T, U const&>, "Cannot construct T from U.");
   u64 const sz = init.size();
   if (sz)
     Realloc(sz);
 
   T* item = Mem_;
-  for (auto&& value : init)
+  for (auto const& value : init)
     new (item++) T(std::forward<U>(value));
 }
 
@@ -274,7 +268,7 @@ template <std::input_iterator Iterator>
 inline Vector<T>::Vector(Iterator begin, Iterator end, IAllocator* allocator)
     : Vector(allocator)
 {
-  constexpr bool CanUseFastPath = std::is_trivially_copyable_v<T> && std::is_same_v<std::remove_cvref_t<Iterator>, T*>;
+  constexpr bool CanUseFastPath = std::is_trivially_copyable_v<T> && std::same_as<std::remove_cvref_t<Iterator>, T*>;
 
   i32 initialSize = 0;
   if constexpr (CanUseFastPath)
@@ -379,12 +373,15 @@ template <typename U>
 inline void Vector<T>::Assign(i32 const newSize, U const& newValue)
 {
   static_cast(std::constructible_from<T, decltype(U)>, "Cannot construct Vector<T> from U.");
-  i32 const currCap = Capacity();
   Clear();
+
+  i32 const currCap = Capacity();
   if (newSize > currCap)
     Realloc(CalculateCapacity(currCap, newSize));
+
   for (T* item = Mem_; item < Mem_ + newSize; ++item)
     new (item) T(newValue);
+
   Size_ = Mem_ + newSize;
 }
 
@@ -394,12 +391,15 @@ inline void Vector<T>::Assign(Iterator begin, Iterator end)
 {
   static_cast(std::constructible_from<T, decltype(*begin)>, "Cannot construct Vector<T> from the provided iterator.");
   Clear();
+
   i32 const newSize = std::distance(begin, end);
   i32 const currCap = Capacity();
   if (newSize >= currCap)
     Realloc(CalculateCapacity(currCap, newSize));
+
   for (T* item = Mem_; item < Mem_ + newSize; ++item)
     new (item) T(*begin++);
+
   Size_ = Mem_ + newSize;
 }
 
@@ -511,10 +511,12 @@ template <typename T>
 inline void Vector<T>::Resize(i32 const newSize)
 {
   static_assert(std::default_initializable<T>, "Vector Resize(newSize) requires T to be default constructible.");
+
   i32 const currSize = Size();
   i32 const currCap  = Capacity();
   if (currCap < newSize)
     Realloc(newSize);
+
   if (currSize < newSize)
   {
     i32 const ds = newSize - currSize;
@@ -534,10 +536,12 @@ template <typename U>
 inline void Vector<T>::Resize(i32 const newSize, U const& value)
 {
   static_assert(std::constructible_from<T, decltype(value)>, "Vector Resize(newSize, value) requires T to be constructible from value.");
+
   i32 const currSize = Size();
   i32 const currCap  = Capacity();
   if (currCap < newSize)
     Realloc(newSize);
+
   if (currSize < newSize)
   {
     i32 const ds = newSize - currSize;
@@ -597,16 +601,184 @@ inline T* Vector<T>::Insert(T const* position, i32 const count, U const& value)
     Assign(count, value);
     return begin();
   }
+
   i32 const posIndex = position - Mem_;
   i32 const currCap  = Capacity();
   i32 const currSize = Size();
   i32 const newSize  = currSize + count;
   if (currCap < newSize)
     Realloc(CalculateCapacity(currCap, newSize));
-  Algorithm::Move(Mem_ + posIndex, Size_, Size_);
+
+  Algorithm::Move(Mem_ + posIndex, Size_, Mem_ + count);
   for (T* item = Mem_ + posIndex; item < Mem_ + posIndex + count; ++item)
     new (item) T(value);
+
   Size_ = Mem_ + newSize;
   return Mem_ + posIndex;
+}
+
+template <typename T>
+template <std::input_iterator Iterator>
+inline T* Vector<T>::Insert(T const* position, Iterator begin, Iterator end)
+{
+  static_cast(std::constructible_from<T, decltype(*begin)>, "Vector Insert(position, begin, end) cannot construct T from *begin.");
+  check(Mem_ <= position && position <= Size_, "Vector Insert(position, begin, end) has an invalid position.");
+  if (position == end())
+  {
+    Assign(begin, end);
+    return begin();
+  }
+
+  i32 const elemCount = std::distance(begin, end);
+  i32 const posIndex  = position - Mem_;
+  i32 const currCap   = Capacity();
+  i32 const currSize  = Size();
+  i32 const newSize   = currSize + elemCount;
+  if (currCap < newSize)
+    Realloc(CalculateCapacity(currCap, newSize));
+
+  Algorithm::Move(Mem_ + posIndex, Size_, Mem_ + elemCount);
+  for (T* item = Mem_ + posIndex; item < Mem_ + posIndex + count; ++item)
+    new (item) T(*begin++);
+
+  Size_ = Mem_ + newSize;
+  return Mem_ + posIndex;
+}
+
+template <typename T>
+template <typename... Args>
+inline T* Vector<T>::Emplace(T const* position, Args&&... args)
+{
+  static_cast(std::constructible_from<T, std::forward<Args>(args)...>, "Vector Emplace(position, Args...) cannot construct T from Args.");
+  check(Mem_ <= position && position <= Size_, "Vector Emplace(position, Args...) has an invalid position.");
+  i32 const posIndex = position - Mem_;
+  i32 const size     = Size();
+  i32 const cap      = Capacity();
+  if (size == cap)
+    Realloc(CalculateCapacity(cap, size + 1));
+
+  T* pos = Mem_ + posIndex;
+  Algorithm::Move(pos, Size_, pos + 1);
+  new (pos) T(std::forward<Args>(args)...);
+  ++Size_;
+  return pos;
+}
+
+template <typename T>
+template <typename... Args>
+inline T* Vector<T>::EmplaceBackUnsafe(Args&&... args)
+{
+  check(Size() < Capacity(), "Vector EmplaceBackUnsafe(Args) out of bounds insertion.");
+  T* pos = Size_++;
+  new (pos) T(std::forward<Args>(args)...);
+  return pos;
+}
+
+template <typename T>
+inline T* Vector<T>::Erase(T const* position)
+{
+  check(Mem_ <= position && position <= Size_, "Vector Erase(position) has an invalid position.");
+  if (IsEmpty() || position == end())
+    return end();
+
+  position->~T(); // TODO: UB to move into a destroyed object
+  Algorithm::Move(position + 1, Size_, position);
+  return position;
+}
+
+template <typename T>
+inline T* Vector<T>::Erase(T* begin, T* end)
+{
+  check(begin <= end && Mem_ <= begin && end <= Size_, "Vector Erase(begin, end) has an invalid range.");
+  if (IsEmpty() || begin == end)
+    return this->end();
+
+  Destroy(begin, end); // TODO: UB to move into a destroyed object
+}
+
+template <typename T>
+inline T* Vector<T>::Erase(i32 const position)
+{
+  return Erase(Mem_ + position);
+}
+
+template <typename T>
+inline T* Vector<T>::Erase(i32 const position, i32 const count)
+{
+  return Erase(Mem_ + position, Mem_ + position + count);
+}
+
+template <typename T>
+inline void Vector<T>::PopBack()
+{
+  if (!IsEmpty())
+    (--Size_)->~T();
+}
+
+template <typename T>
+template <typename U>
+inline bool Vector<T>::Contains(U&& value)
+{
+  return Find(std::forward<U>(value)) != end();
+}
+
+template <typename T>
+template <std::predicate<T const&> Comparer>
+inline bool Vector<T>::Contains(Comparer&& comparer)
+{
+  return Find(std::forward<Comparer>(comparer)) != end();
+}
+
+template <typename T>
+template <typename U>
+inline T* Vector<T>::Find(U&& value)
+{
+  static_cast(std::equality_comparable_with<T, std::forward<U>(value)>, "Vector Find(value) cannot compare T == U");
+  for (auto const& item : *this)
+    if (item == std::forward<U>(value))
+      return &item;
+  return end();
+}
+
+template <typename T>
+template <std::predicate<T const&> Comparer>
+inline T* Vector<T>::Find(Comparer&& comparer)
+{
+  for (auto const& item : *this)
+    if (comparer(item))
+      return &item;
+  return end();
+}
+
+template <typename T>
+template <typename U>
+inline bool Vector<T>::operator==(Vector<U> const& other)
+{
+  static_cast(std::equality_comparable_with<T, U>, "Vector operator==(Vector<U>) cannot compare T == U");
+  if (Size() || other.Size())
+    return false;
+
+  for (i32 i = 0; i < Size(); ++i)
+  {
+    if (!(Mem_[i] == other.Mem_[i]))
+      return false;
+  }
+  return true;
+}
+
+template <typename T>
+template <typename U>
+inline bool Vector<T>::operator!=(Vector<U> const& other)
+{
+  static_cast(std::equality_comparable_with<T, U>, "Vector operator==(Vector<U>) cannot compare T == U");
+  if (Size() || other.Size())
+    return true;
+
+  for (i32 i = 0; i < Size(); ++i)
+  {
+    if (Mem_[i] == other.Mem_[i])
+      return false;
+  }
+  return true;
 }
 } // namespace Core
