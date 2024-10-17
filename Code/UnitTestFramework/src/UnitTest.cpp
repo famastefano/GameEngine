@@ -9,8 +9,8 @@ static std::mutex GlobalOutputMutex;
 
 namespace UnitTest::Private
 {
-std::atomic<int>       GlobalPassedTestsCounter = 0;
-std::atomic<int>       GlobalFailedTestsCounter = 0;
+std::atomic<int> GlobalPassedTestsCounter = 0;
+std::atomic<int> GlobalFailedTestsCounter = 0;
 
 TestBase::TestBase(char const* SuiteName, char const* TestName)
     : SuiteName(SuiteName)

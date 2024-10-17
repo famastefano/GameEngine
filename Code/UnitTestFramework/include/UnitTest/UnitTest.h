@@ -26,7 +26,6 @@ private:
   bool HasFailed = false;
 };
 
-extern std::vector<TestBase*> GlobalTestCollection;
 extern std::atomic<int>       GlobalPassedTestsCounter;
 extern std::atomic<int>       GlobalFailedTestsCounter;
 } // namespace UnitTest::Private

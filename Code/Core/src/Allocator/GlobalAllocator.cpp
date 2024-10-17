@@ -4,7 +4,6 @@
 #include <intrin.h>
 #include <mutex>
 #include <new>
-#include <unordered_map>
 
 static Core::GlobalAllocator globalAllocatorInstance;
 
@@ -15,8 +14,24 @@ IAllocator* globalAllocator = &globalAllocatorInstance;
 static HANDLE     MemHandle = GetProcessHeap() ? GetProcessHeap() : HeapCreate(0, 0, 0);
 static std::mutex GlobalAllocatorMutex;
 
-// TODO: refactor to use a flat map as we expect very specific optimized use-cases for data aligned over 16B
-static std::unordered_map<void*, void*> OverAlignedPointers;
+struct AllocMetadata
+{
+  void* OverAligned;
+  void* Original;
+};
+static i32            MetaDataSize     = 0;
+static i32            MetaDataCapacity = 1'024;
+static AllocMetadata* MetaData         = (AllocMetadata*)globalAllocator->Alloc(1'024 * sizeof(AllocMetadata), alignof(AllocMetadata));
+
+constexpr bool operator==(AllocMetadata const& metadata, void* p)
+{
+  return metadata.OverAligned == p;
+}
+
+void           ReallocMetadata();
+void           AddMetadata(AllocMetadata const& metadata);
+void           RemoveMetadata(AllocMetadata* metadata);
+AllocMetadata* FindMetadata(void* p);
 
 void* GlobalAllocator::Alloc(i64 size, i32 const alignment)
 {
@@ -40,11 +55,11 @@ void* GlobalAllocator::Alloc(i64 size, i32 const alignment)
   check(addr & (alignment - 1), "Invalid alignment!");
 
   std::scoped_lock lck{GlobalAllocatorMutex};
-  OverAlignedPointers[(void*)addr] = p;
+  AddMetadata({.OverAligned = (void*)addr, .Original = p});
   return (void*)addr;
 }
 
- void* GlobalAllocator::Realloc(void* p, i64 size, i32 const alignment)
+void* GlobalAllocator::Realloc(void* p, i64 size, i32 const alignment)
 {
   check((alignment == 1 || !(alignment & 0x1)), "Alignment must be a power of 2.");
 
@@ -68,7 +83,7 @@ void* GlobalAllocator::Alloc(i64 size, i32 const alignment)
   check(addr & (alignment - 1), "Invalid alignment!");
 
   std::scoped_lock lck{GlobalAllocatorMutex};
-  OverAlignedPointers[(void*)addr] = newP;
+  AddMetadata({.OverAligned = (void*)addr, .Original = newP});
   return (void*)addr;
 }
 
@@ -76,8 +91,11 @@ void GlobalAllocator::Free(void* p)
 {
   {
     std::scoped_lock lck{GlobalAllocatorMutex};
-    if (auto it = OverAlignedPointers.find(p); it != OverAlignedPointers.end())
-      p = it->second;
+    if (AllocMetadata* metadata = FindMetadata(p))
+    {
+      p = metadata->Original;
+      RemoveMetadata(metadata);
+    }
   }
   HeapFree(MemHandle, 0, p);
 }
@@ -95,6 +113,45 @@ bool GlobalAllocator::IsCopyable()
 bool GlobalAllocator::OwnedByContainer()
 {
   return false;
+}
+
+void ReallocMetadata()
+{
+  i32 const newCap = MetaDataCapacity * 2;
+  if (void* reallocated = globalAllocator->Realloc(MetaData, newCap, alignof(AllocMetadata)))
+  {
+    MetaData         = (AllocMetadata*)reallocated;
+    MetaDataCapacity = newCap;
+    return;
+  }
+  if (void* newAlloc = globalAllocator->Alloc(newCap, alignof(AllocMetadata)))
+  {
+    // We rely on the fact that the memory has been initialized with HEAP_ZERO_MEMORY here!
+    std::memcpy(newAlloc, MetaData, sizeof(AllocMetadata) * MetaDataSize);
+    globalAllocator->Free(MetaData);
+    MetaData         = (AllocMetadata*)newAlloc;
+    MetaDataCapacity = newCap;
+    return;
+  }
+  std::terminate();
+}
+
+void AddMetadata(AllocMetadata const& metadata)
+{
+  if (MetaDataSize == MetaDataCapacity)
+    ReallocMetadata();
+  MetaData[MetaDataSize++] = metadata;
+}
+
+void RemoveMetadata(AllocMetadata* metadata)
+{
+  std::swap(MetaData[--MetaDataSize], *metadata);
+}
+
+AllocMetadata* FindMetadata(void* p)
+{
+  auto it = std::find(MetaData, MetaData + MetaDataSize, p);
+  return it != MetaData + MetaDataSize ? it : nullptr;
 }
 } // namespace Core
 

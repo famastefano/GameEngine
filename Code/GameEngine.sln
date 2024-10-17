@@ -8,6 +8,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTestFramework", "UnitTe
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameEngineProjectTemplate", "GameEngineProjectTemplate\GameEngineProjectTemplate.vcxproj", "{B342E31C-5AF6-4524-B5CA-0D8B2E207806}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CoreTests", "CoreTests\CoreTests.vcxproj", "{C2ABE3E7-8710-4A72-B6E2-838C95BB3B9C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -26,6 +28,10 @@ Global
 		{B342E31C-5AF6-4524-B5CA-0D8B2E207806}.Debug|x64.Build.0 = Debug|x64
 		{B342E31C-5AF6-4524-B5CA-0D8B2E207806}.Release|x64.ActiveCfg = Release|x64
 		{B342E31C-5AF6-4524-B5CA-0D8B2E207806}.Release|x64.Build.0 = Release|x64
+		{C2ABE3E7-8710-4A72-B6E2-838C95BB3B9C}.Debug|x64.ActiveCfg = Debug|x64
+		{C2ABE3E7-8710-4A72-B6E2-838C95BB3B9C}.Debug|x64.Build.0 = Debug|x64
+		{C2ABE3E7-8710-4A72-B6E2-838C95BB3B9C}.Release|x64.ActiveCfg = Release|x64
+		{C2ABE3E7-8710-4A72-B6E2-838C95BB3B9C}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
