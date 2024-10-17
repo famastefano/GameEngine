@@ -33,6 +33,11 @@ void           AddMetadata(AllocMetadata const& metadata);
 void           RemoveMetadata(AllocMetadata* metadata);
 AllocMetadata* FindMetadata(void* p);
 
+constexpr bool IsAlignedTo(void* p, i32 const alignment)
+{
+  return !((u64)p & (alignment - 1));
+}
+
 void* GlobalAllocator::Alloc(i64 size, i32 const alignment)
 {
   check((alignment == 1 || !(alignment & 0x1)), "Alignment must be a power of 2.");
@@ -40,51 +45,49 @@ void* GlobalAllocator::Alloc(i64 size, i32 const alignment)
   if (alignment <= MEMORY_ALLOCATION_ALIGNMENT)
     return HeapAlloc(MemHandle, HEAP_ZERO_MEMORY, size);
 
-  size          += alignment;
-  void* const p  = HeapAlloc(MemHandle, HEAP_ZERO_MEMORY, size);
-  if (!p)
-    return p;
+  size                  += alignment;
+  void* const allocated  = HeapAlloc(MemHandle, HEAP_ZERO_MEMORY, size);
+  if (!allocated)
+    return allocated;
 
-  u64 addr = (u64)p;
-  if (addr & (alignment - 1)) // Sometimes the memory is already aligned over than 16-byte for pure coincidence
-    return p;
+  if (IsAlignedTo(allocated, alignment)) // Sometimes the memory is already aligned over than 16-byte for pure coincidence
+    return allocated;
 
   unsigned long index;
   _BitScanForward(&index, alignment);
-  addr <<= index - 4; // already aligned to 16-bytes, so we only shift by the delta
-  check(addr & (alignment - 1), "Invalid alignment!");
+  void* const overaligned = (void*)((u64)allocated << (index - 4)); // already aligned to 16-bytes, so we only shift by the delta
+  check(IsAlignedTo(overaligned, alignment), "Invalid alignment!");
 
   std::scoped_lock lck{GlobalAllocatorMutex};
-  AddMetadata({.OverAligned = (void*)addr, .Original = p});
-  return (void*)addr;
+  AddMetadata({.OverAligned = overaligned, .Original = allocated});
+  return overaligned;
 }
 
-void* GlobalAllocator::Realloc(void* p, i64 size, i32 const alignment)
+void* GlobalAllocator::Realloc(void* toRealloc, i64 size, i32 const alignment)
 {
   check((alignment == 1 || !(alignment & 0x1)), "Alignment must be a power of 2.");
 
   if (alignment > MEMORY_ALLOCATION_ALIGNMENT)
     size += alignment;
 
-  void* newP = HeapReAlloc(MemHandle, HEAP_REALLOC_IN_PLACE_ONLY | HEAP_ZERO_MEMORY, p, size);
-  if (!newP)
-    newP = HeapReAlloc(MemHandle, HEAP_ZERO_MEMORY, p, size);
+  void* reallocated = HeapReAlloc(MemHandle, HEAP_REALLOC_IN_PLACE_ONLY | HEAP_ZERO_MEMORY, toRealloc, size);
+  if (!reallocated)
+    reallocated = HeapReAlloc(MemHandle, HEAP_ZERO_MEMORY, toRealloc, size);
 
-  if (!newP || alignment <= MEMORY_ALLOCATION_ALIGNMENT)
-    return newP;
+  if (!reallocated || alignment <= MEMORY_ALLOCATION_ALIGNMENT)
+    return reallocated;
 
-  u64 addr = (u64)newP;
-  if (addr & (alignment - 1)) // Sometimes the memory is already aligned over than 16-byte for pure coincidence
-    return newP;
+  if (IsAlignedTo(reallocated, alignment)) // Sometimes the memory is already aligned over than 16-byte for pure coincidence
+    return reallocated;
 
   unsigned long index;
   _BitScanForward(&index, alignment);
-  addr <<= index - 4; // already aligned to 16-bytes, so we only shift by the delta
-  check(addr & (alignment - 1), "Invalid alignment!");
+  void* const overaligned = (void*)((u64)reallocated << (index - 4)); // already aligned to 16-bytes, so we only shift by the delta
+  check(IsAlignedTo(overaligned, alignment), "Invalid alignment!");
 
   std::scoped_lock lck{GlobalAllocatorMutex};
-  AddMetadata({.OverAligned = (void*)addr, .Original = newP});
-  return (void*)addr;
+  AddMetadata({.OverAligned = overaligned, .Original = reallocated});
+  return overaligned;
 }
 
 void GlobalAllocator::Free(void* p)
