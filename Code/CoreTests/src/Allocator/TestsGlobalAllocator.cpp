@@ -21,7 +21,7 @@ UNIT_TEST_SUITE(Allocator)
   }
   UNIT_TEST(GlobalAllocator_Alloc_IncreasedSizes)
   {
-    for(Core::i32 allocSize = 16; allocSize < 10*1024*1024; allocSize *= 2)
+    for (Core::i32 allocSize = 16; allocSize < 10 * 1'024 * 1'024; allocSize *= 2)
     {
       void* p = Core::globalAllocator->Alloc(allocSize, 8);
       UNIT_TEST_REQUIRE(p);
@@ -30,11 +30,19 @@ UNIT_TEST_SUITE(Allocator)
   }
   UNIT_TEST(GlobalAllocator_Alloc_IncreasedAlignment)
   {
-    for(Core::i32 align = 1; align < 4096; align *= 2)
+    for (Core::i32 align = 1; align < 4'096; align *= 2)
     {
       void* p = Core::globalAllocator->Alloc(512, align);
       UNIT_TEST_REQUIRE(p);
       Core::globalAllocator->Free(p);
+    }
+  }
+  UNIT_TEST(GlobalAllocator_Alloc_OverAlignmentQuantity)
+  {
+    for (Core::i32 iterations = 0; iterations < 1'024 * 1'024; ++iterations)
+    {
+      void* p = Core::globalAllocator->Alloc(0, 32);
+      UNIT_TEST_REQUIRE(p);
     }
   }
 }

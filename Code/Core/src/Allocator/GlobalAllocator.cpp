@@ -19,9 +19,13 @@ struct AllocMetadata
   void* OverAligned;
   void* Original;
 };
-static i32            MetaDataSize     = 0;
-static i32            MetaDataCapacity = 1'024;
-static AllocMetadata* MetaData         = (AllocMetadata*)globalAllocator->Alloc(1'024 * sizeof(AllocMetadata), alignof(AllocMetadata));
+
+struct MetaData
+{
+  inline static i32            Size     = 0;
+  inline static i32            Capacity = 0;
+  inline static AllocMetadata* Data     = nullptr;
+};
 
 constexpr bool operator==(AllocMetadata const& metadata, void* p)
 {
@@ -120,20 +124,27 @@ bool GlobalAllocator::OwnedByContainer()
 
 void ReallocMetadata()
 {
-  i32 const newCap = MetaDataCapacity * 2;
-  if (void* reallocated = globalAllocator->Realloc(MetaData, newCap, alignof(AllocMetadata)))
+  i32 const newCap    = MetaData::Capacity ? MetaData::Capacity * 2 : 1'024;
+  i32 const allocSize = newCap * sizeof(AllocMetadata);
+  if (MetaData::Data)
   {
-    MetaData         = (AllocMetadata*)reallocated;
-    MetaDataCapacity = newCap;
-    return;
+    if (void* reallocated = globalAllocator->Realloc(MetaData::Data, allocSize, alignof(AllocMetadata)))
+    {
+      MetaData::Data     = (AllocMetadata*)reallocated;
+      MetaData::Capacity = newCap;
+      return;
+    }
   }
-  if (void* newAlloc = globalAllocator->Alloc(newCap, alignof(AllocMetadata)))
+  if (void* newAlloc = globalAllocator->Alloc(allocSize, alignof(AllocMetadata)))
   {
-    // We rely on the fact that the memory has been initialized with HEAP_ZERO_MEMORY here!
-    std::memcpy(newAlloc, MetaData, sizeof(AllocMetadata) * MetaDataSize);
-    globalAllocator->Free(MetaData);
-    MetaData         = (AllocMetadata*)newAlloc;
-    MetaDataCapacity = newCap;
+    if (MetaData::Data)
+    {
+      // We rely on the fact that the memory has been initialized with HEAP_ZERO_MEMORY here!
+      std::memcpy(newAlloc, MetaData::Data, sizeof(AllocMetadata) * MetaData::Size);
+      globalAllocator->Free(MetaData::Data);
+    }
+    MetaData::Data     = (AllocMetadata*)newAlloc;
+    MetaData::Capacity = newCap;
     return;
   }
   std::terminate();
@@ -141,20 +152,20 @@ void ReallocMetadata()
 
 void AddMetadata(AllocMetadata const& metadata)
 {
-  if (MetaDataSize == MetaDataCapacity)
+  if (MetaData::Size == MetaData::Capacity)
     ReallocMetadata();
-  MetaData[MetaDataSize++] = metadata;
+  MetaData::Data[MetaData::Size++] = metadata;
 }
 
 void RemoveMetadata(AllocMetadata* metadata)
 {
-  std::swap(MetaData[--MetaDataSize], *metadata);
+  std::swap(MetaData::Data[--MetaData::Size], *metadata);
 }
 
 AllocMetadata* FindMetadata(void* p)
 {
-  auto it = std::find(MetaData, MetaData + MetaDataSize, p);
-  return it != MetaData + MetaDataSize ? it : nullptr;
+  auto it = std::find(MetaData::Data, MetaData::Data + MetaData::Size, p);
+  return it != MetaData::Data + MetaData::Size ? it : nullptr;
 }
 } // namespace Core
 
