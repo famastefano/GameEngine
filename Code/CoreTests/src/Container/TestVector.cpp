@@ -200,28 +200,42 @@ UNIT_TEST_SUITE(Container)
     for (i32 i = 0; i < v.Size(); ++i)
       UNIT_TEST_REQUIRE(v[i] == arr[i]);
   }
+  UNIT_TEST(Vector_TrivialType_NonEmptyVectorFrontEqualsDataAndBegin)
+  {
+    Vector<int> v{0, 1, 2};
+    UNIT_TEST_REQUIRE(v.Front() == 0);
+    UNIT_TEST_REQUIRE(*v.Data() == v.Front());
+    UNIT_TEST_REQUIRE(v.Data() == v.begin());
+  }
+  UNIT_TEST(Vector_TrivialType_NonEmptyVectorBack)
+  {
+    Vector<int> v{0, 1, 2};
+    UNIT_TEST_REQUIRE(v.Back() == 2);
+    UNIT_TEST_REQUIRE(v.Back() == *(v.Data() + v.Size() - 1));
+  }
+  UNIT_TEST(Vector_TrivialType_EmptyVectorHasBeginEqualsEnd)
+  {
+    Vector<int> v;
+    UNIT_TEST_REQUIRE(v.begin() == v.end());
+  }
+  UNIT_TEST(Vector_TrivialType_EmptyVectorHasNullptrData)
+  {
+    Vector<int> v;
+    UNIT_TEST_REQUIRE(v.Data() == nullptr);
+  }
+  UNIT_TEST(Vector_TrivialType_ReserveChangesTheCapacityToExactlyThatValue)
+  {
+    Vector<int> v;
+    v.Reserve(97'364);
+    UNIT_TEST_REQUIRE(v.IsEmpty());
+    UNIT_TEST_REQUIRE(v.Capacity() == 97'364);
+  }
+  UNIT_TEST(Vector_TrivialType_ResizeOnEmptyVectorBehavesLikeCtorWithSize)
+  {
+    Vector<int> v0(5'431);
+    Vector<int> v1;
+    v1.Resize(v0.Size());
+    UNIT_TEST_REQUIRE(v1.Size() == 5'431);
+    UNIT_TEST_REQUIRE(v1.Capacity() == 5'431);
+  }
 }
-
-// template <typename U = T>
-// void Assign(i32 const newSize, U const& newValue);
-
-// template <std::input_iterator Iterator>
-// void Assign(Iterator begin, Iterator end);
-
-// T&       operator[](i32 const pos);
-// T const& operator[](i32 const pos) const;
-
-// T&       Front();
-// T const& Front() const;
-
-// T&       Back();
-// T const& Back() const;
-
-// T*       Data();
-// T const* Data() const;
-
-// T*       begin();
-// T const* begin() const;
-
-// T*       end();
-// T const* end() const;

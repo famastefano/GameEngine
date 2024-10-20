@@ -526,6 +526,9 @@ inline void Vector<T>::Resize(i32 const newSize)
   if (currCap < newSize)
     Realloc(newSize);
 
+  if (currSize == 0)
+    Size_ = Mem_ + newSize;
+
   if (currSize < newSize)
   {
     i32 const ds = newSize - currSize;
@@ -536,7 +539,7 @@ inline void Vector<T>::Resize(i32 const newSize)
   {
     i32 const ds = currSize - newSize;
     Destroy(Size_ - ds, Size_);
-    Size -= ds;
+    Size_ -= ds;
   }
 }
 
