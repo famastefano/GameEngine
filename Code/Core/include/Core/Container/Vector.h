@@ -6,6 +6,7 @@
 #include <Core/Allocator/Allocator.h>
 #include <Core/Assert/Assert.h>
 #include <Core/Definitions.h>
+#include <cmath>
 #include <concepts>
 #include <cstring>
 #include <initializer_list>
@@ -204,8 +205,11 @@ inline void Vector<T>::Destroy(T* from, T* to)
 template <typename T>
 inline i32 Vector<T>::CalculateCapacity(i32 currCapacity, i32 const desiredSize)
 {
+  if (currCapacity == 0)
+    return desiredSize;
+
   while (currCapacity < desiredSize)
-    currCapacity *= ReallocRatio;
+    currCapacity *= (i32)std::ceilf(ReallocRatio);
   return currCapacity;
 }
 
@@ -391,7 +395,7 @@ inline void Vector<T>::Assign(Iterator begin, Iterator end)
   static_assert(std::constructible_from<T, decltype(*begin)>, "Cannot construct Vector<T> from the provided iterator.");
   Clear();
 
-  i32 const newSize = std::distance(begin, end);
+  i32 const newSize = (i32)std::distance(begin, end);
   i32 const currCap = Capacity();
   if (newSize >= currCap)
     Realloc(CalculateCapacity(currCap, newSize));

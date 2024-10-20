@@ -7,15 +7,15 @@ UNIT_TEST_SUITE(Container)
 
   struct NullAllocator : Core::IAllocator
   {
-    __declspec(allocator) __declspec(restrict) void* Alloc(i64 const size, i32 const alignment)
+    void* Alloc(i64 const size, i32 const alignment)
     {
       return nullptr;
     }
-    __declspec(allocator) __declspec(restrict) __declspec(noalias) void* Realloc(void* p, i64 const size, i32 const alignment)
+    void* Realloc(void* p, i64 const size, i32 const alignment)
     {
       return nullptr;
     }
-    __declspec(noalias) void Free(void* p, i32 const alignment)
+    void Free(void* p, i32 const alignment)
     {
     }
     bool IsMovable()
@@ -104,14 +104,124 @@ UNIT_TEST_SUITE(Container)
     UNIT_TEST_REQUIRE_FALSE(v0.Allocator() == v1.Allocator());
     UNIT_TEST_REQUIRE(v1.Allocator() == Core::globalAllocator);
   }
+  UNIT_TEST(Vector_TrivialType_MoveCtorFromEmpty)
+  {
+    Vector<int> v0;
+    i32 const   v0_sz  = v0.Size();
+    i32 const   v0_cap = v0.Capacity();
+
+    Vector<int> v1(std::move(v0));
+    UNIT_TEST_REQUIRE(v1.Size() == v0_sz);
+    UNIT_TEST_REQUIRE(v1.Capacity() == v0_cap);
+    UNIT_TEST_REQUIRE(v1.Allocator() == Core::globalAllocator);
+
+    UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
+    UNIT_TEST_REQUIRE(v0.IsEmpty());
+    UNIT_TEST_REQUIRE(v0.Capacity() == 0);
+  }
+  UNIT_TEST(Vector_TrivialType_MoveCtorFromInitialized)
+  {
+    Vector<int> v0{0, 1, 2, 3};
+    i32 const   v0_sz  = v0.Size();
+    i32 const   v0_cap = v0.Capacity();
+
+    Vector<int> v1(std::move(v0));
+    UNIT_TEST_REQUIRE(v1.Size() == v0_sz);
+    UNIT_TEST_REQUIRE(v1.Capacity() == v0_cap);
+    UNIT_TEST_REQUIRE(v1.Allocator() == Core::globalAllocator);
+
+    UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
+    UNIT_TEST_REQUIRE(v0.IsEmpty());
+    UNIT_TEST_REQUIRE(v0.Capacity() == 0);
+  }
+  UNIT_TEST(Vector_TrivialType_CopyAssignFromEmpty)
+  {
+    Vector<int> v0;
+    Vector<int> v1 = v0;
+    UNIT_TEST_REQUIRE(v0.Size() == v1.Size());
+    UNIT_TEST_REQUIRE(v0.Capacity() == v1.Capacity());
+    UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
+  }
+  UNIT_TEST(Vector_TrivialType_CopyAssignFromInitialized)
+  {
+    Vector<int> v0{0, 1, 2, 3};
+    Vector<int> v1 = v0;
+    UNIT_TEST_REQUIRE(v0.Size() == v1.Size());
+    UNIT_TEST_REQUIRE(v0.Capacity() == v1.Capacity());
+    UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
+    UNIT_TEST_REQUIRE(memcmp(v0.Data(), v1.Data(), v0.AllocSize()) == 0);
+  }
+  UNIT_TEST(Vector_TrivialType_MoveAssignFromEmpty)
+  {
+    Vector<int> v0;
+    i32 const   v0_sz  = v0.Size();
+    i32 const   v0_cap = v0.Capacity();
+
+    Vector<int> v1 = std::move(v0);
+    UNIT_TEST_REQUIRE(v1.Size() == v0_sz);
+    UNIT_TEST_REQUIRE(v1.Capacity() == v0_cap);
+    UNIT_TEST_REQUIRE(v1.Allocator() == Core::globalAllocator);
+
+    UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
+    UNIT_TEST_REQUIRE(v0.IsEmpty());
+    UNIT_TEST_REQUIRE(v0.Capacity() == 0);
+  }
+  UNIT_TEST(Vector_TrivialType_MoveAssignFromInitialized)
+  {
+    Vector<int> v0{0, 1, 2, 3};
+    i32 const   v0_sz  = v0.Size();
+    i32 const   v0_cap = v0.Capacity();
+
+    Vector<int> v1 = std::move(v0);
+    UNIT_TEST_REQUIRE(v1.Size() == v0_sz);
+    UNIT_TEST_REQUIRE(v1.Capacity() == v0_cap);
+    UNIT_TEST_REQUIRE(v1.Allocator() == Core::globalAllocator);
+
+    UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
+    UNIT_TEST_REQUIRE(v0.IsEmpty());
+    UNIT_TEST_REQUIRE(v0.Capacity() == 0);
+  }
+  UNIT_TEST(Vector_TrivialType_AssignWithValue)
+  {
+    Vector<int> v;
+    v.Assign(512, 0xDE'AD);
+    UNIT_TEST_REQUIRE(v.Size() == 512);
+    UNIT_TEST_REQUIRE(v.Capacity() == 512);
+    for (auto const& i : v)
+      UNIT_TEST_REQUIRE(i == 0xDE'AD);
+  }
+  UNIT_TEST(Vector_TrivialType_AssignWithIterators)
+  {
+    int         arr[] = {-1, -2, -3, -4};
+    Vector<int> v;
+    v.Assign(std::begin(arr), std::end(arr));
+    UNIT_TEST_REQUIRE(v.Size() == 4);
+    UNIT_TEST_REQUIRE(v.Capacity() == 4);
+    for (i32 i = 0; i < v.Size(); ++i)
+      UNIT_TEST_REQUIRE(v[i] == arr[i]);
+  }
 }
 
-/*
+// template <typename U = T>
+// void Assign(i32 const newSize, U const& newValue);
 
-Vector(Vector const& other);
-Vector(Vector const& other, IAllocator* allocator);
+// template <std::input_iterator Iterator>
+// void Assign(Iterator begin, Iterator end);
 
-Vector(Vector&& other);
+// T&       operator[](i32 const pos);
+// T const& operator[](i32 const pos) const;
 
-~Vector();
-*/
+// T&       Front();
+// T const& Front() const;
+
+// T&       Back();
+// T const& Back() const;
+
+// T*       Data();
+// T const* Data() const;
+
+// T*       begin();
+// T const* begin() const;
+
+// T*       end();
+// T const* end() const;
