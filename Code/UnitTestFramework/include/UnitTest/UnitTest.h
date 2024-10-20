@@ -9,8 +9,8 @@ namespace UnitTest::Private
 class TestBase
 {
 public:
-  char const* SuiteName;
-  char const* TestName;
+  char const* SuiteName_;
+  char const* TestName_;
 
   TestBase(char const* SuiteName, char const* TestName);
   void Run();
@@ -20,10 +20,10 @@ public:
 protected:
   virtual void ExecuteTest() = 0;
 
-  void MarkAsFailed();
+  void MarkAsFailed(char const* reason);
 
 private:
-  bool HasFailed = false;
+  char const* FailReason_{};
 };
 
 extern std::atomic<int> GlobalPassedTestsCounter;
@@ -52,20 +52,20 @@ extern std::atomic<int> GlobalFailedTestsCounter;
   static AutoRegisteringTest_##Name _unit_test_autoreg_##Name;           \
   void                              AutoRegisteringTest_##Name::ExecuteTest()
 
-#define UNIT_TEST_REQUIRE(Expr) \
-  {                             \
-    const bool result = (Expr); \
-    if (!result)                \
-    {                           \
-      MarkAsFailed();           \
-      return;                   \
-    }                           \
+#define UNIT_TEST_REQUIRE(Expr)                      \
+  {                                                  \
+    const bool result = (Expr);                      \
+    if (!result)                                     \
+    {                                                \
+      MarkAsFailed("Expression `" #Expr "` is false."); \
+      return;                                        \
+    }                                                \
   }
 
 #define UNIT_TEST_REQUIRE_FALSE(Expr) UNIT_TEST_REQUIRE(!(Expr))
 
-#define UNIT_TEST_FAIL() \
-  MarkAsFailed();        \
+#define UNIT_TEST_FAIL()         \
+  MarkAsFailed("Forced Faile."); \
   return
 
 #define UNIT_TEST_PASS() return

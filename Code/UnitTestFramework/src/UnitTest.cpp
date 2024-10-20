@@ -13,24 +13,25 @@ std::atomic<int> GlobalPassedTestsCounter = 0;
 std::atomic<int> GlobalFailedTestsCounter = 0;
 
 TestBase::TestBase(char const* SuiteName, char const* TestName)
-    : SuiteName(SuiteName)
-    , TestName(TestName)
+    : SuiteName_(SuiteName)
+    , TestName_(TestName)
 {
   GetTests().emplace_back(this);
 }
 void TestBase::Run()
 {
   std::string msg  = "TEST ";
-  msg             += SuiteName;
+  msg             += SuiteName_;
   msg             += '.';
-  msg             += TestName;
+  msg             += TestName_;
 
   ExecuteTest();
 
   std::string endMsg = "RESULT: ";
-  if (HasFailed)
+  if (FailReason_)
   {
-    endMsg += "FAILED";
+    endMsg += "FAILED - ";
+    endMsg += FailReason_;
     UnitTest::Private::GlobalFailedTestsCounter.fetch_add(1, std::memory_order_relaxed);
   }
   else
@@ -49,8 +50,8 @@ std::vector<TestBase*>& TestBase::GetTests()
   static std::vector<TestBase*> tests;
   return tests;
 }
-void TestBase::MarkAsFailed()
+void TestBase::MarkAsFailed(char const* reason)
 {
-  HasFailed = true;
+  FailReason_ = reason;
 }
 } // namespace UnitTest::Private

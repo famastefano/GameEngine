@@ -61,7 +61,7 @@ std::vector<UnitTest::Private::TestBase*> GetFilteredTests()
     return filtered;
 
   std::erase_if(filtered, [](UnitTest::Private::TestBase* test) {
-    return std::string_view{test->SuiteName} != Options.Suite;
+    return std::string_view{test->SuiteName_} != Options.Suite;
   });
   return filtered;
 }
