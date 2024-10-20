@@ -155,7 +155,9 @@ inline void Vector<T>::Reset()
 template <typename T>
 inline void Vector<T>::Realloc(i32 const newCapacity)
 {
-  check(newCapacity > 0, "Invalid capacity");
+  if(newCapacity == 0)
+    return;
+
   i32 const currSize = Size();
 
   if (Mem_)

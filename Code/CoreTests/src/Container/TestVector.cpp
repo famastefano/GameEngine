@@ -20,11 +20,11 @@ UNIT_TEST_SUITE(Container)
     }
     bool IsMovable()
     {
-      return false;
+      return true;
     }
     bool IsCopyable()
     {
-      return false;
+      return true;
     }
     bool OwnedByContainer()
     {
@@ -76,14 +76,37 @@ UNIT_TEST_SUITE(Container)
     for (i32 i = 0; i < v.Size(); ++i)
       UNIT_TEST_REQUIRE(v[i] == arr[i]);
   }
+  UNIT_TEST(Vector_TrivialType_CopyCtorFromEmpty)
+  {
+    Vector<int> v0;
+    Vector<int> v1(v0);
+    UNIT_TEST_REQUIRE(v0.Size() == v1.Size());
+    UNIT_TEST_REQUIRE(v0.Capacity() == v1.Capacity());
+    UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
+  }
+  UNIT_TEST(Vector_TrivialType_CopyCtorFromEmptyWithCustomAllocator)
+  {
+    NullAllocator alloc;
+    Vector<int>   v0(&alloc);
+    Vector<int>   v1(v0);
+    UNIT_TEST_REQUIRE(v0.Size() == v1.Size());
+    UNIT_TEST_REQUIRE(v0.Capacity() == v1.Capacity());
+    UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
+    UNIT_TEST_REQUIRE(v1.Allocator() == &alloc);
+  }
+  UNIT_TEST(Vector_TrivialType_CopyCtorFromEmptyWithCustomAllocatorAsParam)
+  {
+    NullAllocator alloc;
+    Vector<int>   v0(&alloc);
+    Vector<int>   v1(v0, Core::globalAllocator);
+    UNIT_TEST_REQUIRE(v0.Size() == v1.Size());
+    UNIT_TEST_REQUIRE(v0.Capacity() == v1.Capacity());
+    UNIT_TEST_REQUIRE_FALSE(v0.Allocator() == v1.Allocator());
+    UNIT_TEST_REQUIRE(v1.Allocator() == Core::globalAllocator);
+  }
 }
 
 /*
-template <typename U = T>
-Vector(i32 const initialSize, U const& initialValue, IAllocator* allocator = globalAllocator);
-
-template <std::input_iterator Iterator>
-Vector(Iterator begin, Iterator end, IAllocator* allocator = globalAllocator);
 
 Vector(Vector const& other);
 Vector(Vector const& other, IAllocator* allocator);
