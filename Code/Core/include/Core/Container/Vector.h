@@ -148,7 +148,7 @@ template <typename T>
 inline void Vector<T>::Reset()
 {
   Destroy(Mem_, Size_);
-  Allocator_->Free(Mem_);
+  Allocator_->Free(Mem_, alignof(T));
   Mem_ = Size_ = Capacity_ = nullptr;
 }
 
@@ -160,7 +160,7 @@ inline void Vector<T>::Realloc(i32 const newCapacity)
 
   if (Mem_)
   {
-    newMem = Allocator_->Realloc(Mem_, newCapacity * sizeof(T), alignof(T));
+    T* newMem = Allocator_->Realloc(Mem_, newCapacity * sizeof(T), alignof(T));
     if (newMem)
     {
       Mem_      = newMem;
@@ -179,7 +179,7 @@ inline void Vector<T>::Realloc(i32 const newCapacity)
     Algorithm::Move(Mem_, Size_ - (currSize - newCapacity), newMem);
 
   Destroy(Mem_, Size_);
-  Allocator_->Free(Mem_);
+  Allocator_->Free(Mem_, alignof(T));
 
   Mem_      = newMem;
   Size_     = Mem_ + currSize;
@@ -200,7 +200,7 @@ inline void Vector<T>::Destroy(T* from, T* to)
 template <typename T>
 inline i32 Vector<T>::CalculateCapacity(i32 currCapacity, i32 const desiredSize)
 {
-  while(currCapacity < desiredSize)
+  while (currCapacity < desiredSize)
     currCapacity *= ReallocRatio;
   return currCapacity;
 }
@@ -372,7 +372,7 @@ template <typename T>
 template <typename U>
 inline void Vector<T>::Assign(i32 const newSize, U const& newValue)
 {
-  static_cast(std::constructible_from<T, decltype(U)>, "Cannot construct Vector<T> from U.");
+  static_assert(std::constructible_from<T, decltype(newValue)>, "Cannot construct Vector<T> from U const&.");
   Clear();
 
   i32 const currCap = Capacity();
@@ -389,7 +389,7 @@ template <typename T>
 template <std::input_iterator Iterator>
 inline void Vector<T>::Assign(Iterator begin, Iterator end)
 {
-  static_cast(std::constructible_from<T, decltype(*begin)>, "Cannot construct Vector<T> from the provided iterator.");
+  static_assert(std::constructible_from<T, decltype(*begin)>, "Cannot construct Vector<T> from the provided iterator.");
   Clear();
 
   i32 const newSize = std::distance(begin, end);
@@ -563,7 +563,7 @@ inline void Vector<T>::Swap(Vector& other)
   check(canMove, "Cannot swap Vector with immovable allocators, will fallback to a deep-copy without an allocator swap!");
   if (canMove)
   {
-    std::swap(Mem, other.Mem_);
+    std::swap(Mem_, other.Mem_);
     std::swap(Size_, other.Size_);
     std::swap(Capacity_, other.Capacity_);
     std::swap(Allocator_, other.Allocator_);
@@ -587,14 +587,14 @@ template <typename T>
 template <typename U>
 inline T* Vector<T>::Insert(T const* position, U&& value)
 {
-  return Emplace(position, std::forward<U>(value);
+  return Emplace(position, std::forward<U>(value));
 }
 
 template <typename T>
 template <typename U>
 inline T* Vector<T>::Insert(T const* position, i32 const count, U const& value)
 {
-  static_cast(std::constructible_from<T, decltype(value)>, "Vector Insert(position, count, value) cannot construct T from value.");
+  static_assert(std::constructible_from<T, decltype(value)>, "Vector Insert(position, count, value) cannot construct T from value.");
   check(Mem_ <= position && position <= Size_, "Vector Insert(position, count, value) has an invalid position.");
   if (position == end())
   {
@@ -621,7 +621,7 @@ template <typename T>
 template <std::input_iterator Iterator>
 inline T* Vector<T>::Insert(T const* position, Iterator begin, Iterator end)
 {
-  static_cast(std::constructible_from<T, decltype(*begin)>, "Vector Insert(position, begin, end) cannot construct T from *begin.");
+  static_assert(std::constructible_from<T, decltype(*begin)>, "Vector Insert(position, begin, end) cannot construct T from *begin.");
   check(Mem_ <= position && position <= Size_, "Vector Insert(position, begin, end) has an invalid position.");
   if (position == end())
   {
@@ -638,7 +638,7 @@ inline T* Vector<T>::Insert(T const* position, Iterator begin, Iterator end)
     Realloc(CalculateCapacity(currCap, newSize));
 
   Algorithm::Move(Mem_ + posIndex, Size_, Mem_ + elemCount);
-  for (T* item = Mem_ + posIndex; item < Mem_ + posIndex + count; ++item)
+  for (T* item = Mem_ + posIndex; item < Mem_ + posIndex + elemCount; ++item)
     new (item) T(*begin++);
 
   Size_ = Mem_ + newSize;
@@ -649,7 +649,7 @@ template <typename T>
 template <typename... Args>
 inline T* Vector<T>::Emplace(T const* position, Args&&... args)
 {
-  static_cast(std::constructible_from<T, std::forward<Args>(args)...>, "Vector Emplace(position, Args...) cannot construct T from Args.");
+  static_assert(std::constructible_from<T, std::forward<Args>(args)...>, "Vector Emplace(position, Args...) cannot construct T from Args.");
   check(Mem_ <= position && position <= Size_, "Vector Emplace(position, Args...) has an invalid position.");
   i32 const posIndex = position - Mem_;
   i32 const size     = Size();
@@ -733,7 +733,7 @@ template <typename T>
 template <typename U>
 inline T* Vector<T>::Find(U&& value)
 {
-  static_cast(std::equality_comparable_with<T, std::forward<U>(value)>, "Vector Find(value) cannot compare T == U");
+  static_assert(std::equality_comparable_with<T, std::forward<U>(value)>, "Vector Find(value) cannot compare T == U");
   for (auto const& item : *this)
     if (item == std::forward<U>(value))
       return &item;
@@ -754,7 +754,7 @@ template <typename T>
 template <typename U>
 inline bool Vector<T>::operator==(Vector<U> const& other)
 {
-  static_cast(std::equality_comparable_with<T, U>, "Vector operator==(Vector<U>) cannot compare T == U");
+  static_assert(std::equality_comparable_with<T, U>, "Vector operator==(Vector<U>) cannot compare T == U");
   if (Size() || other.Size())
     return false;
 
@@ -770,7 +770,7 @@ template <typename T>
 template <typename U>
 inline bool Vector<T>::operator!=(Vector<U> const& other)
 {
-  static_cast(std::equality_comparable_with<T, U>, "Vector operator==(Vector<U>) cannot compare T == U");
+  static_assert(std::equality_comparable_with<T, U>, "Vector operator==(Vector<U>) cannot compare T == U");
   if (Size() || other.Size())
     return true;
 

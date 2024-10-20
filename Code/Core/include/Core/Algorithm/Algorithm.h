@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Core/Definitions.h>
 #include <cstring>
 #include <iterator>
 #include <type_traits>
@@ -9,7 +10,7 @@ namespace Core::Algorithm
 namespace Private
 {
 template <typename InputIterator, typename OutputIterator>
-void FastCopy(__declspec(noalias) InputIterator fromStart, __declspec(noalias) InputIterator fromEnd, __declspec(noalias) OutputIterator to)
+__declspec(noalias) void FastCopy(InputIterator fromStart, InputIterator fromEnd, OutputIterator to)
 {
   u64 const fromStartAddr = (u64)fromStart;
   u64 const fromEndAddr   = (u64)fromEnd;
@@ -38,7 +39,7 @@ constexpr bool CanFastCopy()
 template <typename InputIterator, typename OutputIterator>
 void Move(InputIterator fromStart, InputIterator fromEnd, OutputIterator to)
 {
-  static_cast(std::input_iterator<InputIterator> && std::output_iterator<OutputIterator>);
+  static_assert(std::input_iterator<InputIterator> && std::output_iterator<OutputIterator>);
   if constexpr (Private::CanFastCopy<InputIterator, OutputIterator>())
   {
     Private::FastCopy(fromStart, fromEnd, to);
