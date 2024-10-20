@@ -239,12 +239,12 @@ inline Vector<T>::Vector(i32 const initialSize, IAllocator* allocator)
 template <typename T>
 template <typename U>
 inline Vector<T>::Vector(std::initializer_list<U> init, IAllocator* allocator)
-    : Vector(init.size(), allocator)
+    : Vector((i32)init.size(), allocator)
 {
   static_assert(std::constructible_from<T, U const&>, "Cannot construct T from U.");
   T* item = Mem_;
   for (auto const& value : init)
-    new (item++) T(std::forward<U>(value));
+    new (item++) T(value);
 }
 
 template <typename T>
@@ -400,7 +400,7 @@ inline void Vector<T>::Assign(Iterator begin, Iterator end)
 template <typename T>
 inline T& Vector<T>::operator[](i32 const pos)
 {
-  check(u32(pos) < Size(), "Vector operator[] out-of-bounds access.");
+  check(u32(pos) < u32(Size()), "Vector operator[] out-of-bounds access.");
   return Mem_[pos];
 }
 

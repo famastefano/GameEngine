@@ -56,10 +56,17 @@ UNIT_TEST_SUITE(Container)
   }
   UNIT_TEST(Vector_TrivialType_CtorWithInitialSizeAndValue)
   {
-    Vector<int> v(512, 0xBEEF);
+    Vector<int> v(512, 0xBE'EF);
     UNIT_TEST_REQUIRE(v.Size() == 512);
-    for(const int& i : v)
-      UNIT_TEST_REQUIRE(i == 0xBEEF);
+    for (int const& i : v)
+      UNIT_TEST_REQUIRE(i == 0xBE'EF);
+  }
+  UNIT_TEST(Vector_TrivialType_CtorWithInitList)
+  {
+    Vector<int> v{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    UNIT_TEST_REQUIRE(v.Size() == 10);
+    for (i32 i = 0; i < v.Size(); ++i)
+      UNIT_TEST_REQUIRE(v[i] == i);
   }
 }
 
