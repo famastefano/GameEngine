@@ -11,7 +11,7 @@ public:
   // Inherited via IAllocator
   __declspec(allocator) __declspec(restrict) void* Alloc(i64 const size, i32 const alignment) override;
   __declspec(allocator) __declspec(restrict) __declspec(noalias) void* Realloc(void* p, i64 const size, i32 const alignment) override;
-  __declspec(noalias) void Free(void* p) override;
+  __declspec(noalias) void Free(void* p, i32 const alignment) override;
   bool IsMovable() override;
   bool IsCopyable() override;
   bool OwnedByContainer() override;

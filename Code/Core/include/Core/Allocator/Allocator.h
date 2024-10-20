@@ -27,7 +27,7 @@ public:
 
   // Frees the block of memory previously allocated via a call to Alloc()
   // WARNING: `p` shall be the exact same pointer returned by Alloc()
-  __declspec(noalias) virtual void Free(void* p) = 0;
+  __declspec(noalias) virtual void Free(void* p, i32 const alignment) = 0;
 
   // If the allocator is also "moved into" the new container when a move operation is performed.
   // WARNING: if this is false, a copy will be made.
