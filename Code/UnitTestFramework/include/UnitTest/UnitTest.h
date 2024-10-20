@@ -26,8 +26,8 @@ private:
   bool HasFailed = false;
 };
 
-extern std::atomic<int>       GlobalPassedTestsCounter;
-extern std::atomic<int>       GlobalFailedTestsCounter;
+extern std::atomic<int> GlobalPassedTestsCounter;
+extern std::atomic<int> GlobalFailedTestsCounter;
 } // namespace UnitTest::Private
 
 #define UNIT_TEST_SUITE(Name)                        \
@@ -61,13 +61,11 @@ extern std::atomic<int>       GlobalFailedTestsCounter;
       return;                   \
     }                           \
   }
-#define UNIT_TEST_REQUIRE_FALSE(expr) UNIT_TEST_REQUIRE(!(expr))
+
+#define UNIT_TEST_REQUIRE_FALSE(Expr) UNIT_TEST_REQUIRE(!(Expr))
+
 #define UNIT_TEST_FAIL() \
-  {                      \
-    MarkAsFailed();      \
-    return;              \
-  }
-#define UNIT_TEST_PASS() \
-  {                      \
-    return;              \
-  }
+  MarkAsFailed();        \
+  return
+
+#define UNIT_TEST_PASS() return
