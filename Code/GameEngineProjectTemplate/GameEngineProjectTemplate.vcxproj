@@ -67,6 +67,7 @@
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <ErrorReporting>None</ErrorReporting>
       <DiagnosticsFormat>Caret</DiagnosticsFormat>
+      <AdditionalOptions>/wd4530 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -90,6 +91,7 @@
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <ErrorReporting>None</ErrorReporting>
       <DiagnosticsFormat>Caret</DiagnosticsFormat>
+      <AdditionalOptions>/w4530 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
