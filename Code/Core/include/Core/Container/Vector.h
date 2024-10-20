@@ -239,13 +239,9 @@ inline Vector<T>::Vector(i32 const initialSize, IAllocator* allocator)
 template <typename T>
 template <typename U>
 inline Vector<T>::Vector(std::initializer_list<U> init, IAllocator* allocator)
-    : Vector(allocator)
+    : Vector(init.size(), allocator)
 {
   static_assert(std::constructible_from<T, U const&>, "Cannot construct T from U.");
-  u64 const sz = init.size();
-  if (sz)
-    Realloc(sz);
-
   T* item = Mem_;
   for (auto const& value : init)
     new (item++) T(std::forward<U>(value));
@@ -254,12 +250,9 @@ inline Vector<T>::Vector(std::initializer_list<U> init, IAllocator* allocator)
 template <typename T>
 template <typename U>
 inline Vector<T>::Vector(i32 const initialSize, U const& initialValue, IAllocator* allocator)
-    : Vector(initialValue, allocator)
+    : Vector(initialSize, allocator)
 {
   static_assert(std::constructible_from<T, decltype(initialValue)>, "Cannot construct T from U.");
-  if (initialSize)
-    Realloc(initialSize);
-
   for (T* item = Mem_; item < Size_; ++item)
     new (item) T(initialValue);
 }

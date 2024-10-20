@@ -43,7 +43,7 @@ UNIT_TEST_SUITE(Container)
   UNIT_TEST(Vector_TrivialType_CtorWithCustomAllocator)
   {
     NullAllocator alloc;
-    Vector<int> v(&alloc);
+    Vector<int>   v(&alloc);
     UNIT_TEST_REQUIRE(v.Allocator() == &alloc);
   }
   UNIT_TEST(Vector_TrivialType_CtorWithInitialSize)
@@ -54,24 +54,32 @@ UNIT_TEST_SUITE(Container)
     UNIT_TEST_REQUIRE(v.Capacity() == 10);
     UNIT_TEST_REQUIRE(v.Allocator() == Core::globalAllocator);
   }
+  UNIT_TEST(Vector_TrivialType_CtorWithInitialSizeAndValue)
+  {
+    Vector<int> v(512, 0xBEEF);
+    UNIT_TEST_REQUIRE(v.Size() == 512);
+    for(const int& i : v)
+      UNIT_TEST_REQUIRE(i == 0xBEEF);
+  }
 }
 
+/*
+Vector(IAllocator* allocator = globalAllocator);
+Vector(i32 const initialSize, IAllocator* allocator = globalAllocator);
 
-  /*Vector(IAllocator* allocator = globalAllocator);
-  Vector(i32 const initialSize, IAllocator* allocator = globalAllocator);
+template <typename U = T>
+Vector(std::initializer_list<U> init, IAllocator* allocator = globalAllocator);
 
-  template <typename U = T>
-  Vector(std::initializer_list<U> init, IAllocator* allocator = globalAllocator);
+template <typename U = T>
+Vector(i32 const initialSize, U const& initialValue, IAllocator* allocator = globalAllocator);
 
-  template <typename U = T>
-  Vector(i32 const initialSize, U const& initialValue, IAllocator* allocator = globalAllocator);
+template <std::input_iterator Iterator>
+Vector(Iterator begin, Iterator end, IAllocator* allocator = globalAllocator);
 
-  template <std::input_iterator Iterator>
-  Vector(Iterator begin, Iterator end, IAllocator* allocator = globalAllocator);
+Vector(Vector const& other);
+Vector(Vector const& other, IAllocator* allocator);
 
-  Vector(Vector const& other);
-  Vector(Vector const& other, IAllocator* allocator);
+Vector(Vector&& other);
 
-  Vector(Vector&& other);
-
-  ~Vector();*/
+~Vector();
+*/
