@@ -68,15 +68,17 @@ UNIT_TEST_SUITE(Container)
     for (i32 i = 0; i < v.Size(); ++i)
       UNIT_TEST_REQUIRE(v[i] == i);
   }
+  UNIT_TEST(Vector_TrivialType_CtorFromIterators)
+  {
+    int         arr[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    Vector<int> v(std::begin(arr), std::end(arr));
+    UNIT_TEST_REQUIRE(v.Size() == 10);
+    for (i32 i = 0; i < v.Size(); ++i)
+      UNIT_TEST_REQUIRE(v[i] == arr[i]);
+  }
 }
 
 /*
-Vector(IAllocator* allocator = globalAllocator);
-Vector(i32 const initialSize, IAllocator* allocator = globalAllocator);
-
-template <typename U = T>
-Vector(std::initializer_list<U> init, IAllocator* allocator = globalAllocator);
-
 template <typename U = T>
 Vector(i32 const initialSize, U const& initialValue, IAllocator* allocator = globalAllocator);
 

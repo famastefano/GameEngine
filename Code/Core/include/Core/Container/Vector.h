@@ -266,11 +266,12 @@ inline Vector<T>::Vector(Iterator begin, Iterator end, IAllocator* allocator)
 
   i32 initialSize = 0;
   if constexpr (CanUseFastPath)
-    initialSize = end - begin;
+    initialSize = i32(end - begin);
   else
     initialSize = std::distance(begin, end);
 
   Realloc(initialSize);
+  Size_ = Capacity_;
   if constexpr (CanUseFastPath)
   {
     std::memcpy(Mem_, begin, initialSize * sizeof(T));
