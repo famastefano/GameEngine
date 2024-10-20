@@ -490,13 +490,13 @@ inline bool Vector<T>::IsEmpty() const
 template <typename T>
 inline i32 Vector<T>::Size() const
 {
-  return Size_ - Mem_;
+  return i32(Size_ - Mem_);
 }
 
 template <typename T>
 inline i32 Vector<T>::Capacity() const
 {
-  return Capacity_ - Mem_;
+  return i32(Capacity_ - Mem_);
 }
 
 template <typename T>
