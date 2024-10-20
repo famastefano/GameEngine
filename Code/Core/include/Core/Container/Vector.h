@@ -160,7 +160,7 @@ inline void Vector<T>::Realloc(i32 const newCapacity)
 
   if (Mem_)
   {
-    T* newMem = Allocator_->Realloc(Mem_, newCapacity * sizeof(T), alignof(T));
+    T* newMem = (T*)Allocator_->Realloc(Mem_, newCapacity * sizeof(T), alignof(T));
     if (newMem)
     {
       Mem_      = newMem;
@@ -170,7 +170,7 @@ inline void Vector<T>::Realloc(i32 const newCapacity)
     }
   }
 
-  T* newMem = Allocator_->Alloc(newCapacity * sizeof(T), alignof(T));
+  T* newMem = (T*)Allocator_->Alloc(newCapacity * sizeof(T), alignof(T));
   check(newMem, "Couldn't allocate Vector memory.");
 
   if (newCapacity >= currSize)
@@ -223,6 +223,7 @@ inline Vector<T>::Vector(i32 const initialSize, IAllocator* allocator)
   if (initialSize)
   {
     Realloc(initialSize);
+    Size_ = Capacity_;
     if constexpr (std::is_trivially_default_constructible_v<T>)
     {
       std::memset(Mem_, 0, Size() * sizeof(T));

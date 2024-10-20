@@ -39,7 +39,7 @@ constexpr bool CanFastCopy()
 template <typename InputIterator, typename OutputIterator>
 void Move(InputIterator fromStart, InputIterator fromEnd, OutputIterator to)
 {
-  static_assert(std::input_iterator<InputIterator> && std::output_iterator<OutputIterator>);
+  static_assert(std::input_iterator<InputIterator> && std::output_iterator<OutputIterator, decltype(*fromStart)>);
   if constexpr (Private::CanFastCopy<InputIterator, OutputIterator>())
   {
     Private::FastCopy(fromStart, fromEnd, to);
