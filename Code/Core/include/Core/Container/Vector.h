@@ -86,6 +86,8 @@ public:
 
   i32 Capacity() const;
 
+  i32 AllocSize() const;
+
   void Reserve(i32 const capacity);
 
   void Resize(i32 const newSize);
@@ -155,7 +157,7 @@ inline void Vector<T>::Reset()
 template <typename T>
 inline void Vector<T>::Realloc(i32 const newCapacity)
 {
-  if(newCapacity == 0)
+  if (newCapacity == 0)
     return;
 
   i32 const currSize = Size();
@@ -494,6 +496,12 @@ template <typename T>
 inline i32 Vector<T>::Capacity() const
 {
   return i32(Capacity_ - Mem_);
+}
+
+template <typename T>
+inline i32 Vector<T>::AllocSize() const
+{
+  return Size() * sizeof(T);
 }
 
 template <typename T>
