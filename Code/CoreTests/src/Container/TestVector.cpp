@@ -230,6 +230,12 @@ UNIT_TEST_SUITE(Container)
     UNIT_TEST_REQUIRE(v.IsEmpty());
     UNIT_TEST_REQUIRE(v.Capacity() == 97'364);
   }
+  UNIT_TEST(Vector_TrivialType_ReserveIsNOPIfCapacityAlreadyGreater)
+  {
+    Vector<int> v(10);
+    v.Reserve(5);
+    UNIT_TEST_REQUIRE(v.Capacity() == 10);
+  }
   UNIT_TEST(Vector_TrivialType_ResizeOnEmptyVectorBehavesLikeCtorWithSize)
   {
     Vector<int> v0(5'431);
@@ -237,5 +243,53 @@ UNIT_TEST_SUITE(Container)
     v1.Resize(v0.Size());
     UNIT_TEST_REQUIRE(v1.Size() == 5'431);
     UNIT_TEST_REQUIRE(v1.Capacity() == 5'431);
+  }
+  UNIT_TEST(Vector_TrivialType_ResizeWithCustomValue)
+  {
+    Vector<int> v;
+    v.Resize(10, 52);
+    UNIT_TEST_REQUIRE(v.Size() == 10);
+    for (auto const& value : v)
+      UNIT_TEST_REQUIRE(value == 52);
+  }
+  UNIT_TEST(Vector_TrivialType_ResizeDestroysElementsIfNewSizeIsSmaller)
+  {
+    Vector<int> v(10, 42);
+    v.Resize(2, 99);
+    UNIT_TEST_REQUIRE(v.Size() == 2);
+    for (auto const& value : v)
+      UNIT_TEST_REQUIRE(value == 42);
+  }
+  UNIT_TEST(Vector_TrivialType_ResizeAppendsElementsIfNewSizeIsBigger)
+  {
+    Vector<int> v(10, 42);
+    v.Resize(20, 99);
+    UNIT_TEST_REQUIRE(v.Size() == 20);
+    for (i32 i = 0; i < 10; ++i)
+      UNIT_TEST_REQUIRE(v[i] == 42);
+    for (i32 i = 10; i < 20; ++i)
+      UNIT_TEST_REQUIRE(v[i] == 99);
+  }
+  UNIT_TEST(Vector_TrivialType_ClearOfEmptyDoesNothing)
+  {
+    Vector<int> v;
+    v.Clear();
+    UNIT_TEST_REQUIRE(v.IsEmpty());
+    UNIT_TEST_REQUIRE(v.Capacity() == 0);
+  }
+  UNIT_TEST(Vector_TrivialType_ClearOfReservedLeavesCapacityUnchanged)
+  {
+    Vector<int> v;
+    v.Reserve(20);
+    v.Clear();
+    UNIT_TEST_REQUIRE(v.IsEmpty());
+    UNIT_TEST_REQUIRE(v.Capacity() == 20);
+  }
+  UNIT_TEST(Vector_TrivialType_ClearOfInitializedLeavesCapacityUnchanged)
+  {
+    Vector<int> v = {1, 2, 3, 4, 5};
+    v.Clear();
+    UNIT_TEST_REQUIRE(v.IsEmpty());
+    UNIT_TEST_REQUIRE(v.Capacity() == 5);
   }
 }
