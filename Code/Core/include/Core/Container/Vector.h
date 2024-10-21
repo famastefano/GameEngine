@@ -104,13 +104,37 @@ public:
   T* Insert(T const* position, U&& value);
 
   template <typename U = T>
+  T* Insert(i32 const position, U&& value)
+  {
+    return Insert(Data() + position, std::forward<U>(value));
+  }
+
+  template <typename U = T>
   T* Insert(T const* position, i32 const count, U const& value);
+
+  template <typename U = T>
+  T* Insert(i32 const position, i32 const count, U const& value)
+  {
+    return Insert(Data() + position, count, value);
+  }
 
   template <std::input_iterator Iterator>
   T* Insert(T const* position, Iterator begin, Iterator end);
 
+  template <std::input_iterator Iterator>
+  T* Insert(i32 const position, Iterator begin, Iterator end)
+  {
+    return Insert(Data() + position, begin, end);
+  }
+
   template <typename... Args>
   T* Emplace(T const* position, Args&&... args);
+
+  template <typename... Args>
+  T* Emplace(i32 const position, Args&&... args)
+  {
+    return Emplace(Data() + position, std::forward<Args>(args)...);
+  }
 
   template <typename... Args>
   T* EmplaceBack(Args&&... args)
@@ -234,7 +258,7 @@ inline Vector<T>::Vector(i32 const initialSize, IAllocator* allocator)
     Size_ = Capacity_;
     if constexpr (std::is_trivially_default_constructible_v<T>)
     {
-      std::memset(Mem_, 0, Size() * sizeof(T));
+      std::memset(Mem_, 0, AllocSize());
     }
     else
     {
@@ -270,19 +294,19 @@ template <std::input_iterator Iterator>
 inline Vector<T>::Vector(Iterator begin, Iterator end, IAllocator* allocator)
     : Vector(allocator)
 {
-  constexpr bool CanUseFastPath = std::is_trivially_copyable_v<T> && std::same_as<std::remove_cvref_t<Iterator>, T*>;
+  constexpr bool canUseFastPath = std::is_trivially_copyable_v<T> && std::same_as<std::remove_cvref_t<Iterator>, T*>;
 
   i32 initialSize = 0;
-  if constexpr (CanUseFastPath)
+  if constexpr (canUseFastPath)
     initialSize = i32(end - begin);
   else
     initialSize = std::distance(begin, end);
 
   Realloc(initialSize);
   Size_ = Capacity_;
-  if constexpr (CanUseFastPath)
+  if constexpr (canUseFastPath)
   {
-    std::memcpy(Mem_, begin, initialSize * sizeof(T));
+    std::memcpy(Mem_, begin, AllocSize());
   }
   else
   {
@@ -400,10 +424,18 @@ inline void Vector<T>::Assign(Iterator begin, Iterator end)
   if (newSize >= currCap)
     Realloc(CalculateCapacity(currCap, newSize));
 
-  for (T* item = Mem_; item < Mem_ + newSize; ++item)
-    new (item) T(*begin++);
-
   Size_ = Mem_ + newSize;
+
+  constexpr bool canUseFastPath = std::is_trivially_copyable_v<T> && std::same_as<std::remove_cvref_t<Iterator>, T*>;
+  if constexpr (canUseFastPath)
+  {
+    std::memcpy(Mem_, begin, AllocSize());
+  }
+  else
+  {
+    for (T* item = Mem_; item < Size_; ++item)
+      new (item) T(*begin++);
+  }
 }
 
 template <typename T>
@@ -625,14 +657,17 @@ inline T* Vector<T>::Insert(T const* position, i32 const count, U const& value)
     return begin();
   }
 
-  i32 const posIndex = position - Mem_;
+  i32 const posIndex = i32(position - Mem_);
   i32 const currCap  = Capacity();
   i32 const currSize = Size();
   i32 const newSize  = currSize + count;
   if (currCap < newSize)
     Realloc(CalculateCapacity(currCap, newSize));
 
-  Algorithm::Move(Mem_ + posIndex, Size_, Mem_ + count);
+  T* fromStart = Mem_ + posIndex;
+  T* fromEnd   = Size_;
+  T* to        = fromStart + count;
+  Algorithm::Move(fromStart, fromEnd, to);
   for (T* item = Mem_ + posIndex; item < Mem_ + posIndex + count; ++item)
     new (item) T(value);
 
@@ -646,14 +681,14 @@ inline T* Vector<T>::Insert(T const* position, Iterator begin, Iterator end)
 {
   static_assert(std::constructible_from<T, decltype(*begin)>, "Vector Insert(position, begin, end) cannot construct T from *begin.");
   check(Mem_ <= position && position <= Size_, "Vector Insert(position, begin, end) has an invalid position.");
-  if (position == end())
+  if (position == this->end())
   {
     Assign(begin, end);
-    return begin();
+    return this->begin();
   }
 
-  i32 const elemCount = std::distance(begin, end);
-  i32 const posIndex  = position - Mem_;
+  i32 const elemCount = (i32)std::distance(begin, end);
+  i32 const posIndex  = i32(position - Mem_);
   i32 const currCap   = Capacity();
   i32 const currSize  = Size();
   i32 const newSize   = currSize + elemCount;
@@ -661,10 +696,19 @@ inline T* Vector<T>::Insert(T const* position, Iterator begin, Iterator end)
     Realloc(CalculateCapacity(currCap, newSize));
 
   Algorithm::Move(Mem_ + posIndex, Size_, Mem_ + elemCount);
-  for (T* item = Mem_ + posIndex; item < Mem_ + posIndex + elemCount; ++item)
-    new (item) T(*begin++);
 
   Size_ = Mem_ + newSize;
+
+  constexpr bool canUseFastPath = std::is_trivially_copyable_v<T> && std::same_as<std::remove_cvref_t<Iterator>, T*>;
+  if constexpr (canUseFastPath)
+  {
+    std::memcpy(Mem_ + posIndex, begin, elemCount * sizeof(T));
+  }
+  else
+  {
+    for (T* item = Mem_ + posIndex; item < Mem_ + posIndex + elemCount; ++item)
+      new (item) T(*begin++);
+  }
   return Mem_ + posIndex;
 }
 
@@ -672,9 +716,9 @@ template <typename T>
 template <typename... Args>
 inline T* Vector<T>::Emplace(T const* position, Args&&... args)
 {
-  static_assert(std::constructible_from<T, std::forward<Args>(args)...>, "Vector Emplace(position, Args...) cannot construct T from Args.");
+  static_assert(std::constructible_from<T, Args...>, "Vector Emplace(position, Args...) cannot construct T from Args.");
   check(Mem_ <= position && position <= Size_, "Vector Emplace(position, Args...) has an invalid position.");
-  i32 const posIndex = position - Mem_;
+  i32 const posIndex = i32(position - Mem_);
   i32 const size     = Size();
   i32 const cap      = Capacity();
   if (size == cap)

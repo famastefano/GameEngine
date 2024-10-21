@@ -292,4 +292,77 @@ UNIT_TEST_SUITE(Container)
     UNIT_TEST_REQUIRE(v.IsEmpty());
     UNIT_TEST_REQUIRE(v.Capacity() == 5);
   }
+  UNIT_TEST(Vector_TrivialType_InsertAtEndIsAnAppend)
+  {
+    Vector<int> v;
+    v.Insert(v.end(), 10);
+    UNIT_TEST_REQUIRE(v.Size() == 1);
+    UNIT_TEST_REQUIRE(v.Front() == 10);
+  }
+  UNIT_TEST(Vector_TrivialType_InsertAtBeginWithEmptyVectorIsAnAppend)
+  {
+    Vector<int> v;
+    v.Insert(v.begin(), 10);
+    UNIT_TEST_REQUIRE(v.Size() == 1);
+    UNIT_TEST_REQUIRE(v.Front() == 10);
+  }
+  UNIT_TEST(Vector_TrivialType_InsertInMiddleOfNonEmptyShiftsOthersOnTheRight)
+  {
+    Vector<int> v = {0, 1, 2, 3, 4};
+    v.Insert(2, 10);
+    UNIT_TEST_REQUIRE(v.Size() == 6);
+    UNIT_TEST_REQUIRE(v[2] == 10);
+  }
+  UNIT_TEST(Vector_TrivialType_InsertReturnsPosOfInsertedElem)
+  {
+    Vector<int> v0;
+    int*        elem0 = v0.Insert(0, 4);
+    UNIT_TEST_REQUIRE(*elem0 == 4);
+
+    Vector<int> v1(5, 32);
+    int*        elem1 = v1.Insert(v1.end(), 420);
+    UNIT_TEST_REQUIRE(*elem1 == 420);
+
+    Vector<int> v2    = {1, 2};
+    int*        elem2 = v2.Insert(v2.begin(), 50);
+    UNIT_TEST_REQUIRE(*elem2 == 50);
+  }
+  UNIT_TEST(Vector_TrivialType_InsertWithQuantityInsertsElementsAtThatPosition)
+  {
+    Vector<int> v0;
+    int*        elem0 = v0.Insert(v0.begin(), 50, 99);
+    UNIT_TEST_REQUIRE(v0.Size() == 50);
+    UNIT_TEST_REQUIRE(elem0 == v0.begin());
+    for (auto const& item : v0)
+      UNIT_TEST_REQUIRE(item == 99);
+
+    Vector<int> v1    = {10, 20, 30, 40};
+    int*        elem1 = v1.Insert(v1.begin(), 50, 99);
+    UNIT_TEST_REQUIRE(elem1 == v1.begin());
+    UNIT_TEST_REQUIRE(v1.Size() == 4 + 50);
+    for (i32 i = 0; i < 50; ++i)
+      UNIT_TEST_REQUIRE(v1[i] == 99);
+
+    Vector<int> v2    = {10, 20, 30, 40};
+    int*        elem2 = v2.Insert(2, 3, 0);
+    UNIT_TEST_REQUIRE(v2.Size() == 4 + 3);
+    UNIT_TEST_REQUIRE(elem2 == v2.Data() + 2);
+    UNIT_TEST_REQUIRE(v2[0] == 10);
+    UNIT_TEST_REQUIRE(v2[1] == 20);
+    UNIT_TEST_REQUIRE(v2[2] == 0);
+    UNIT_TEST_REQUIRE(v2[3] == 0);
+    UNIT_TEST_REQUIRE(v2[4] == 0);
+    UNIT_TEST_REQUIRE(v2[5] == 30);
+    UNIT_TEST_REQUIRE(v2[6] == 40);
+  }
+  UNIT_TEST(Vector_TrivialType_InsertWithIteratorsCopiesEntireRange)
+  {
+    int         data[] = {0, 1, 2};
+    Vector<int> v;
+    v.Insert(0, std::begin(data), std::end(data));
+    UNIT_TEST_REQUIRE(v.Size() == 3);
+    UNIT_TEST_REQUIRE(v[0] == 0);
+    UNIT_TEST_REQUIRE(v[1] == 1);
+    UNIT_TEST_REQUIRE(v[2] == 2);
+  }
 }
