@@ -44,17 +44,11 @@ void* GlobalAllocator::Realloc(void* toRealloc, i64 size, i32 const alignment)
 {
   check((alignment == 1 || !(alignment & 0x1)), "Alignment must be a power of 2.");
   if (alignment <= MEMORY_ALLOCATION_ALIGNMENT)
-  {
-    void* reallocated = HeapReAlloc(MemHandle, HEAP_REALLOC_IN_PLACE_ONLY | HEAP_ZERO_MEMORY, toRealloc, size);
-    return reallocated ? reallocated : HeapReAlloc(MemHandle, HEAP_ZERO_MEMORY, toRealloc, size);
-  }
+    return HeapReAlloc(MemHandle, HEAP_REALLOC_IN_PLACE_ONLY | HEAP_ZERO_MEMORY, toRealloc, size);
 
   void*     actualPtr   = FromAlignedPointer(toRealloc, alignment);
   i32 const offset      = sizeof(void*) + (alignment - 1);
   void*     reallocated = HeapReAlloc(MemHandle, HEAP_REALLOC_IN_PLACE_ONLY | HEAP_ZERO_MEMORY, actualPtr, size + offset);
-  if (!reallocated)
-    reallocated = HeapReAlloc(MemHandle, HEAP_ZERO_MEMORY, actualPtr, size + offset);
-
   if (!reallocated)
     return nullptr;
 

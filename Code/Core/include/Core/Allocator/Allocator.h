@@ -21,7 +21,7 @@ public:
 
   // Reallocates a contiguous block of memory with at least `size` capacity.
   // Returns:
-  //   success, a valid pointer
+  //   success, a valid pointer == p (Realloc never moves the memory block, always expands/shrinks it)
   //   fail, nullptr
   __declspec(allocator) __declspec(restrict) __declspec(noalias) virtual void* Realloc(void* p, i64 const size, i32 const alignment) = 0;
 
