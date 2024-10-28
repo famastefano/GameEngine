@@ -1016,4 +1016,475 @@ UNIT_TEST_SUITE(Container)
     UNIT_TEST_REQUIRE(v0 == v1);
     UNIT_TEST_REQUIRE_FALSE(v0 != v1);
   }
+
+  // MovableOnlyType
+
+  class MovableOnlyType
+  {
+    int v;
+
+  public:
+    MovableOnlyType(int v)
+        : v(v)
+    {
+    }
+    MovableOnlyType()
+        : MovableOnlyType(-824)
+    {
+    }
+    MovableOnlyType(MovableOnlyType const&) = delete;
+    MovableOnlyType(MovableOnlyType&& other)
+    {
+      v = std::exchange(other.v, INT_MIN);
+    }
+    MovableOnlyType& operator=(MovableOnlyType&& other)
+    {
+      v = std::exchange(other.v, INT_MIN);
+      return *this;
+    }
+    ~MovableOnlyType()
+    {
+      v = INT_MIN;
+      static_assert(!std::is_trivially_copyable_v<MovableOnlyType>);
+    }
+    int Get() const
+    {
+      return v;
+    }
+    bool operator==(MovableOnlyType const& other) const
+    {
+      return v == other.v;
+    }
+  };
+
+  UNIT_TEST(Vector_MovableOnlyType_DefaultCtor)
+  {
+    Vector<MovableOnlyType> v;
+    UNIT_TEST_REQUIRE(v.IsEmpty());
+    UNIT_TEST_REQUIRE(v.Size() == 0);
+    UNIT_TEST_REQUIRE(v.Capacity() == 0);
+    UNIT_TEST_REQUIRE(v.Allocator() == Core::globalAllocator);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_CtorWithCustomAllocator)
+  {
+    NullAllocator           alloc;
+    Vector<MovableOnlyType> v(&alloc);
+    UNIT_TEST_REQUIRE(v.Allocator() == &alloc);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_CtorWithInitialSize)
+  {
+    Vector<MovableOnlyType> v(10);
+    UNIT_TEST_REQUIRE_FALSE(v.IsEmpty());
+    UNIT_TEST_REQUIRE(v.Size() == 10);
+    UNIT_TEST_REQUIRE(v.Capacity() == 10);
+    UNIT_TEST_REQUIRE(v.Allocator() == Core::globalAllocator);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_CtorWithInitialSizeAndValue)
+  {
+    Vector<MovableOnlyType> v(512, 0xBE'EF);
+    UNIT_TEST_REQUIRE(v.Size() == 512);
+    for (auto const& item : v)
+      UNIT_TEST_REQUIRE(item.Get() == 0xBE'EF);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_CtorWithInitList)
+  {
+    Vector<MovableOnlyType> v{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    UNIT_TEST_REQUIRE(v.Size() == 10);
+    for (i32 i = 0; i < v.Size(); ++i)
+      UNIT_TEST_REQUIRE(v[i].Get() == i);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_CtorFromIterators)
+  {
+    int                     arr[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    Vector<MovableOnlyType> v(std::begin(arr), std::end(arr));
+    UNIT_TEST_REQUIRE(v.Size() == 10);
+    for (i32 i = 0; i < v.Size(); ++i)
+      UNIT_TEST_REQUIRE(v[i].Get() == arr[i]);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_MoveCtorFromEmpty)
+  {
+    Vector<MovableOnlyType> v0;
+    i32 const               v0_sz  = v0.Size();
+    i32 const               v0_cap = v0.Capacity();
+
+    Vector<MovableOnlyType> v1(std::move(v0));
+    UNIT_TEST_REQUIRE(v1.Size() == v0_sz);
+    UNIT_TEST_REQUIRE(v1.Capacity() == v0_cap);
+    UNIT_TEST_REQUIRE(v1.Allocator() == Core::globalAllocator);
+
+    UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
+    UNIT_TEST_REQUIRE(v0.IsEmpty());
+    UNIT_TEST_REQUIRE(v0.Capacity() == 0);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_MoveCtorFromInitialized)
+  {
+    Vector<MovableOnlyType> v0{0, 1, 2, 3};
+    i32 const               v0_sz  = v0.Size();
+    i32 const               v0_cap = v0.Capacity();
+
+    Vector<MovableOnlyType> v1(std::move(v0));
+    UNIT_TEST_REQUIRE(v1.Size() == v0_sz);
+    UNIT_TEST_REQUIRE(v1.Capacity() == v0_cap);
+    UNIT_TEST_REQUIRE(v1.Allocator() == Core::globalAllocator);
+
+    UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
+    UNIT_TEST_REQUIRE(v0.IsEmpty());
+    UNIT_TEST_REQUIRE(v0.Capacity() == 0);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_CopyAssignFromEmpty)
+  {
+    Vector<MovableOnlyType> v0;
+    Vector<MovableOnlyType> v1 = v0;
+    UNIT_TEST_REQUIRE(v0.Size() == v1.Size());
+    UNIT_TEST_REQUIRE(v0.Capacity() == v1.Capacity());
+    UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
+  }
+  UNIT_TEST(Vector_MovableOnlyType_CopyAssignFromInitialized)
+  {
+    Vector<MovableOnlyType> v0{0, 1, 2, 3};
+    Vector<MovableOnlyType> v1 = v0;
+    UNIT_TEST_REQUIRE(v0.Size() == v1.Size());
+    UNIT_TEST_REQUIRE(v0.Capacity() == v1.Capacity());
+    UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
+    UNIT_TEST_REQUIRE(memcmp(v0.Data(), v1.Data(), v0.AllocSize()) == 0);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_MoveAssignFromEmpty)
+  {
+    Vector<MovableOnlyType> v0;
+    i32 const               v0_sz  = v0.Size();
+    i32 const               v0_cap = v0.Capacity();
+
+    Vector<MovableOnlyType> v1 = std::move(v0);
+    UNIT_TEST_REQUIRE(v1.Size() == v0_sz);
+    UNIT_TEST_REQUIRE(v1.Capacity() == v0_cap);
+    UNIT_TEST_REQUIRE(v1.Allocator() == Core::globalAllocator);
+
+    UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
+    UNIT_TEST_REQUIRE(v0.IsEmpty());
+    UNIT_TEST_REQUIRE(v0.Capacity() == 0);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_MoveAssignFromInitialized)
+  {
+    Vector<MovableOnlyType> v0{0, 1, 2, 3};
+    i32 const               v0_sz  = v0.Size();
+    i32 const               v0_cap = v0.Capacity();
+
+    Vector<MovableOnlyType> v1 = std::move(v0);
+    UNIT_TEST_REQUIRE(v1.Size() == v0_sz);
+    UNIT_TEST_REQUIRE(v1.Capacity() == v0_cap);
+    UNIT_TEST_REQUIRE(v1.Allocator() == Core::globalAllocator);
+
+    UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
+    UNIT_TEST_REQUIRE(v0.IsEmpty());
+    UNIT_TEST_REQUIRE(v0.Capacity() == 0);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_AssignWithValue)
+  {
+    Vector<MovableOnlyType> v;
+    v.Assign(512, 0xDE'AD);
+    UNIT_TEST_REQUIRE(v.Size() == 512);
+    UNIT_TEST_REQUIRE(v.Capacity() == 512);
+    for (auto const& item : v)
+      UNIT_TEST_REQUIRE(item.Get() == 0xDE'AD);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_AssignWithIterators)
+  {
+    int                     arr[] = {-1, -2, -3, -4};
+    Vector<MovableOnlyType> v;
+    v.Assign(std::begin(arr), std::end(arr));
+    UNIT_TEST_REQUIRE(v.Size() == 4);
+    UNIT_TEST_REQUIRE(v.Capacity() == 4);
+    for (i32 i = 0; i < v.Size(); ++i)
+      UNIT_TEST_REQUIRE(v[i].Get() == arr[i]);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_NonEmptyVectorFrontEqualsDataAndBegin)
+  {
+    Vector<MovableOnlyType> v{0, 1, 2};
+    UNIT_TEST_REQUIRE(v.Front().Get() == 0);
+    UNIT_TEST_REQUIRE(v.Data()->Get() == v.Front().Get());
+    UNIT_TEST_REQUIRE(v.Data() == v.begin());
+  }
+  UNIT_TEST(Vector_MovableOnlyType_NonEmptyVectorBack)
+  {
+    Vector<MovableOnlyType> v{0, 1, 2};
+    UNIT_TEST_REQUIRE(v.Back().Get() == 2);
+    UNIT_TEST_REQUIRE(v.Back().Get() == (v.Data() + v.Size() - 1)->Get());
+  }
+  UNIT_TEST(Vector_MovableOnlyType_EmptyVectorHasBeginEqualsEnd)
+  {
+    Vector<MovableOnlyType> v;
+    UNIT_TEST_REQUIRE(v.begin() == v.end());
+  }
+  UNIT_TEST(Vector_MovableOnlyType_EmptyVectorHasNullptrData)
+  {
+    Vector<MovableOnlyType> v;
+    UNIT_TEST_REQUIRE(v.Data() == nullptr);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_ReserveChangesTheCapacityToExactlyThatValue)
+  {
+    Vector<MovableOnlyType> v;
+    v.Reserve(97'364);
+    UNIT_TEST_REQUIRE(v.IsEmpty());
+    UNIT_TEST_REQUIRE(v.Capacity() == 97'364);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_ReserveIsNOPIfCapacityAlreadyGreater)
+  {
+    Vector<MovableOnlyType> v(10);
+    v.Reserve(5);
+    UNIT_TEST_REQUIRE(v.Capacity() == 10);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_ResizeOnEmptyVectorBehavesLikeCtorWithSize)
+  {
+    Vector<MovableOnlyType> v0(5'431);
+    Vector<MovableOnlyType> v1;
+    v1.Resize(v0.Size());
+    UNIT_TEST_REQUIRE(v1.Size() == 5'431);
+    UNIT_TEST_REQUIRE(v1.Capacity() == 5'431);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_ResizeWithCustomValue)
+  {
+    Vector<MovableOnlyType> v;
+    v.Resize(10, 52);
+    UNIT_TEST_REQUIRE(v.Size() == 10);
+    for (auto const& value : v)
+      UNIT_TEST_REQUIRE(value.Get() == 52);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_ResizeDestroysElementsIfNewSizeIsSmaller)
+  {
+    Vector<MovableOnlyType> v(10, 42);
+    v.Resize(2, 99);
+    UNIT_TEST_REQUIRE(v.Size() == 2);
+    for (auto const& value : v)
+      UNIT_TEST_REQUIRE(value.Get() == 42);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_ResizeAppendsElementsIfNewSizeIsBigger)
+  {
+    Vector<MovableOnlyType> v(10, 42);
+    v.Resize(20, 99);
+    UNIT_TEST_REQUIRE(v.Size() == 20);
+    for (i32 i = 0; i < 10; ++i)
+      UNIT_TEST_REQUIRE(v[i].Get() == 42);
+    for (i32 i = 10; i < 20; ++i)
+      UNIT_TEST_REQUIRE(v[i].Get() == 99);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_ClearOfEmptyDoesNothing)
+  {
+    Vector<MovableOnlyType> v;
+    v.Clear();
+    UNIT_TEST_REQUIRE(v.IsEmpty());
+    UNIT_TEST_REQUIRE(v.Capacity() == 0);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_ClearOfReservedLeavesCapacityUnchanged)
+  {
+    Vector<MovableOnlyType> v;
+    v.Reserve(20);
+    v.Clear();
+    UNIT_TEST_REQUIRE(v.IsEmpty());
+    UNIT_TEST_REQUIRE(v.Capacity() == 20);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_ClearOfInitializedLeavesCapacityUnchanged)
+  {
+    Vector<MovableOnlyType> v = {1, 2, 3, 4, 5};
+    v.Clear();
+    UNIT_TEST_REQUIRE(v.IsEmpty());
+    UNIT_TEST_REQUIRE(v.Capacity() == 5);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_InsertAtEndIsAnAppend)
+  {
+    Vector<MovableOnlyType> v;
+    v.Insert(v.end(), 10);
+    UNIT_TEST_REQUIRE(v.Size() == 1);
+    UNIT_TEST_REQUIRE(v.Front().Get() == 10);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_InsertAtBeginWithEmptyVectorIsAnAppend)
+  {
+    Vector<MovableOnlyType> v;
+    v.Insert(v.begin(), 10);
+    UNIT_TEST_REQUIRE(v.Size() == 1);
+    UNIT_TEST_REQUIRE(v.Front().Get() == 10);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_InsertInMiddleOfNonEmptyShiftsOthersOnTheRight)
+  {
+    Vector<MovableOnlyType> v = {0, 1, 2, 3, 4};
+    v.Insert(2, 10);
+    UNIT_TEST_REQUIRE(v.Size() == 6);
+    UNIT_TEST_REQUIRE(v[2].Get() == 10);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_InsertReturnsPosOfInsertedElem)
+  {
+    Vector<MovableOnlyType> v0;
+    auto*                   elem0 = v0.Insert(0, 4);
+    UNIT_TEST_REQUIRE(elem0->Get() == 4);
+
+    Vector<MovableOnlyType> v1(5, 32);
+    auto*                   elem1 = v1.Insert(v1.end(), 420);
+    UNIT_TEST_REQUIRE(elem1->Get() == 420);
+
+    Vector<MovableOnlyType> v2    = {1, 2};
+    auto*                   elem2 = v2.Insert(v2.begin(), 50);
+    UNIT_TEST_REQUIRE(elem2->Get() == 50);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_InsertWithQuantityInsertsElementsAtThatPosition)
+  {
+    Vector<MovableOnlyType> v0;
+    auto*                   elem0 = v0.Insert(v0.begin(), 50, 99);
+    UNIT_TEST_REQUIRE(v0.Size() == 50);
+    UNIT_TEST_REQUIRE(elem0 == v0.begin());
+    for (auto const& item : v0)
+      UNIT_TEST_REQUIRE(item.Get() == 99);
+
+    Vector<MovableOnlyType> v1    = {10, 20, 30, 40};
+    auto*                   elem1 = v1.Insert(v1.begin(), 50, 99);
+    UNIT_TEST_REQUIRE(elem1 == v1.begin());
+    UNIT_TEST_REQUIRE(v1.Size() == 4 + 50);
+    for (i32 i = 0; i < 50; ++i)
+      UNIT_TEST_REQUIRE(v1[i].Get() == 99);
+
+    Vector<MovableOnlyType> v2    = {10, 20, 30, 40};
+    auto*                   elem2 = v2.Insert(2, 3, 0);
+    UNIT_TEST_REQUIRE(v2.Size() == 4 + 3);
+    UNIT_TEST_REQUIRE(elem2 == v2.Data() + 2);
+    UNIT_TEST_REQUIRE(v2[0].Get() == 10);
+    UNIT_TEST_REQUIRE(v2[1].Get() == 20);
+    UNIT_TEST_REQUIRE(v2[2].Get() == 0);
+    UNIT_TEST_REQUIRE(v2[3].Get() == 0);
+    UNIT_TEST_REQUIRE(v2[4].Get() == 0);
+    UNIT_TEST_REQUIRE(v2[5].Get() == 30);
+    UNIT_TEST_REQUIRE(v2[6].Get() == 40);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_InsertWithIteratorsCopiesEntireRange)
+  {
+    int                     data[] = {0, 1, 2};
+    Vector<MovableOnlyType> v;
+    v.Insert(0, std::begin(data), std::end(data));
+    UNIT_TEST_REQUIRE(v.Size() == 3);
+    UNIT_TEST_REQUIRE(v[0].Get() == 0);
+    UNIT_TEST_REQUIRE(v[1].Get() == 1);
+    UNIT_TEST_REQUIRE(v[2].Get() == 2);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_EmplaceBackReallocatesIfNecessary)
+  {
+    Vector<MovableOnlyType> v;
+    for (int i = 0; i < 10; ++i)
+      v.EmplaceBack(i);
+
+    UNIT_TEST_REQUIRE(v.Size() == 10);
+    for (int i = 0; i < 10; ++i)
+      UNIT_TEST_REQUIRE(v[i].Get() == i);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_EraseDoesNothingIfIteratorIsTheEnd)
+  {
+    Vector<MovableOnlyType> v;
+    auto                    elem0 = v.Erase(v.end());
+    auto                    elem1 = v.Erase(v.begin());
+    UNIT_TEST_REQUIRE(elem0 == elem1);
+    UNIT_TEST_REQUIRE(elem0 == v.end());
+  }
+  UNIT_TEST(Vector_MovableOnlyType_EraseReturnsBeginIfErasingTheFirstElement)
+  {
+    Vector<MovableOnlyType> v{0, 1, 2};
+    auto                    elem = v.Erase(v.begin());
+    UNIT_TEST_REQUIRE(elem == v.begin());
+    UNIT_TEST_REQUIRE(elem->Get() == 1);
+    UNIT_TEST_REQUIRE(v.Size() == 2);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_EraseReturnsEndIfDeletingTheLastElement)
+  {
+    Vector<MovableOnlyType> v{0, 1, 2};
+    auto                    elem = v.Erase(v.begin() + 2);
+    UNIT_TEST_REQUIRE(elem == v.end());
+    UNIT_TEST_REQUIRE(v.Size() == 2);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_EraseReturnsEndIfDeletingAllTheRightRange)
+  {
+    Vector<MovableOnlyType> v{0, 1, 2};
+    auto                    elem = v.Erase(v.begin() + 1, v.end());
+    UNIT_TEST_REQUIRE(elem == v.end());
+    UNIT_TEST_REQUIRE(v.Size() == 1);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_EraseReturnsEndIfDeletingAllElements)
+  {
+    Vector<MovableOnlyType> v{0, 1, 2};
+    auto                    elem = v.Erase(v.begin(), v.end());
+    UNIT_TEST_REQUIRE(elem == v.end());
+    UNIT_TEST_REQUIRE(v.Size() == 0);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_PopBackRemovesTheLastElement)
+  {
+    Vector<MovableOnlyType> v{0, 1, 2};
+    v.PopBack();
+    UNIT_TEST_REQUIRE(v.Size() == 2);
+    UNIT_TEST_REQUIRE(v.Back().Get() == 1);
+    v.PopBack();
+    UNIT_TEST_REQUIRE(v.Size() == 1);
+    UNIT_TEST_REQUIRE(v.Back().Get() == 0);
+    v.PopBack();
+    UNIT_TEST_REQUIRE(v.Size() == 0);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_PopBackDoesntCrashIfTheVectorIsEmpty)
+  {
+    Vector<MovableOnlyType> v{0, 1, 2};
+    for (int i = 0; i < 10; ++i)
+      v.PopBack();
+    UNIT_TEST_REQUIRE(v.IsEmpty());
+  }
+  UNIT_TEST(Vector_MovableOnlyType_ContainsReturnsFalseWithAnEmptyVector_Comparer)
+  {
+    Vector<MovableOnlyType> v;
+    UNIT_TEST_REQUIRE_FALSE(v.Contains([](MovableOnlyType const&) { return false; }));
+  }
+  UNIT_TEST(Vector_MovableOnlyType_ContainsReturnsFalseIfTheElementIsntThere_Comparer)
+  {
+    Vector<MovableOnlyType> v{1, 2, 3};
+    UNIT_TEST_REQUIRE_FALSE(v.Contains([](MovableOnlyType const& v) { return v.Get() == 0; }));
+  }
+  UNIT_TEST(Vector_MovableOnlyType_ContainsFindsTheElement_Comparer)
+  {
+    Vector<MovableOnlyType> v{1, 2, 3};
+    UNIT_TEST_REQUIRE(v.Contains([](MovableOnlyType const& v) { return v.Get() == 1; }));
+    UNIT_TEST_REQUIRE(v.Contains([](MovableOnlyType const& v) { return v.Get() == 2; }));
+    UNIT_TEST_REQUIRE(v.Contains([](MovableOnlyType const& v) { return v.Get() == 3; }));
+  }
+  UNIT_TEST(Vector_MovableOnlyType_FindReturnsNullptrWithAnEmptyVector_Comparer)
+  {
+    Vector<MovableOnlyType> v;
+    auto*                   item = v.Find([](MovableOnlyType const&) { return false; });
+    UNIT_TEST_REQUIRE(item == nullptr);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_FindReturnsPointerToFoundElement_Comparer)
+  {
+    Vector<MovableOnlyType> v{1, 2, 3};
+    auto*                   item1 = v.Find([](MovableOnlyType const& v) { return v.Get() == 1; });
+    auto*                   item2 = v.Find([](MovableOnlyType const& v) { return v.Get() == 2; });
+    auto*                   item3 = v.Find([](MovableOnlyType const& v) { return v.Get() == 3; });
+    UNIT_TEST_REQUIRE(item1 != nullptr && item1->Get() == 1);
+    UNIT_TEST_REQUIRE(item2 != nullptr && item2->Get() == 2);
+    UNIT_TEST_REQUIRE(item3 != nullptr && item3->Get() == 3);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_TwoEmptyVectorsAreAlwaysEqual)
+  {
+    Vector<MovableOnlyType> v0, v1;
+    UNIT_TEST_REQUIRE(v0 == v1);
+    UNIT_TEST_REQUIRE_FALSE(v0 != v1);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_AnEmptyVectorIsAlwaysDifferentThanANonEmptyOne)
+  {
+    Vector<MovableOnlyType> v0, v1{0, 1};
+    UNIT_TEST_REQUIRE_FALSE(v0 == v1);
+    UNIT_TEST_REQUIRE(v0 != v1);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_DifferentVectorsAreNeverEqual)
+  {
+    Vector<MovableOnlyType> v0{0, 1, 2};
+    Vector<MovableOnlyType> v1{1, 4};
+    UNIT_TEST_REQUIRE_FALSE(v0 == v1);
+    UNIT_TEST_REQUIRE(v0 != v1);
+  }
+  UNIT_TEST(Vector_MovableOnlyType_VectorsWithTheSameValuesAreEqual)
+  {
+    Vector<MovableOnlyType> v0{0, 1, 2};
+    Vector<MovableOnlyType> v1{0, 1, 2};
+    UNIT_TEST_REQUIRE(v0 == v1);
+    UNIT_TEST_REQUIRE_FALSE(v0 != v1);
+  }
 }

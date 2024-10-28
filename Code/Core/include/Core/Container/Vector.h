@@ -316,6 +316,7 @@ inline Vector<T>::Vector(Iterator begin, Iterator end, IAllocator* allocator)
   }
   else
   {
+    static_assert(std::constructible_from<T, decltype(*begin)>, "Vector(begin, end, allocator) requires T to be constructible from *begin.");
     for (T* item = Mem_; item < Size_; ++item)
       new (item) T(*begin++);
   }
