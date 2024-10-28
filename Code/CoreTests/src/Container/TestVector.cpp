@@ -365,4 +365,162 @@ UNIT_TEST_SUITE(Container)
     UNIT_TEST_REQUIRE(v[1] == 1);
     UNIT_TEST_REQUIRE(v[2] == 2);
   }
+  UNIT_TEST(Vector_TrivialType_EmplaceBackReallocatesIfNecessary)
+  {
+    Vector<int> v;
+    for (int i = 0; i < 10; ++i)
+      v.EmplaceBack(i);
+
+    UNIT_TEST_REQUIRE(v.Size() == 10);
+    for (int i = 0; i < 10; ++i)
+      UNIT_TEST_REQUIRE(v[i] == i);
+  }
+  UNIT_TEST(Vector_TrivialType_EraseDoesNothingIfIteratorIsTheEnd)
+  {
+    Vector<int> v;
+    auto        elem0 = v.Erase(v.end());
+    auto        elem1 = v.Erase(v.begin());
+    UNIT_TEST_REQUIRE(elem0 == elem1);
+    UNIT_TEST_REQUIRE(elem0 == v.end());
+  }
+  UNIT_TEST(Vector_TrivialType_EraseReturnsBeginIfErasingTheFirstElement)
+  {
+    Vector<int> v{0, 1, 2};
+    auto        elem = v.Erase(v.begin());
+    UNIT_TEST_REQUIRE(elem == v.begin());
+    UNIT_TEST_REQUIRE(*elem == 1);
+    UNIT_TEST_REQUIRE(v.Size() == 2);
+  }
+  UNIT_TEST(Vector_TrivialType_EraseReturnsEndIfDeletingTheLastElement)
+  {
+    Vector<int> v{0, 1, 2};
+    auto        elem = v.Erase(v.begin() + 2);
+    UNIT_TEST_REQUIRE(elem == v.end());
+    UNIT_TEST_REQUIRE(v.Size() == 2);
+  }
+  UNIT_TEST(Vector_TrivialType_EraseReturnsEndIfDeletingAllTheRightRange)
+  {
+    Vector<int> v{0, 1, 2};
+    auto        elem = v.Erase(v.begin() + 1, v.end());
+    UNIT_TEST_REQUIRE(elem == v.end());
+    UNIT_TEST_REQUIRE(v.Size() == 1);
+  }
+  UNIT_TEST(Vector_TrivialType_EraseReturnsEndIfDeletingAllElements)
+  {
+    Vector<int> v{0, 1, 2};
+    auto        elem = v.Erase(v.begin(), v.end());
+    UNIT_TEST_REQUIRE(elem == v.end());
+    UNIT_TEST_REQUIRE(v.Size() == 0);
+  }
+  UNIT_TEST(Vector_TrivialType_PopBackRemovesTheLastElement)
+  {
+    Vector<int> v{0, 1, 2};
+    v.PopBack();
+    UNIT_TEST_REQUIRE(v.Size() == 2);
+    UNIT_TEST_REQUIRE(v.Back() == 1);
+    v.PopBack();
+    UNIT_TEST_REQUIRE(v.Size() == 1);
+    UNIT_TEST_REQUIRE(v.Back() == 0);
+    v.PopBack();
+    UNIT_TEST_REQUIRE(v.Size() == 0);
+  }
+  UNIT_TEST(Vector_TrivialType_PopBackDoesntCrashIfTheVectorIsEmpty)
+  {
+    Vector<int> v{0, 1, 2};
+    for (int i = 0; i < 10; ++i)
+      v.PopBack();
+    UNIT_TEST_REQUIRE(v.IsEmpty());
+  }
+  UNIT_TEST(Vector_TrivialType_ContainsReturnsFalseWithAnEmptyVector)
+  {
+    Vector<int> v;
+    UNIT_TEST_REQUIRE_FALSE(v.Contains(0));
+  }
+  UNIT_TEST(Vector_TrivialType_ContainsReturnsFalseWithAnEmptyVector_Comparer)
+  {
+    Vector<int> v;
+    UNIT_TEST_REQUIRE_FALSE(v.Contains([](int) { return false; }));
+  }
+  UNIT_TEST(Vector_TrivialType_ContainsReturnsFalseIfTheElementIsntThere)
+  {
+    Vector<int> v{1, 2, 3};
+    UNIT_TEST_REQUIRE_FALSE(v.Contains(0));
+  }
+  UNIT_TEST(Vector_TrivialType_ContainsReturnsFalseIfTheElementIsntThere_Comparer)
+  {
+    Vector<int> v{1, 2, 3};
+    UNIT_TEST_REQUIRE_FALSE(v.Contains([](int v) { return v == 0; }));
+  }
+  UNIT_TEST(Vector_TrivialType_ContainsFindsTheElement)
+  {
+    Vector<int> v{1, 2, 3};
+    UNIT_TEST_REQUIRE(v.Contains(1));
+    UNIT_TEST_REQUIRE(v.Contains(2));
+    UNIT_TEST_REQUIRE(v.Contains(3));
+  }
+  UNIT_TEST(Vector_TrivialType_ContainsFindsTheElement_Comparer)
+  {
+    Vector<int> v{1, 2, 3};
+    UNIT_TEST_REQUIRE(v.Contains([](int v) { return v == 1; }));
+    UNIT_TEST_REQUIRE(v.Contains([](int v) { return v == 2; }));
+    UNIT_TEST_REQUIRE(v.Contains([](int v) { return v == 3; }));
+  }
+  UNIT_TEST(Vector_TrivialType_FindReturnsNullptrWithAnEmptyVector)
+  {
+    Vector<int> v;
+    auto*       item = v.Find(0);
+    UNIT_TEST_REQUIRE(item == nullptr);
+  }
+  UNIT_TEST(Vector_TrivialType_FindReturnsNullptrWithAnEmptyVector_Comparer)
+  {
+    Vector<int> v;
+    auto*       item = v.Find([](int) { return false; });
+    UNIT_TEST_REQUIRE(item == nullptr);
+  }
+  UNIT_TEST(Vector_TrivialType_FindReturnsPointerToFoundElement)
+  {
+    Vector<int> v{1, 2, 3};
+    auto*       item1 = v.Find(1);
+    auto*       item2 = v.Find(2);
+    auto*       item3 = v.Find(3);
+    UNIT_TEST_REQUIRE(item1 != nullptr && *item1 == 1);
+    UNIT_TEST_REQUIRE(item2 != nullptr && *item2 == 2);
+    UNIT_TEST_REQUIRE(item3 != nullptr && *item3 == 3);
+  }
+  UNIT_TEST(Vector_TrivialType_FindReturnsPointerToFoundElement_Comparer)
+  {
+    Vector<int> v{1, 2, 3};
+    auto*       item1 = v.Find([](int v) { return v == 1; });
+    auto*       item2 = v.Find([](int v) { return v == 2; });
+    auto*       item3 = v.Find([](int v) { return v == 3; });
+    UNIT_TEST_REQUIRE(item1 != nullptr && *item1 == 1);
+    UNIT_TEST_REQUIRE(item2 != nullptr && *item2 == 2);
+    UNIT_TEST_REQUIRE(item3 != nullptr && *item3 == 3);
+  }
+  UNIT_TEST(Vector_TrivialType_TwoEmptyVectorsAreAlwaysEqual)
+  {
+    Vector<int> v0, v1;
+    UNIT_TEST_REQUIRE(v0 == v1);
+    UNIT_TEST_REQUIRE_FALSE(v0 != v1);
+  }
+  UNIT_TEST(Vector_TrivialType_AnEmptyVectorIsAlwaysDifferentThanANonEmptyOne)
+  {
+    Vector<int> v0, v1{0, 1};
+    UNIT_TEST_REQUIRE_FALSE(v0 == v1);
+    UNIT_TEST_REQUIRE(v0 != v1);
+  }
+  UNIT_TEST(Vector_TrivialType_DifferentVectorsAreNeverEqual)
+  {
+    Vector<int>   v0{0, 1, 2};
+    Vector<float> v1{1.0f, 4.5f};
+    UNIT_TEST_REQUIRE_FALSE(v0 == v1);
+    UNIT_TEST_REQUIRE(v0 != v1);
+  }
+  UNIT_TEST(Vector_TrivialType_EquallyComparableTypesWithTheSameValueMakeEqualVectors)
+  {
+    Vector<int>                v0{0, 1, 2};
+    Vector<unsigned long long> v1{0, 1, 2};
+    UNIT_TEST_REQUIRE(v0 == v1);
+    UNIT_TEST_REQUIRE_FALSE(v0 != v1);
+  }
 }

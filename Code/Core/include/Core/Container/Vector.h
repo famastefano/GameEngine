@@ -145,7 +145,7 @@ public:
   template <typename... Args>
   T* EmplaceBackUnsafe(Args&&... args);
 
-  T* Erase(T const* position);
+  T* Erase(T* position);
   T* Erase(T* begin, T* end);
   T* Erase(i32 const position);
   T* Erase(i32 const position, i32 const count);
@@ -153,22 +153,29 @@ public:
   void PopBack();
 
   template <typename U = T>
-  bool Contains(U&& value);
+  bool Contains(U const& value) const;
 
   template <std::predicate<T const&> Comparer>
-  bool Contains(Comparer&& comparer);
+  bool Contains(Comparer&& comparer) const;
 
   template <typename U = T>
-  T* Find(U&& value);
+  T* Find(U const& value);
+  template <typename U = T>
+  T const* Find(U const& value) const;
 
   template <std::predicate<T const&> Comparer>
   T* Find(Comparer&& comparer);
+  template <std::predicate<T const&> Comparer>
+  T const* Find(Comparer&& comparer) const;
 
   template <typename U = T>
   bool operator==(Vector<U> const& other);
 
   template <typename U = T>
-  bool operator!=(Vector<U> const& other);
+  bool operator!=(Vector<U> const& other)
+  {
+    return !operator==(other);
+  }
 };
 
 template <typename T>
@@ -448,7 +455,7 @@ inline T& Vector<T>::operator[](i32 const pos)
 template <typename T>
 inline T const& Vector<T>::operator[](i32 const pos) const
 {
-  check(u32(pos) < Size(), "Vector operator[] out-of-bounds access.");
+  check(u32(pos) < u32(Size()), "Vector operator[] out-of-bounds access.");
   return Mem_[pos];
 }
 
@@ -742,15 +749,12 @@ inline T* Vector<T>::EmplaceBackUnsafe(Args&&... args)
 }
 
 template <typename T>
-inline T* Vector<T>::Erase(T const* position)
+inline T* Vector<T>::Erase(T* position)
 {
   check(Mem_ <= position && position <= Size_, "Vector Erase(position) has an invalid position.");
   if (IsEmpty() || position == end())
     return end();
-
-  position->~T(); // TODO: UB to move into a destroyed object
-  Algorithm::Move(position + 1, Size_, position);
-  return position;
+  return Erase(position, position + 1);
 }
 
 template <typename T>
@@ -760,7 +764,21 @@ inline T* Vector<T>::Erase(T* begin, T* end)
   if (IsEmpty() || begin == end)
     return this->end();
 
-  Destroy(begin, end); // TODO: UB to move into a destroyed object
+  if constexpr (!std::is_trivially_destructible_v<T>)
+  {
+    for (T* item = begin; item < end; ++item)
+    {
+      T&& tmp{std::move(*item)};
+      tmp.~T();
+    }
+  }
+  // It's safe to move as the range [begin, end) has moved-from objects
+  Algorithm::Move(end, this->end(), begin);
+  Size_ -= end - begin;
+
+  if (Size_ <= end)
+    return this->end();
+  return end - 1;
 }
 
 template <typename T>
@@ -784,26 +802,36 @@ inline void Vector<T>::PopBack()
 
 template <typename T>
 template <typename U>
-inline bool Vector<T>::Contains(U&& value)
+inline bool Vector<T>::Contains(U const& value) const
 {
-  return Find(std::forward<U>(value)) != end();
+  return Find(value) != end();
 }
 
 template <typename T>
 template <std::predicate<T const&> Comparer>
-inline bool Vector<T>::Contains(Comparer&& comparer)
+inline bool Vector<T>::Contains(Comparer&& comparer) const
 {
   return Find(std::forward<Comparer>(comparer)) != end();
 }
 
 template <typename T>
 template <typename U>
-inline T* Vector<T>::Find(U&& value)
+inline T* Vector<T>::Find(U const& value)
 {
-  static_assert(std::equality_comparable_with<T, std::forward<U>(value)>, "Vector Find(value) cannot compare T == U");
+  auto const* selfConst = this;
+  return const_cast<T*>(selfConst->Find(value));
+}
+
+template <typename T>
+template <typename U>
+inline T const* Vector<T>::Find(U const& value) const
+{
+  static_assert(std::equality_comparable_with<decltype(*begin()), decltype(value)>, "Vector Find(value) cannot compare T == U");
   for (auto const& item : *this)
-    if (item == std::forward<U>(value))
+  {
+    if (item == value)
       return &item;
+  }
   return end();
 }
 
@@ -811,9 +839,19 @@ template <typename T>
 template <std::predicate<T const&> Comparer>
 inline T* Vector<T>::Find(Comparer&& comparer)
 {
+  auto const* selfConst = this;
+  return const_cast<T*>(selfConst->Find(std::forward<Comparer>(comparer)));
+}
+
+template <typename T>
+template <std::predicate<T const&> Comparer>
+inline T const* Vector<T>::Find(Comparer&& comparer) const
+{
   for (auto const& item : *this)
+  {
     if (comparer(item))
       return &item;
+  }
   return end();
 }
 
@@ -821,29 +859,13 @@ template <typename T>
 template <typename U>
 inline bool Vector<T>::operator==(Vector<U> const& other)
 {
-  static_assert(std::equality_comparable_with<T, U>, "Vector operator==(Vector<U>) cannot compare T == U");
-  if (Size() || other.Size())
+  static_assert(std::equality_comparable_with<T const&, U const&>, "Vector operator==(Vector<U>) cannot compare T == U");
+  if (Size() != other.Size())
     return false;
 
   for (i32 i = 0; i < Size(); ++i)
   {
-    if (!(Mem_[i] == other.Mem_[i]))
-      return false;
-  }
-  return true;
-}
-
-template <typename T>
-template <typename U>
-inline bool Vector<T>::operator!=(Vector<U> const& other)
-{
-  static_assert(std::equality_comparable_with<T, U>, "Vector operator==(Vector<U>) cannot compare T == U");
-  if (Size() || other.Size())
-    return true;
-
-  for (i32 i = 0; i < Size(); ++i)
-  {
-    if (Mem_[i] == other.Mem_[i])
+    if (!((*this)[i] == other[i]))
       return false;
   }
   return true;
