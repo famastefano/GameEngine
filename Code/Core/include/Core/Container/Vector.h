@@ -196,8 +196,7 @@ inline void Vector<T>::Realloc(i32 const newCapacity)
 
   if (Mem_)
   {
-    T* newMem = (T*)Allocator_->Realloc(Mem_, newCapacity * sizeof(T), alignof(T));
-    if (newMem)
+    if (T* newMem = (T*)Allocator_->Realloc(Mem_, newCapacity * sizeof(T), alignof(T)))
     {
       Mem_      = newMem;
       Size_     = Mem_ + currSize;
@@ -307,7 +306,7 @@ inline Vector<T>::Vector(Iterator begin, Iterator end, IAllocator* allocator)
   if constexpr (canUseFastPath)
     initialSize = i32(end - begin);
   else
-    initialSize = std::distance(begin, end);
+    initialSize = i32(std::distance(begin, end));
 
   Realloc(initialSize);
   Size_ = Capacity_;
@@ -570,14 +569,13 @@ inline void Vector<T>::Resize(i32 const newSize)
 
   if (currSize < newSize)
   {
-    i32 const ds = newSize - currSize;
-    for (T* item = Size_ - ds; item < Size_ + ds; ++item)
+    for (T* item = Mem_ + currSize; item < Size_; ++item)
       new (item) T;
   }
   else if (currSize > newSize)
   {
     i32 const ds = currSize - newSize;
-    Destroy(Size_ - ds, Size_);
+    Destroy(Mem_ + ds, Size_);
     Size_ -= ds;
   }
 }
@@ -596,24 +594,14 @@ inline void Vector<T>::Resize(i32 const newSize, U const& value)
     if (currCap < newSize)
       Realloc(newSize);
 
-    if (currSize == 0)
-    {
-      Size_ = Mem_ + newSize;
-      for (T* item = Mem_; item < Size_; ++item)
-        new (item) T(value);
-    }
-    else
-    {
-      i32 const ds = newSize - currSize;
-      for (T* item = Mem_ + ds; item < Size_ + ds; ++item)
-        new (item) T(value);
-      Size_ = Mem_ + newSize;
-    }
+    Size_ = Mem_ + newSize;
+    for (T* item = Mem_ + currSize; item < Size_; ++item)
+      new (item) T(value);
   }
   else if (currSize > newSize)
   {
     i32 const ds = currSize - newSize;
-    Destroy(Size_ - ds - 1, Size_);
+    Destroy(Mem_ + ds, Size_);
     Size_ -= ds;
   }
 }
