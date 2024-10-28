@@ -40,7 +40,7 @@ template <typename InputIterator, typename OutputIterator>
 void Move(InputIterator fromStart, InputIterator fromEnd, OutputIterator to)
 {
   static_assert(std::input_iterator<InputIterator>);
-  static_assert(std::output_iterator<OutputIterator, decltype(*to)>);
+  static_assert(std::output_iterator<OutputIterator, decltype(std::move(*fromStart))>);
   if constexpr (Private::CanFastCopy<InputIterator, OutputIterator>())
   {
     Private::FastCopy(fromStart, fromEnd, to);
