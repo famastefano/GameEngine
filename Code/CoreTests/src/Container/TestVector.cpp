@@ -1131,23 +1131,6 @@ UNIT_TEST_SUITE(Container)
     UNIT_TEST_REQUIRE(v0.IsEmpty());
     UNIT_TEST_REQUIRE(v0.Capacity() == 0);
   }
-  UNIT_TEST(Vector_MovableOnlyType_CopyAssignFromEmpty)
-  {
-    Vector<MovableOnlyType> v0;
-    Vector<MovableOnlyType> v1 = v0;
-    UNIT_TEST_REQUIRE(v0.Size() == v1.Size());
-    UNIT_TEST_REQUIRE(v0.Capacity() == v1.Capacity());
-    UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
-  }
-  UNIT_TEST(Vector_MovableOnlyType_CopyAssignFromInitialized)
-  {
-    Vector<MovableOnlyType> v0{0, 1, 2, 3};
-    Vector<MovableOnlyType> v1 = v0;
-    UNIT_TEST_REQUIRE(v0.Size() == v1.Size());
-    UNIT_TEST_REQUIRE(v0.Capacity() == v1.Capacity());
-    UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
-    UNIT_TEST_REQUIRE(memcmp(v0.Data(), v1.Data(), v0.AllocSize()) == 0);
-  }
   UNIT_TEST(Vector_MovableOnlyType_MoveAssignFromEmpty)
   {
     Vector<MovableOnlyType> v0;
