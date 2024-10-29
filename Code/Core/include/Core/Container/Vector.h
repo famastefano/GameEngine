@@ -1,7 +1,5 @@
 #pragma once
 
-// TODO: Comment + Refactor
-
 #include <Core/Algorithm/Algorithm.h>
 #include <Core/Allocator/Allocator.h>
 #include <Core/Assert/Assert.h>
@@ -27,10 +25,17 @@ private:
   T*          Size_;
   T*          Capacity_;
 
-  void        Reset();
-  void        Realloc(i32 const newCapacity);
+  // Vector's state will now be 1:1 as a default constructed Vector, with the custom allocator.
+  void Reset();
+
+  // Reallocates the memory to the specified capacity, possibly without invalidating iterators.
+  void Realloc(i32 const newCapacity);
+
+  // Invokes the destructor of all items in the provided range.
   static void Destroy(T* from, T* to);
-  static i32  CalculateCapacity(i32 const currCapacity, i32 const desiredSize);
+
+  // Calculates the new capacity given a size, based on the ReallocRatio.
+  static i32 CalculateCapacity(i32 const currCapacity, i32 const desiredSize);
 
 public:
   Vector(IAllocator* allocator = globalAllocator);
@@ -87,6 +92,7 @@ public:
 
   i32 Capacity() const;
 
+  // The allocated size, in bytes.
   i32 AllocSize() const;
 
   void Reserve(i32 const capacity);
@@ -142,6 +148,8 @@ public:
     return Emplace(end(), std::forward<Args>(args)...);
   }
 
+  // Fast-construct in-place a new element at the end.
+  // WARNING: Doesn't check if there's enough capacity to hold the new element.
   template <typename... Args>
   T* EmplaceBackUnsafe(Args&&... args);
 
