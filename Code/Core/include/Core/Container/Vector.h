@@ -37,6 +37,15 @@ private:
   // Calculates the new capacity given a size, based on the ReallocRatio.
   static i32 CalculateCapacity(i32 const currCapacity, i32 const desiredSize);
 
+  template <typename U>
+  static constexpr bool CanFastInitialize()
+  {
+    return std::is_trivially_copyable_v<T>
+        && std::is_trivially_copyable_v<U>
+        && sizeof(T) == sizeof(U)
+        && sizeof(T) == sizeof(u8);
+  }
+
 public:
   Vector(IAllocator* allocator = globalAllocator);
   Vector(i32 const initialSize, IAllocator* allocator = globalAllocator);
@@ -299,8 +308,15 @@ inline Vector<T>::Vector(i32 const initialSize, U const& initialValue, IAllocato
     : Vector(initialSize, allocator)
 {
   static_assert(std::constructible_from<T, decltype(initialValue)>, "Cannot construct T from U.");
-  for (T* item = Mem_; item < Size_; ++item)
-    new (item) T(initialValue);
+  if constexpr (CanFastInitialize<U>())
+  {
+    std::memset(Mem_, (int)initialValue, AllocSize());
+  }
+  else
+  {
+    for (T* item = Mem_; item < Size_; ++item)
+      new (item) T(initialValue);
+  }
 }
 
 template <typename T>
@@ -421,10 +437,16 @@ inline void Vector<T>::Assign(i32 const newSize, U const& newValue)
   if (newSize > currCap)
     Realloc(CalculateCapacity(currCap, newSize));
 
-  for (T* item = Mem_; item < Mem_ + newSize; ++item)
-    new (item) T(newValue);
-
   Size_ = Mem_ + newSize;
+  if constexpr (CanFastInitialize<U>())
+  {
+    std::memset(Mem_, (int)newValue, AllocSize());
+  }
+  else
+  {
+    for (T* item = Mem_; item < Size_; ++item)
+      new (item) T(newValue);
+  }
 }
 
 template <typename T>
@@ -578,8 +600,15 @@ inline void Vector<T>::Resize(i32 const newSize)
 
   if (currSize < newSize)
   {
-    for (T* item = Mem_ + currSize; item < Size_; ++item)
-      new (item) T;
+    if constexpr (std::is_trivially_default_constructible_v<T>)
+    {
+      std::memset(Mem_ + currSize, 0, (Size_ - (Mem_ + currSize)) * sizeof(T));
+    }
+    else
+    {
+      for (T* item = Mem_ + currSize; item < Size_; ++item)
+        new (item) T;
+    }
   }
   else if (currSize > newSize)
   {
@@ -604,8 +633,15 @@ inline void Vector<T>::Resize(i32 const newSize, U const& value)
       Realloc(newSize);
 
     Size_ = Mem_ + newSize;
-    for (T* item = Mem_ + currSize; item < Size_; ++item)
-      new (item) T(value);
+    if constexpr (CanFastInitialize<U>())
+    {
+      std::memset(Mem_ + currSize, (int)value, (Size_ - (Mem_ + currSize)) * sizeof(T));
+    }
+    else
+    {
+      for (T* item = Mem_ + currSize; item < Size_; ++item)
+        new (item) T(value);
+    }
   }
   else if (currSize > newSize)
   {
@@ -672,8 +708,15 @@ inline T* Vector<T>::Insert(T const* position, i32 const count, U const& value)
   T* fromEnd   = Size_;
   T* to        = fromStart + count;
   Algorithm::Move(fromStart, fromEnd, to);
-  for (T* item = Mem_ + posIndex; item < Mem_ + posIndex + count; ++item)
-    new (item) T(value);
+  if constexpr (CanFastInitialize<U>())
+  {
+    std::memset(Mem_ + posIndex, (int)value, count * sizeof(T));
+  }
+  else
+  {
+    for (T* item = Mem_ + posIndex; item < Mem_ + posIndex + count; ++item)
+      new (item) T(value);
+  }
 
   Size_ = Mem_ + newSize;
   return Mem_ + posIndex;
@@ -698,7 +741,7 @@ inline T* Vector<T>::Insert(T const* position, Iterator begin, Iterator end)
   i32 const newSize   = currSize + elemCount;
   if (currCap < newSize)
     Realloc(CalculateCapacity(currCap, newSize));
-
+  
   Algorithm::Move(Mem_ + posIndex, Size_, Mem_ + elemCount);
 
   Size_ = Mem_ + newSize;
@@ -860,11 +903,18 @@ inline bool Vector<T>::operator==(Vector<U> const& other)
   if (Size() != other.Size())
     return false;
 
-  for (i32 i = 0; i < Size(); ++i)
+  if constexpr (std::is_trivially_copyable_v<T> && std::is_trivially_copyable_v<U> && sizeof(T) == sizeof(U))
   {
-    if (!((*this)[i] == other[i]))
-      return false;
+    return std::memcmp(Mem_, other.Data(), AllocSize());
   }
-  return true;
+  else
+  {
+    for (i32 i = 0; i < Size(); ++i)
+    {
+      if (!((*this)[i] == other[i]))
+        return false;
+    }
+    return true;
+  }
 }
 } // namespace Core
