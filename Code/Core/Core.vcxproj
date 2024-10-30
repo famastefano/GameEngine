@@ -89,6 +89,7 @@
     <ClInclude Include="include\Core\Algorithm\Algorithm.h" />
     <ClInclude Include="include\Core\Allocator\Allocator.h" />
     <ClInclude Include="include\Core\Allocator\GlobalAllocator.h" />
+    <ClInclude Include="include\Core\Allocator\ArenaStackAllocator.h" />
     <ClInclude Include="include\Core\API.h" />
     <ClInclude Include="include\Core\Assert\Assert.h" />
     <ClInclude Include="include\Core\Container\Vector.h" />

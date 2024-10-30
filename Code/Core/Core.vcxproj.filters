@@ -42,6 +42,9 @@
     <ClInclude Include="include\Core\Reflection\Reflection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Core\Allocator\ArenaStackAllocator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="include\Core\Platform\Platform.cpp">
