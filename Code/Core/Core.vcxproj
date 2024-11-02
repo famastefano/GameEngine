@@ -92,6 +92,8 @@
     <ClInclude Include="include\Core\Allocator\ArenaStackAllocator.h" />
     <ClInclude Include="include\Core\API.h" />
     <ClInclude Include="include\Core\Assert\Assert.h" />
+    <ClInclude Include="include\Core\Container\Span.h" />
+    <ClInclude Include="include\Core\Container\String.h" />
     <ClInclude Include="include\Core\Container\Vector.h" />
     <ClInclude Include="include\Core\Definitions.h" />
     <ClInclude Include="include\Core\Platform\Platform.h" />
