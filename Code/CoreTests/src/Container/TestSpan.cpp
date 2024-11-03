@@ -20,36 +20,6 @@ UNIT_TEST_SUITE(Span)
     UNIT_TEST_REQUIRE(s.begin() == s.end());
   }
 
-  UNIT_TEST(Span_DynamicSize_CtorFromStaticArray)
-  {
-    i32       arr[5] = {0, 1, 2, 3, 4};
-    Span<i32> s{arr};
-    UNIT_TEST_REQUIRE(s.Size() == 5);
-    i32 i = 0;
-    for (i32 item : s)
-      UNIT_TEST_REQUIRE(arr[i++] == item);
-  }
-
-  UNIT_TEST(Span_CompileSize_CtorFromStaticArray)
-  {
-    i32          arr[5] = {0, 1, 2, 3, 4};
-    Span<i32, 5> s{arr};
-    UNIT_TEST_REQUIRE(s.Size() == 5);
-    i32 i = 0;
-    for (i32 item : s)
-      UNIT_TEST_REQUIRE(arr[i++] == item);
-  }
-
-  UNIT_TEST(Span_CompileSize_CtorFromStaticArray_LessSize)
-  {
-    i32          arr[5] = {0, 1, 2, 3, 4};
-    Span<i32, 2> s{arr};
-    UNIT_TEST_REQUIRE(s.Size() == 2);
-    i32 i = 0;
-    for (i32 item : s)
-      UNIT_TEST_REQUIRE(arr[i++] == item);
-  }
-
   UNIT_TEST(Span_DynamicSize_CtorFromIteratorAndCount)
   {
     i32       arr[5] = {0, 1, 2, 3, 4};

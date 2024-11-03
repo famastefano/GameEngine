@@ -13,28 +13,26 @@
 namespace Core
 {
 template <typename CharT>
-class StringView : public Span<CharT, DynamicSize>
+class StringView : public Span<CharT const, DynamicSize>
 {
   static_assert(std::same_as<CharT, char> || std::same_as<CharT, wchar_t>, "StringView supports only char and wchar_t.");
 
 public:
-  using Super = Span<CharT, DynamicSize>;
+  using Super = Span<CharT const, DynamicSize>;
 
   inline static constexpr i32 NotFound = -1;
 
-  using Span<CharT, DynamicSize>::Span;
+  using Span<CharT const, DynamicSize>::Span;
 
-  constexpr StringView(std::nullptr_t) = delete;
-
-  template <std::enable_if_t<std::same_as<CharT, char>, bool> = true>
-  constexpr StringView(CharT const* s)
-      : Span(s, strlen(s))
+  template <typename CharU = CharT, std::enable_if_t<std::same_as<CharU, char>, bool> = true>
+  constexpr StringView(CharU const* s)
+      : Super(s, i32(strlen(s)))
   {
   }
 
-  template <std::enable_if_t<std::same_as<CharT, wchar_t>, bool> = true>
-  constexpr StringView(CharT const* s)
-      : Span(s, wcslen(s))
+  template <typename CharU = CharT, std::enable_if_t<std::same_as<CharU, wchar_t>, bool> = true>
+  constexpr StringView(CharU const* s)
+      : Super(s, i32(wcslen(s)))
   {
   }
 

@@ -75,14 +75,6 @@ public:
     check(Size() == (end - start));
   }
 
-  template <i32 N>
-  constexpr Span(T (&arr)[N])
-      : Data_(std::data(arr))
-      , SpanSize_(N)
-  {
-    static_assert(Size_ <= N || Size_ == DynamicSize);
-  }
-
   template <typename U>
   explicit constexpr Span(Vector<U> const& vec)
       : Data_(vec.Data())
