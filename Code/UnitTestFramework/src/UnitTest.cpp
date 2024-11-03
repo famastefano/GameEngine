@@ -16,9 +16,9 @@ TestBase::TestBase(char const* SuiteName, char const* TestName)
     : SuiteName_(SuiteName)
     , TestName_(TestName)
 {
-  GetTests().emplace_back(this);
+  GetTests().EmplaceBack(this);
 }
-void TestBase::Run()
+void TestBase::Run(TestOptions const& options)
 {
   std::string msg  = "TEST ";
   msg             += SuiteName_;
@@ -40,14 +40,17 @@ void TestBase::Run()
     UnitTest::Private::GlobalPassedTestsCounter.fetch_add(1, std::memory_order_relaxed);
   }
 
-  std::scoped_lock lck{GlobalOutputMutex};
-  std::cout << msg << '\n'
-            << endMsg << '\n'
-            << '\n';
+  if (options.OutputOnlyIfFailed && FailReason_ || !options.OutputOnlyIfFailed)
+  {
+    std::scoped_lock lck{GlobalOutputMutex};
+    std::cout << msg << '\n'
+              << endMsg << '\n'
+              << '\n';
+  }
 }
-std::vector<TestBase*>& TestBase::GetTests()
+Core::Vector<TestBase*>& TestBase::GetTests()
 {
-  static std::vector<TestBase*> tests;
+  static Core::Vector<TestBase*> tests;
   return tests;
 }
 void TestBase::MarkAsFailed(char const* reason)

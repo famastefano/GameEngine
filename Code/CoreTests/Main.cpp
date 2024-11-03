@@ -10,9 +10,11 @@ struct RunOptions
 {
   std::string_view Suite{};
   bool             WantsParallelExecution{};
+  bool             OutputOnlyIfFailed{};
 } Options{};
 
-std::vector<UnitTest::Private::TestBase*> GetFilteredTests();
+Core::Vector<UnitTest::Private::TestBase*> GetFilteredTests();
+UnitTest::TestOptions                      MakeTestOptions();
 
 int main(int argc, char** argv)
 {
@@ -20,31 +22,38 @@ int main(int argc, char** argv)
   {
     std::string_view arg = argv[i];
     if (arg == "--parallel")
+    {
       Options.WantsParallelExecution = true;
+    }
     else if (arg.starts_with("--test-suite="))
     {
       arg.remove_prefix(strlen("--test-suite="));
       Options.Suite = arg;
     }
+    else if (arg == "--output-only-failed")
+    {
+      Options.OutputOnlyIfFailed = true;
+    }
   }
 
-  auto const tests = GetFilteredTests();
+  auto const testOptions = MakeTestOptions();
+  auto const tests       = GetFilteredTests();
   if (!Options.WantsParallelExecution)
   {
     for (auto* test : tests)
-      test->Run();
+      test->Run(testOptions);
   }
   else
   {
-    std::vector<std::jthread> workers(std::thread::hardware_concurrency());
-    std::atomic<int>          testId = 0;
+    Core::Vector<std::jthread> workers(std::thread::hardware_concurrency());
+    std::atomic<int>           testId = 0;
     for (auto& worker : workers)
     {
-      worker = std::jthread([&tests, &testId] {
+      worker = std::jthread([&testOptions, &tests, &testId] {
         int const id = testId.fetch_add(1, std::memory_order_relaxed);
-        if (id >= tests.size())
+        if (id >= tests.Size())
           return;
-        tests[id]->Run();
+        tests[id]->Run(testOptions);
       });
     }
   }
@@ -54,14 +63,26 @@ int main(int argc, char** argv)
   std::cout << std::format("Total: {} Passed: {} Failed: {}\n", passed + failed, passed, failed);
 }
 
-std::vector<UnitTest::Private::TestBase*> GetFilteredTests()
+Core::Vector<UnitTest::Private::TestBase*> GetFilteredTests()
 {
   auto filtered = UnitTest::Private::TestBase::GetTests();
   if (Options.Suite.empty())
     return filtered;
 
-  std::erase_if(filtered, [](UnitTest::Private::TestBase* test) {
-    return std::string_view{test->SuiteName_} != Options.Suite;
-  });
-  return filtered;
+  while (true)
+  {
+    auto* item = filtered.Find([](UnitTest::Private::TestBase* test) {
+      return std::string_view{test->SuiteName_} != Options.Suite;
+    });
+    if (!item)
+      return filtered;
+    filtered.Erase(item);
+  }
+}
+
+UnitTest::TestOptions MakeTestOptions()
+{
+  UnitTest::TestOptions opt{};
+  opt.OutputOnlyIfFailed = Options.OutputOnlyIfFailed;
+  return opt;
 }
