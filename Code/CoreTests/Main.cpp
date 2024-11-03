@@ -74,7 +74,7 @@ Core::Vector<UnitTest::Private::TestBase*> GetFilteredTests()
     auto* item = filtered.Find([](UnitTest::Private::TestBase* test) {
       return std::string_view{test->SuiteName_} != Options.Suite;
     });
-    if (!item)
+    if (item == filtered.end())
       return filtered;
     filtered.Erase(item);
   }
