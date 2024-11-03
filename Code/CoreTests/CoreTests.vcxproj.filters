@@ -27,5 +27,8 @@
     <ClCompile Include="src\Container\TestSpan.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Container\TestStringView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
