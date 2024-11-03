@@ -83,20 +83,22 @@ public:
     static_assert(Size_ <= N || Size_ == DynamicSize);
   }
 
-  explicit constexpr Span(Vector<T> const& vec)
+  template <typename U>
+  explicit constexpr Span(Vector<U> const& vec)
       : Data_(vec.Data())
       , SpanSize_(vec.Size())
   {
   }
 
-  explicit constexpr Span(Vector<T>& vec)
+  template <typename U>
+  explicit constexpr Span(Vector<U>& vec)
       : Data_(vec.Data())
       , SpanSize_(vec.Size())
   {
   }
 
   explicit(Size_ != DynamicSize) constexpr Span(std::initializer_list<T> il) noexcept
-      : Span(il.begin(), il.size())
+      : Span(il.begin(), i32(il.size()))
   {
   }
 

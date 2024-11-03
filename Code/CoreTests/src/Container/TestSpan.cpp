@@ -176,7 +176,7 @@ UNIT_TEST_SUITE(Span)
   UNIT_TEST(Span_DynamicSize_FirstOfEmptyReturnsAnotherEmpty)
   {
     Span<i32> s;
-    Span<i32> other = s.First(0);
+    auto      other = s.First(0);
     UNIT_TEST_REQUIRE(s.IsEmpty());
     UNIT_TEST_REQUIRE(other.IsEmpty());
   }
@@ -184,8 +184,138 @@ UNIT_TEST_SUITE(Span)
   UNIT_TEST(Span_CompileSize_FirstOfEmptyReturnsAnotherEmpty)
   {
     Span<i32, 0> s;
-    Span<i32, 0> other = s.First<0>();
+    auto         other = s.First<0>();
     UNIT_TEST_REQUIRE(s.IsEmpty());
     UNIT_TEST_REQUIRE(other.IsEmpty());
+  }
+
+  UNIT_TEST(Span_DynamicSize_FirstWithSameSizeReturnsACopy)
+  {
+    Vector<i32>     v{1, 2, 3};
+    Span<i32 const> s{v};
+    auto            other = s.First(3);
+    UNIT_TEST_REQUIRE(s.Size() == other.Size());
+    for (i32 i = 0; i < other.Size(); ++i)
+      UNIT_TEST_REQUIRE(s[i] == other[i]);
+  }
+
+  UNIT_TEST(Span_CompileSize_FirstWithSameSizeReturnsACopy)
+  {
+    Vector<i32>        v{1, 2, 3};
+    Span<i32 const, 3> s{v};
+    auto               other = s.First<3>();
+    UNIT_TEST_REQUIRE(s.Size() == other.Size());
+    for (i32 i = 0; i < other.Size(); ++i)
+      UNIT_TEST_REQUIRE(s[i] == other[i]);
+  }
+
+  UNIT_TEST(Span_DynamicSize_FirstWithLessSize)
+  {
+    Vector<i32> v{1, 2, 3};
+    Span<i32>   s{v};
+    auto        other = s.First(2);
+    for (i32 i = 0; i < other.Size(); ++i)
+      UNIT_TEST_REQUIRE(s[i] == other[i]);
+  }
+
+  UNIT_TEST(Span_CompileSize_FirstWithLessSize)
+  {
+    Vector<i32>  v{1, 2, 3};
+    Span<i32, 3> s{v};
+    auto         other = s.First<2>();
+    for (i32 i = 0; i < other.Size(); ++i)
+      UNIT_TEST_REQUIRE(s[i] == other[i]);
+  }
+
+  UNIT_TEST(Span_DynamicSize_LastOfEmptyReturnsAnotherEmpty)
+  {
+    Span<i32> s;
+    auto      other = s.Last(0);
+    UNIT_TEST_REQUIRE(s.IsEmpty());
+    UNIT_TEST_REQUIRE(other.IsEmpty());
+  }
+
+  UNIT_TEST(Span_CompileSize_LastOfEmptyReturnsAnotherEmpty)
+  {
+    Span<i32, 0> s;
+    auto         other = s.Last<0>();
+    UNIT_TEST_REQUIRE(s.IsEmpty());
+    UNIT_TEST_REQUIRE(other.IsEmpty());
+  }
+
+  UNIT_TEST(Span_DynamicSize_LastWithSameSizeReturnsACopy)
+  {
+    Vector<i32>     v{1, 2, 3};
+    Span<i32 const> s{v};
+    auto            other = s.Last(3);
+    UNIT_TEST_REQUIRE(s.Size() == other.Size());
+    for (i32 i = 0; i < other.Size(); ++i)
+      UNIT_TEST_REQUIRE(s[i] == other[i]);
+  }
+
+  UNIT_TEST(Span_CompileSize_LastWithSameSizeReturnsACopy)
+  {
+    Vector<i32>        v{1, 2, 3};
+    Span<i32 const, 3> s{v};
+    auto               other = s.Last<3>();
+    UNIT_TEST_REQUIRE(s.Size() == other.Size());
+    for (i32 i = 0; i < other.Size(); ++i)
+      UNIT_TEST_REQUIRE(s[i] == other[i]);
+  }
+
+  UNIT_TEST(Span_DynamicSize_LastWithLessSize)
+  {
+    Vector<i32> v{1, 2, 3};
+    Span<i32>   s{v};
+    auto        other = s.Last(2);
+    for (i32 i = 0; i < other.Size(); ++i)
+      UNIT_TEST_REQUIRE(s[i + 1] == other[i]);
+  }
+
+  UNIT_TEST(Span_CompileSize_LastWithLessSize)
+  {
+    Vector<i32>  v{1, 2, 3};
+    Span<i32, 3> s{v};
+    auto         other = s.Last<2>();
+    for (i32 i = 0; i < other.Size(); ++i)
+      UNIT_TEST_REQUIRE(s[i + 1] == other[i]);
+  }
+
+  UNIT_TEST(Span_DynamicSize_SubSpanWithSameSizeReturnsACopy)
+  {
+    Vector<i32>     v{1, 2, 3};
+    Span<i32 const> s{v};
+    auto            other = s.SubSpan(0, 3);
+    UNIT_TEST_REQUIRE(s.Size() == other.Size());
+    for (i32 i = 0; i < other.Size(); ++i)
+      UNIT_TEST_REQUIRE(s[i] == other[i]);
+  }
+
+  UNIT_TEST(Span_CompileSize_SubSpanWithSameSizeReturnsACopy)
+  {
+    Vector<i32>        v{1, 2, 3};
+    Span<i32 const, 3> s{v};
+    auto               other = s.SubSpan<0, 3>();
+    UNIT_TEST_REQUIRE(s.Size() == other.Size());
+    for (i32 i = 0; i < other.Size(); ++i)
+      UNIT_TEST_REQUIRE(s[i] == other[i]);
+  }
+
+  UNIT_TEST(Span_DynamicSize_SubSpanWithLessSize)
+  {
+    Vector<i32> v{1, 2, 3};
+    Span<i32>   s{v};
+    auto        other = s.SubSpan(1, 2);
+    for (i32 i = 0; i < other.Size(); ++i)
+      UNIT_TEST_REQUIRE(s[i + 1] == other[i]);
+  }
+
+  UNIT_TEST(Span_CompileSize_SubSpanWithLessSize)
+  {
+    Vector<i32>  v{1, 2, 3};
+    Span<i32, 3> s{v};
+    auto         other = s.SubSpan<1, 2>();
+    for (i32 i = 0; i < other.Size(); ++i)
+      UNIT_TEST_REQUIRE(s[i + 1] == other[i]);
   }
 }
