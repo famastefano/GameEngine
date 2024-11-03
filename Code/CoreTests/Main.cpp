@@ -69,15 +69,10 @@ Core::Vector<UnitTest::Private::TestBase*> GetFilteredTests()
   if (Options.Suite.empty())
     return filtered;
 
-  while (true)
-  {
-    auto* item = filtered.Find([](UnitTest::Private::TestBase* test) {
-      return std::string_view{test->SuiteName_} != Options.Suite;
-    });
-    if (item == filtered.end())
-      return filtered;
-    filtered.Erase(item);
-  }
+  filtered.EraseIf([](UnitTest::Private::TestBase* test) {
+    return std::string_view{test->SuiteName_} != Options.Suite;
+  });
+  return filtered;
 }
 
 UnitTest::TestOptions MakeTestOptions()

@@ -167,6 +167,9 @@ public:
   T* Erase(i32 const position);
   T* Erase(i32 const position, i32 const count);
 
+  template <std::predicate<T const&> Comparer>
+  T* EraseIf(Comparer&& comparer);
+
   void PopBack();
 
   template <typename U = T>
@@ -741,7 +744,7 @@ inline T* Vector<T>::Insert(T const* position, Iterator begin, Iterator end)
   i32 const newSize   = currSize + elemCount;
   if (currCap < newSize)
     Realloc(CalculateCapacity(currCap, newSize));
-  
+
   Algorithm::Move(Mem_ + posIndex, Size_, Mem_ + elemCount);
 
   Size_ = Mem_ + newSize;
@@ -831,6 +834,16 @@ template <typename T>
 inline T* Vector<T>::Erase(i32 const position, i32 const count)
 {
   return Erase(Mem_ + position, Mem_ + position + count);
+}
+
+template <typename T>
+template <std::predicate<T const&> Comparer>
+T* Vector<T>::EraseIf(Comparer&& comparer)
+{
+  T* curr = Mem_;
+  while (curr != Size_)
+    curr = comparer(*curr) ? Erase(curr) : curr + 1;
+  return curr;
 }
 
 template <typename T>
