@@ -9,6 +9,15 @@
             <Item Name="OwnedByContainer">false</Item>
         </Expand>
     </Type>
+    <Type Name="Core::ArenaStackAllocator&lt;*,*&gt;">
+        <DisplayString>{{ size=$T1 }}</DisplayString>
+        <DisplayString>{{ alignment=$T2 }}</DisplayString>
+        <Expand>
+            <Item Name="IsMovable">false</Item>
+            <Item Name="IsCopyable">false</Item>
+            <Item Name="OwnedByContainer">false</Item>
+        </Expand>
+    </Type>
     <!-- Containers -->
     <Type Name="Core::Vector&lt;*&gt;">
         <DisplayString>{{ size={Size_ - Mem_} }}</DisplayString>
