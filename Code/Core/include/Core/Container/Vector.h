@@ -905,7 +905,7 @@ inline bool Vector<T>::operator==(Vector<U> const& other)
 
   if constexpr (std::is_trivially_copyable_v<T> && std::is_trivially_copyable_v<U> && sizeof(T) == sizeof(U))
   {
-    return std::memcmp(Mem_, other.Data(), AllocSize());
+    return std::memcmp(Mem_, other.Data(), AllocSize()) == 0;
   }
   else
   {
