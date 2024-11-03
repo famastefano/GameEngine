@@ -10,8 +10,7 @@
         </Expand>
     </Type>
     <Type Name="Core::ArenaStackAllocator&lt;*,*&gt;">
-        <DisplayString>{{ size=$T1 }}</DisplayString>
-        <DisplayString>{{ alignment=$T2 }}</DisplayString>
+        <DisplayString>{{ size=$T1, alignment=$T2 }}</DisplayString>
         <Expand>
             <Item Name="IsMovable">false</Item>
             <Item Name="IsCopyable">false</Item>
