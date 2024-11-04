@@ -1,16 +1,15 @@
+#include <Core/Container/String.h>
 #include <UnitTest/UnitTest.h>
 #include <algorithm>
 #include <format>
 #include <iostream>
-#include <string>
-#include <string_view>
 #include <thread>
 
 struct RunOptions
 {
-  std::string_view Suite{};
-  bool             WantsParallelExecution{};
-  bool             OutputOnlyIfFailed{};
+  Core::StringView<char> Suite{};
+  bool                   WantsParallelExecution{};
+  bool                   OutputOnlyIfFailed{};
 } Options{};
 
 Core::Vector<UnitTest::Private::TestBase*> GetFilteredTests();
@@ -20,14 +19,14 @@ int main(int argc, char** argv)
 {
   for (int i = 1; i < argc; ++i)
   {
-    std::string_view arg = argv[i];
+    Core::StringView<char> arg = argv[i];
     if (arg == "--parallel")
     {
       Options.WantsParallelExecution = true;
     }
-    else if (arg.starts_with("--test-suite="))
+    else if (arg.StartsWith("--test-suite="))
     {
-      arg.remove_prefix(strlen("--test-suite="));
+      arg = arg.RemovePrefix(i32(strlen("--test-suite=")));
       Options.Suite = arg;
     }
     else if (arg == "--output-only-failed")
@@ -66,11 +65,11 @@ int main(int argc, char** argv)
 Core::Vector<UnitTest::Private::TestBase*> GetFilteredTests()
 {
   auto filtered = UnitTest::Private::TestBase::GetTests();
-  if (Options.Suite.empty())
+  if (Options.Suite.IsEmpty())
     return filtered;
 
   filtered.EraseIf([](UnitTest::Private::TestBase* test) {
-    return std::string_view{test->SuiteName_} != Options.Suite;
+    return Core::StringView<char>(test->SuiteName_) != Options.Suite;
   });
   return filtered;
 }

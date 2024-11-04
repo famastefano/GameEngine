@@ -18,6 +18,7 @@
         </Expand>
     </Type>
     <!-- Containers -->
+    <!-- Vector -->
     <Type Name="Core::Vector&lt;*&gt;">
         <DisplayString>{{ size={Size_ - Mem_} }}</DisplayString>
         <Expand>
@@ -29,6 +30,7 @@
             </ArrayItems>
         </Expand>
     </Type>
+    <!-- Span -->
     <Type Name="Core::Span&lt;*,*&gt;">
         <Intrinsic Name="IsFixed" Expression="$T2 != -1" />
         <DisplayString Condition="!IsFixed()">{{ size={SpanSize_.N_} }}</DisplayString>
@@ -36,6 +38,82 @@
         <Expand>
             <ArrayItems Condition="IsFixed()">
                 <Size>$T2</Size>
+                <ValuePointer>Data_</ValuePointer>
+            </ArrayItems>
+            <ArrayItems Condition="!IsFixed()">
+                <Size>SpanSize_.N_</Size>
+                <ValuePointer>Data_</ValuePointer>
+            </ArrayItems>
+        </Expand>
+    </Type>
+    <Type Name="Core::Span&lt;char,*&gt;">
+        <Intrinsic Name="IsFixed" Expression="$T1 != -1" />
+        <DisplayString Condition="!IsFixed()">{Data_,[SpanSize_.N_]}</DisplayString>
+        <DisplayString Condition="IsFixed()">{Data_,[$T1]}</DisplayString>
+        <StringView Condition="!IsFixed()">Data_,[SpanSize_.N_]</StringView>
+        <StringView Condition="IsFixed()">Data_,[$T1]</StringView>
+        <Expand>
+            <Item Name="Size" Condition="IsFixed()">$T1</Item>
+            <Item Name="Size" Condition="!IsFixed()">SpanSize_.N_</Item>
+            <ArrayItems Condition="IsFixed()">
+                <Size>$T1</Size>
+                <ValuePointer>Data_</ValuePointer>
+            </ArrayItems>
+            <ArrayItems Condition="!IsFixed()">
+                <Size>SpanSize_.N_</Size>
+                <ValuePointer>Data_</ValuePointer>
+            </ArrayItems>
+        </Expand>
+    </Type>
+    <Type Name="Core::Span&lt;char const,*&gt;">
+        <Intrinsic Name="IsFixed" Expression="$T1 != -1" />
+        <DisplayString Condition="!IsFixed()">{Data_,[SpanSize_.N_]}</DisplayString>
+        <DisplayString Condition="IsFixed()">{Data_,[$T1]}</DisplayString>
+        <StringView Condition="!IsFixed()">Data_,[SpanSize_.N_]</StringView>
+        <StringView Condition="IsFixed()">Data_,[$T1]</StringView>
+        <Expand>
+            <Item Name="Size" Condition="IsFixed()">$T1</Item>
+            <Item Name="Size" Condition="!IsFixed()">SpanSize_.N_</Item>
+            <ArrayItems Condition="IsFixed()">
+                <Size>$T1</Size>
+                <ValuePointer>Data_</ValuePointer>
+            </ArrayItems>
+            <ArrayItems Condition="!IsFixed()">
+                <Size>SpanSize_.N_</Size>
+                <ValuePointer>Data_</ValuePointer>
+            </ArrayItems>
+        </Expand>
+    </Type>
+    <Type Name="Core::Span&lt;wchar_t,*&gt;">
+        <Intrinsic Name="IsFixed" Expression="$T1 != -1" />
+        <DisplayString Condition="!IsFixed()">{Data_,[SpanSize_.N_]}</DisplayString>
+        <DisplayString Condition="IsFixed()">{Data_,[$T1]}</DisplayString>
+        <StringView Condition="!IsFixed()">Data_,[SpanSize_.N_]</StringView>
+        <StringView Condition="IsFixed()">Data_,[$T1]</StringView>
+        <Expand>
+            <Item Name="Size" Condition="IsFixed()">$T1</Item>
+            <Item Name="Size" Condition="!IsFixed()">SpanSize_.N_</Item>
+            <ArrayItems Condition="IsFixed()">
+                <Size>$T1</Size>
+                <ValuePointer>Data_</ValuePointer>
+            </ArrayItems>
+            <ArrayItems Condition="!IsFixed()">
+                <Size>SpanSize_.N_</Size>
+                <ValuePointer>Data_</ValuePointer>
+            </ArrayItems>
+        </Expand>
+    </Type>
+    <Type Name="Core::Span&lt;wchar_t const,*&gt;">
+        <Intrinsic Name="IsFixed" Expression="$T1 != -1" />
+        <DisplayString Condition="!IsFixed()">{Data_,[SpanSize_.N_]}</DisplayString>
+        <DisplayString Condition="IsFixed()">{Data_,[$T1]}</DisplayString>
+        <StringView Condition="!IsFixed()">Data_,[SpanSize_.N_]</StringView>
+        <StringView Condition="IsFixed()">Data_,[$T1]</StringView>
+        <Expand>
+            <Item Name="Size" Condition="IsFixed()">$T1</Item>
+            <Item Name="Size" Condition="!IsFixed()">SpanSize_.N_</Item>
+            <ArrayItems Condition="IsFixed()">
+                <Size>$T1</Size>
                 <ValuePointer>Data_</ValuePointer>
             </ArrayItems>
             <ArrayItems Condition="!IsFixed()">

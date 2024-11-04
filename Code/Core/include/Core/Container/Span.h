@@ -127,7 +127,7 @@ public:
   }
 
   template <i32 Count>
-  constexpr Span<T, Count> First()
+  constexpr Span<T, Count> First() const
   {
     if constexpr (Size_ != DynamicSize)
       static_assert(0 <= Count && Count <= Size_);
@@ -136,14 +136,14 @@ public:
     return Span<T, Count>(Data_, Count);
   }
 
-  constexpr Span<T, DynamicSize> First(i32 const count)
+  constexpr Span<T, DynamicSize> First(i32 const count) const
   {
     check(0 <= count && count <= Size());
     return Span<T, DynamicSize>(Data_, count);
   }
 
   template <i32 Count>
-  constexpr Span<T, Count> Last()
+  constexpr Span<T, Count> Last() const
   {
     if constexpr (Size_ != DynamicSize)
       static_assert(0 <= Count && Size_ - Count >= 0);
@@ -152,14 +152,14 @@ public:
     return Span<T, Count>(Data_ + Size() - Count, Count);
   }
 
-  constexpr Span<T, DynamicSize> Last(i32 const count)
+  constexpr Span<T, DynamicSize> Last(i32 const count) const
   {
     check(0 <= count && Size() - count >= 0);
     return Span<T, DynamicSize>(Data_ + Size() - count, count);
   }
 
   template <i32 Offset, i32 Count>
-  constexpr Span<T, Count> SubSpan()
+  constexpr Span<T, Count> SubSpan() const
   {
     if constexpr (Size_ != DynamicSize)
       static_assert(0 <= Offset + Count && Offset + Count <= Size_);
@@ -168,7 +168,7 @@ public:
     return Span<T, Count>(Data_ + Offset, Count);
   }
 
-  constexpr Span<T, DynamicSize> SubSpan(i32 const offset, i32 const count)
+  constexpr Span<T, DynamicSize> SubSpan(i32 const offset, i32 const count) const
   {
     check(0 <= offset + count && offset + count <= Size());
     return Span<T, DynamicSize>(Data_ + offset, count);

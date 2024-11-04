@@ -36,55 +36,51 @@ public:
   {
   }
 
-  constexpr CharT& Front()
-  {
-    return (*this)[0];
-  }
-
   constexpr CharT const& Front() const
   {
     return (*this)[0];
   }
 
-  constexpr CharT& Back()
-  {
-    constexpr i32 sz = Super::Size();
-    return (*this)[sz > 0 ? sz - 1 : 0];
-  }
-
   constexpr CharT const& Back() const
   {
-    constexpr i32 sz = Super::Size();
+    i32 const sz = Super::Size();
     return (*this)[sz > 0 ? sz - 1 : 0];
   }
 
   constexpr StringView RemovePrefix(i32 const length)
   {
-    return Super::First(length);
+    auto const span = Super::Last(Super::Size() - length);
+    return StringView(span.Data(), span.Size());
   }
 
   constexpr StringView RemoveSuffix(i32 const length)
   {
-    return Super::First(Super::Size() - length);
+    auto const span = Super::First(Super::Size() - length);
+    return StringView(span.Data(), span.Size());
   }
 
   constexpr i32 Copy(CharT* dest, i32 const count, i32 const offset = 0) const
   {
-    CharT*    src         = std::addressof((*this)[offset]);
-    i32 const maximumCopy = Super::Size() - offset;
-    i32 const actualCount = maximumCopy < count ? maximumCopy : count;
+    check(dest && count >= 0 && offset >= 0);
+    CharT const* src         = Super::Data() + offset;
+    i32 const    maximumCopy = Super::Size() - offset;
+    i32 const    actualCount = maximumCopy < count ? maximumCopy : count;
+    check(src + actualCount <= Super::Data() + Super::Size());
     Algorithm::Copy(src, src + actualCount, dest);
     return actualCount;
   }
 
   constexpr StringView SubStr(i32 const offset, i32 const count) const
   {
-    return Super::SubSpan(offset, count);
+    auto const span = Super::SubSpan(offset, count);
+    return StringView(span.Data(), span.Size());
   }
+
+  // TODO: StringView - Add case insensitive handling
 
   constexpr bool StartsWith(StringView const other) const
   {
-    if (Super::Size() < other.Size() || other.IsEmpty())
+    if (Super::Size() < other.Size() || Super::IsEmpty() || other.IsEmpty())
       return false;
     return memcmp(Super::Data(), other.Data(), other.AllocSize()) == 0;
   }
