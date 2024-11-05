@@ -298,12 +298,8 @@ constexpr inline Vector<T>::Vector(i32 const initialSize, IAllocator* allocator)
 template <typename T>
 template <typename U>
 constexpr inline Vector<T>::Vector(std::initializer_list<U> init, IAllocator* allocator)
-    : Vector((i32)init.size(), allocator)
+    : Vector(init.begin(), init.end(), allocator)
 {
-  static_assert(std::constructible_from<T, U const&>, "Cannot construct T from U.");
-  T* item = Mem_;
-  for (auto const& value : init)
-    new (item++) T(value);
 }
 
 template <typename T>
@@ -311,16 +307,7 @@ template <typename U>
 constexpr inline Vector<T>::Vector(i32 const initialSize, U const& initialValue, IAllocator* allocator)
     : Vector(initialSize, allocator)
 {
-  static_assert(std::constructible_from<T, decltype(initialValue)>, "Cannot construct T from U.");
-  if constexpr (CanFastInitialize<U>())
-  {
-    std::memset(Mem_, (int)initialValue, AllocSize());
-  }
-  else
-  {
-    for (T* item = begin(); item < end(); ++item)
-      new (item) T(initialValue);
-  }
+  Assign(initialSize, initialValue);
 }
 
 template <typename T>
@@ -328,26 +315,7 @@ template <std::input_iterator Iterator>
 constexpr inline Vector<T>::Vector(Iterator begin, Iterator end, IAllocator* allocator)
     : Vector(allocator)
 {
-  constexpr bool canUseFastPath = std::is_trivially_copyable_v<T> && std::same_as<std::remove_cvref_t<Iterator>, T*>;
-
-  i32 initialSize = 0;
-  if constexpr (canUseFastPath)
-    initialSize = i32(end - begin);
-  else
-    initialSize = i32(std::distance(begin, end));
-
-  Realloc(initialSize);
-  Size_ = Capacity_;
-  if constexpr (canUseFastPath)
-  {
-    std::memcpy(Mem_, begin, AllocSize());
-  }
-  else
-  {
-    static_assert(std::constructible_from<T, decltype(*begin)>, "Vector(begin, end, allocator) requires T to be constructible from *begin.");
-    for (T* item = Mem_; item < Mem_ + Size_; ++item)
-      new (item) T(*begin++);
-  }
+  Assign(begin, end);
 }
 
 template <typename T>
