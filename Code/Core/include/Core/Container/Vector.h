@@ -26,16 +26,16 @@ private:
   i32         Capacity_;
 
   // Vector's state will now be 1:1 as a default constructed Vector, with the custom allocator.
-  void Reset();
+  constexpr void Reset();
 
   // Reallocates the memory to the specified capacity, possibly without invalidating iterators.
-  void Realloc(i32 const newCapacity);
+  constexpr void Realloc(i32 const newCapacity);
 
   // Invokes the destructor of all items in the provided range.
-  static void Destroy(T* from, T* to);
+  constexpr static void Destroy(T* from, T* to);
 
   // Calculates the new capacity given a size, based on the ReallocRatio.
-  static i32 CalculateCapacity(i32 const currCapacity, i32 const desiredSize);
+  constexpr static i32 CalculateCapacity(i32 const currCapacity, i32 const desiredSize);
 
   template <typename U>
   static constexpr bool CanFastInitialize()
@@ -47,112 +47,112 @@ private:
   }
 
 public:
-  Vector(IAllocator* allocator = globalAllocator);
-  Vector(i32 const initialSize, IAllocator* allocator = globalAllocator);
+  constexpr Vector(IAllocator* allocator = globalAllocator);
+  constexpr Vector(i32 const initialSize, IAllocator* allocator = globalAllocator);
 
   template <typename U = T>
-  Vector(std::initializer_list<U> init, IAllocator* allocator = globalAllocator);
+  constexpr Vector(std::initializer_list<U> init, IAllocator* allocator = globalAllocator);
 
   template <typename U = T>
-  Vector(i32 const initialSize, U const& initialValue, IAllocator* allocator = globalAllocator);
+  constexpr Vector(i32 const initialSize, U const& initialValue, IAllocator* allocator = globalAllocator);
 
   template <std::input_iterator Iterator>
-  Vector(Iterator begin, Iterator end, IAllocator* allocator = globalAllocator);
+  constexpr Vector(Iterator begin, Iterator end, IAllocator* allocator = globalAllocator);
 
-  Vector(Vector const& other);
-  Vector(Vector const& other, IAllocator* allocator);
+  constexpr Vector(Vector const& other);
+  constexpr Vector(Vector const& other, IAllocator* allocator);
 
-  Vector(Vector&& other);
+  constexpr Vector(Vector&& other);
 
-  ~Vector();
+  constexpr ~Vector();
 
-  Vector& operator=(Vector const& other);
-  Vector& operator=(Vector&& other);
+  constexpr Vector& operator=(Vector const& other);
+  constexpr Vector& operator=(Vector&& other);
 
-  IAllocator* Allocator() const;
+  constexpr IAllocator* Allocator() const;
 
   template <typename U = T>
-  void Assign(i32 const newSize, U const& newValue);
+  constexpr void Assign(i32 const newSize, U const& newValue);
 
   template <std::input_iterator Iterator>
-  void Assign(Iterator begin, Iterator end);
+  constexpr void Assign(Iterator begin, Iterator end);
 
-  T&       operator[](i32 const pos);
-  T const& operator[](i32 const pos) const;
+  constexpr T&       operator[](i32 const pos);
+  constexpr T const& operator[](i32 const pos) const;
 
-  T&       Front();
-  T const& Front() const;
+  constexpr T&       Front();
+  constexpr T const& Front() const;
 
-  T&       Back();
-  T const& Back() const;
+  constexpr T&       Back();
+  constexpr T const& Back() const;
 
-  T*       Data();
-  T const* Data() const;
+  constexpr T*       Data();
+  constexpr T const* Data() const;
 
-  T*       begin();
-  T const* begin() const;
+  constexpr T*       begin();
+  constexpr T const* begin() const;
 
-  T*       end();
-  T const* end() const;
+  constexpr T*       end();
+  constexpr T const* end() const;
 
-  bool IsEmpty() const;
+  constexpr bool IsEmpty() const;
 
-  i32 Size() const;
+  constexpr i32 Size() const;
 
-  i32 Capacity() const;
+  constexpr i32 Capacity() const;
 
   // The allocated size, in bytes.
-  i32 AllocSize() const;
+  constexpr i32 AllocSize() const;
 
-  void Reserve(i32 const capacity);
+  constexpr void Reserve(i32 const capacity);
 
-  void Resize(i32 const newSize);
-
-  template <typename U = T>
-  void Resize(i32 const newSize, U const& value);
-
-  void Swap(Vector& other);
-
-  void Clear();
+  constexpr void Resize(i32 const newSize);
 
   template <typename U = T>
-  T* Insert(T const* position, U&& value);
+  constexpr void Resize(i32 const newSize, U const& value);
+
+  constexpr void Swap(Vector& other);
+
+  constexpr void Clear();
 
   template <typename U = T>
-  T* Insert(i32 const position, U&& value)
+  constexpr T* Insert(T const* position, U&& value);
+
+  template <typename U = T>
+  constexpr T* Insert(i32 const position, U&& value)
   {
     return Insert(Data() + position, std::forward<U>(value));
   }
 
   template <typename U = T>
-  T* Insert(T const* position, i32 const count, U const& value);
+  constexpr T* Insert(T const* position, i32 const count, U const& value);
 
   template <typename U = T>
-  T* Insert(i32 const position, i32 const count, U const& value)
+  constexpr T* Insert(i32 const position, i32 const count, U const& value)
   {
     return Insert(Data() + position, count, value);
   }
 
   template <std::input_iterator Iterator>
-  T* Insert(T const* position, Iterator begin, Iterator end);
+  constexpr T* Insert(T const* position, Iterator begin, Iterator end);
 
   template <std::input_iterator Iterator>
-  T* Insert(i32 const position, Iterator begin, Iterator end)
+  constexpr T* Insert(i32 const position, Iterator begin, Iterator end)
   {
     return Insert(Data() + position, begin, end);
   }
 
   template <typename... Args>
-  T* Emplace(T const* position, Args&&... args);
+  constexpr T* Emplace(T const* position, Args&&... args);
 
   template <typename... Args>
-  T* Emplace(i32 const position, Args&&... args)
+  constexpr T* Emplace(i32 const position, Args&&... args)
   {
     return Emplace(Data() + position, std::forward<Args>(args)...);
   }
 
   template <typename... Args>
-  T* EmplaceBack(Args&&... args)
+  constexpr T* EmplaceBack(Args&&... args)
   {
     return Emplace(end(), std::forward<Args>(args)...);
   }
@@ -160,46 +160,46 @@ public:
   // Fast-construct in-place a new element at the end.
   // WARNING: Doesn't check if there's enough capacity to hold the new element.
   template <typename... Args>
-  T* EmplaceBackUnsafe(Args&&... args);
+  constexpr T* EmplaceBackUnsafe(Args&&... args);
 
-  T* Erase(T* position);
-  T* Erase(T* begin, T* end);
-  T* Erase(i32 const position);
-  T* Erase(i32 const position, i32 const count);
-
-  template <std::predicate<T const&> Comparer>
-  T* EraseIf(Comparer&& comparer);
-
-  void PopBack();
-
-  template <typename U = T>
-  bool Contains(U const& value) const;
+  constexpr T* Erase(T* position);
+  constexpr T* Erase(T* begin, T* end);
+  constexpr T* Erase(i32 const position);
+  constexpr T* Erase(i32 const position, i32 const count);
 
   template <std::predicate<T const&> Comparer>
-  bool Contains(Comparer&& comparer) const;
+  constexpr T* EraseIf(Comparer&& comparer);
+
+  constexpr void PopBack();
 
   template <typename U = T>
-  T* Find(U const& value);
-  template <typename U = T>
-  T const* Find(U const& value) const;
+  constexpr bool Contains(U const& value) const;
 
   template <std::predicate<T const&> Comparer>
-  T* Find(Comparer&& comparer);
+  constexpr bool Contains(Comparer&& comparer) const;
+
+  template <typename U = T>
+  constexpr T* Find(U const& value);
+  template <typename U = T>
+  constexpr T const* Find(U const& value) const;
+
   template <std::predicate<T const&> Comparer>
-  T const* Find(Comparer&& comparer) const;
+  constexpr T* Find(Comparer&& comparer);
+  template <std::predicate<T const&> Comparer>
+  constexpr T const* Find(Comparer&& comparer) const;
 
   template <typename U = T>
-  bool operator==(Vector<U> const& other);
+  constexpr bool operator==(Vector<U> const& other);
 
   template <typename U = T>
-  bool operator!=(Vector<U> const& other)
+  constexpr bool operator!=(Vector<U> const& other)
   {
     return !operator==(other);
   }
 };
 
 template <typename T>
-inline void Vector<T>::Reset()
+constexpr inline void Vector<T>::Reset()
 {
   Destroy(begin(), end());
   Allocator_->Free(Mem_, alignof(T));
@@ -208,7 +208,7 @@ inline void Vector<T>::Reset()
 }
 
 template <typename T>
-inline void Vector<T>::Realloc(i32 const newCapacity)
+constexpr inline void Vector<T>::Realloc(i32 const newCapacity)
 {
   if (newCapacity == 0)
     return;
@@ -243,7 +243,7 @@ inline void Vector<T>::Realloc(i32 const newCapacity)
 }
 
 template <typename T>
-inline void Vector<T>::Destroy(T* from, T* to)
+constexpr inline void Vector<T>::Destroy(T* from, T* to)
 {
   check(from <= to, "Vector Destroy called with invalid range.");
   if constexpr (!std::is_trivially_destructible_v<T>)
@@ -254,7 +254,7 @@ inline void Vector<T>::Destroy(T* from, T* to)
 }
 
 template <typename T>
-inline i32 Vector<T>::CalculateCapacity(i32 currCapacity, i32 const desiredSize)
+constexpr inline i32 Vector<T>::CalculateCapacity(i32 currCapacity, i32 const desiredSize)
 {
   if (currCapacity == 0)
     return desiredSize;
@@ -265,7 +265,7 @@ inline i32 Vector<T>::CalculateCapacity(i32 currCapacity, i32 const desiredSize)
 }
 
 template <typename T>
-inline Vector<T>::Vector(IAllocator* allocator)
+constexpr inline Vector<T>::Vector(IAllocator* allocator)
     : Allocator_(allocator)
     , Mem_(nullptr)
     , Size_(0)
@@ -275,7 +275,7 @@ inline Vector<T>::Vector(IAllocator* allocator)
 }
 
 template <typename T>
-inline Vector<T>::Vector(i32 const initialSize, IAllocator* allocator)
+constexpr inline Vector<T>::Vector(i32 const initialSize, IAllocator* allocator)
     : Vector(allocator)
 {
   static_assert(std::default_initializable<T>, "T isn't default constructible.");
@@ -297,7 +297,7 @@ inline Vector<T>::Vector(i32 const initialSize, IAllocator* allocator)
 
 template <typename T>
 template <typename U>
-inline Vector<T>::Vector(std::initializer_list<U> init, IAllocator* allocator)
+constexpr inline Vector<T>::Vector(std::initializer_list<U> init, IAllocator* allocator)
     : Vector((i32)init.size(), allocator)
 {
   static_assert(std::constructible_from<T, U const&>, "Cannot construct T from U.");
@@ -308,7 +308,7 @@ inline Vector<T>::Vector(std::initializer_list<U> init, IAllocator* allocator)
 
 template <typename T>
 template <typename U>
-inline Vector<T>::Vector(i32 const initialSize, U const& initialValue, IAllocator* allocator)
+constexpr inline Vector<T>::Vector(i32 const initialSize, U const& initialValue, IAllocator* allocator)
     : Vector(initialSize, allocator)
 {
   static_assert(std::constructible_from<T, decltype(initialValue)>, "Cannot construct T from U.");
@@ -325,7 +325,7 @@ inline Vector<T>::Vector(i32 const initialSize, U const& initialValue, IAllocato
 
 template <typename T>
 template <std::input_iterator Iterator>
-inline Vector<T>::Vector(Iterator begin, Iterator end, IAllocator* allocator)
+constexpr inline Vector<T>::Vector(Iterator begin, Iterator end, IAllocator* allocator)
     : Vector(allocator)
 {
   constexpr bool canUseFastPath = std::is_trivially_copyable_v<T> && std::same_as<std::remove_cvref_t<Iterator>, T*>;
@@ -351,19 +351,19 @@ inline Vector<T>::Vector(Iterator begin, Iterator end, IAllocator* allocator)
 }
 
 template <typename T>
-inline Vector<T>::Vector(Vector const& other)
+constexpr inline Vector<T>::Vector(Vector const& other)
     : Vector(other, other.Allocator_->IsCopyable() ? other.Allocator_ : globalAllocator)
 {
 }
 
 template <typename T>
-inline Vector<T>::Vector(Vector const& other, IAllocator* allocator)
+constexpr inline Vector<T>::Vector(Vector const& other, IAllocator* allocator)
     : Vector(other.begin(), other.end(), allocator)
 {
 }
 
 template <typename T>
-inline Vector<T>::Vector(Vector&& other)
+constexpr inline Vector<T>::Vector(Vector&& other)
     : Vector()
 {
   if (other.Allocator_->IsMovable())
@@ -386,7 +386,7 @@ inline Vector<T>::Vector(Vector&& other)
 }
 
 template <typename T>
-inline Vector<T>::~Vector()
+constexpr inline Vector<T>::~Vector()
 {
   Reset();
   if (Allocator_->OwnedByContainer())
@@ -394,7 +394,7 @@ inline Vector<T>::~Vector()
 }
 
 template <typename T>
-inline Vector<T>& Vector<T>::operator=(Vector const& other)
+constexpr inline Vector<T>& Vector<T>::operator=(Vector const& other)
 {
   Reset();
   Allocator_ = other.Allocator_->IsCopyable() ? other.Allocator_ : globalAllocator;
@@ -403,7 +403,7 @@ inline Vector<T>& Vector<T>::operator=(Vector const& other)
   return *this;
 }
 template <typename T>
-inline Vector<T>& Vector<T>::operator=(Vector&& other)
+constexpr inline Vector<T>& Vector<T>::operator=(Vector&& other)
 {
   Reset();
   if (other.Allocator_->IsMovable())
@@ -425,14 +425,14 @@ inline Vector<T>& Vector<T>::operator=(Vector&& other)
 }
 
 template <typename T>
-inline IAllocator* Vector<T>::Allocator() const
+constexpr inline IAllocator* Vector<T>::Allocator() const
 {
   return Allocator_;
 }
 
 template <typename T>
 template <typename U>
-inline void Vector<T>::Assign(i32 const newSize, U const& newValue)
+constexpr inline void Vector<T>::Assign(i32 const newSize, U const& newValue)
 {
   static_assert(std::constructible_from<T, decltype(newValue)>, "Cannot construct Vector<T> from U const&.");
   Clear();
@@ -455,14 +455,14 @@ inline void Vector<T>::Assign(i32 const newSize, U const& newValue)
 
 template <typename T>
 template <std::input_iterator Iterator>
-inline void Vector<T>::Assign(Iterator begin, Iterator end)
+constexpr inline void Vector<T>::Assign(Iterator begin, Iterator end)
 {
   static_assert(std::constructible_from<T, decltype(*begin)>, "Cannot construct Vector<T> from the provided iterator.");
   Clear();
 
   i32 const newSize = (i32)std::distance(begin, end);
   i32 const currCap = Capacity();
-  if (newSize >= currCap)
+  if (newSize > currCap)
     Realloc(CalculateCapacity(currCap, newSize));
 
   Size_ = newSize;
@@ -480,109 +480,109 @@ inline void Vector<T>::Assign(Iterator begin, Iterator end)
 }
 
 template <typename T>
-inline T& Vector<T>::operator[](i32 const pos)
+constexpr inline T& Vector<T>::operator[](i32 const pos)
 {
   check(u32(pos) < u32(Size()), "Vector operator[] out-of-bounds access.");
   return Mem_[pos];
 }
 
 template <typename T>
-inline T const& Vector<T>::operator[](i32 const pos) const
+constexpr inline T const& Vector<T>::operator[](i32 const pos) const
 {
   check(u32(pos) < u32(Size()), "Vector operator[] out-of-bounds access.");
   return Mem_[pos];
 }
 
 template <typename T>
-inline T& Vector<T>::Front()
+constexpr inline T& Vector<T>::Front()
 {
   check(!IsEmpty(), "Vector is empty, but Front() was called.");
   return Mem_[0];
 }
 
 template <typename T>
-inline T const& Vector<T>::Front() const
+constexpr inline T const& Vector<T>::Front() const
 {
   check(!IsEmpty(), "Vector is empty, but Front() was called.");
   return Mem_[0];
 }
 
 template <typename T>
-inline T& Vector<T>::Back()
+constexpr inline T& Vector<T>::Back()
 {
   check(!IsEmpty(), "Vector is empty, but Back() was called.");
   return *(end() - 1);
 }
 
 template <typename T>
-inline T const& Vector<T>::Back() const
+constexpr inline T const& Vector<T>::Back() const
 {
   check(!IsEmpty(), "Vector is empty, but Back() was called.");
   return *(end() - 1);
 }
 
 template <typename T>
-inline T* Vector<T>::Data()
+constexpr inline T* Vector<T>::Data()
 {
   return Mem_;
 }
 
 template <typename T>
-inline T const* Vector<T>::Data() const
+constexpr inline T const* Vector<T>::Data() const
 {
   return Mem_;
 }
 
 template <typename T>
-inline T* Vector<T>::begin()
+constexpr inline T* Vector<T>::begin()
 {
   return Mem_;
 }
 
 template <typename T>
-inline T const* Vector<T>::begin() const
+constexpr inline T const* Vector<T>::begin() const
 {
   return Mem_;
 }
 
 template <typename T>
-inline T* Vector<T>::end()
+constexpr inline T* Vector<T>::end()
 {
   return Mem_ + Size_;
 }
 
 template <typename T>
-inline T const* Vector<T>::end() const
+constexpr inline T const* Vector<T>::end() const
 {
   return Mem_ + Size_;
 }
 
 template <typename T>
-inline bool Vector<T>::IsEmpty() const
+constexpr inline bool Vector<T>::IsEmpty() const
 {
   return Size_ == 0;
 }
 
 template <typename T>
-inline i32 Vector<T>::Size() const
+constexpr inline i32 Vector<T>::Size() const
 {
   return Size_;
 }
 
 template <typename T>
-inline i32 Vector<T>::Capacity() const
+constexpr inline i32 Vector<T>::Capacity() const
 {
   return Capacity_;
 }
 
 template <typename T>
-inline i32 Vector<T>::AllocSize() const
+constexpr inline i32 Vector<T>::AllocSize() const
 {
   return Size() * sizeof(T);
 }
 
 template <typename T>
-inline void Vector<T>::Reserve(i32 const capacity)
+constexpr inline void Vector<T>::Reserve(i32 const capacity)
 {
   i32 const currCap = Capacity();
   if (currCap < capacity)
@@ -590,7 +590,7 @@ inline void Vector<T>::Reserve(i32 const capacity)
 }
 
 template <typename T>
-inline void Vector<T>::Resize(i32 const newSize)
+constexpr inline void Vector<T>::Resize(i32 const newSize)
 {
   static_assert(std::default_initializable<T>, "Vector Resize(newSize) requires T to be default constructible.");
 
@@ -624,7 +624,7 @@ inline void Vector<T>::Resize(i32 const newSize)
 
 template <typename T>
 template <typename U>
-inline void Vector<T>::Resize(i32 const newSize, U const& value)
+constexpr inline void Vector<T>::Resize(i32 const newSize, U const& value)
 {
   static_assert(std::constructible_from<T, decltype(value)>, "Vector Resize(newSize, value) requires T to be constructible from value.");
 
@@ -656,7 +656,7 @@ inline void Vector<T>::Resize(i32 const newSize, U const& value)
 }
 
 template <typename T>
-inline void Vector<T>::Swap(Vector& other)
+constexpr inline void Vector<T>::Swap(Vector& other)
 {
   bool const canMove = Allocator_->IsMovable() && other.Allocator_->IsMovable();
   check(canMove, "Cannot swap Vector with immovable allocators, will fallback to a deep-copy without an allocator swap!");
@@ -676,7 +676,7 @@ inline void Vector<T>::Swap(Vector& other)
 }
 
 template <typename T>
-inline void Vector<T>::Clear()
+constexpr inline void Vector<T>::Clear()
 {
   Destroy(begin(), end());
   Size_ = 0;
@@ -684,14 +684,14 @@ inline void Vector<T>::Clear()
 
 template <typename T>
 template <typename U>
-inline T* Vector<T>::Insert(T const* position, U&& value)
+constexpr inline T* Vector<T>::Insert(T const* position, U&& value)
 {
   return Emplace(position, std::forward<U>(value));
 }
 
 template <typename T>
 template <typename U>
-inline T* Vector<T>::Insert(T const* position, i32 const count, U const& value)
+constexpr inline T* Vector<T>::Insert(T const* position, i32 const count, U const& value)
 {
   static_assert(std::constructible_from<T, decltype(value)>, "Vector Insert(position, count, value) cannot construct T from value.");
   check(begin() <= position && position <= end(), "Vector Insert(position, count, value) has an invalid position.");
@@ -728,7 +728,7 @@ inline T* Vector<T>::Insert(T const* position, i32 const count, U const& value)
 
 template <typename T>
 template <std::input_iterator Iterator>
-inline T* Vector<T>::Insert(T const* position, Iterator begin, Iterator end)
+constexpr inline T* Vector<T>::Insert(T const* position, Iterator begin, Iterator end)
 {
   static_assert(std::constructible_from<T, decltype(*begin)>, "Vector Insert(position, begin, end) cannot construct T from *begin.");
   check(Mem_ <= position && position <= Mem_ + Size_, "Vector Insert(position, begin, end) has an invalid position.");
@@ -765,7 +765,7 @@ inline T* Vector<T>::Insert(T const* position, Iterator begin, Iterator end)
 
 template <typename T>
 template <typename... Args>
-inline T* Vector<T>::Emplace(T const* position, Args&&... args)
+constexpr inline T* Vector<T>::Emplace(T const* position, Args&&... args)
 {
   static_assert(std::constructible_from<T, Args...>, "Vector Emplace(position, Args...) cannot construct T from Args.");
   check(begin() <= position && position <= end(), "Vector Emplace(position, Args...) has an invalid position.");
@@ -784,7 +784,7 @@ inline T* Vector<T>::Emplace(T const* position, Args&&... args)
 
 template <typename T>
 template <typename... Args>
-inline T* Vector<T>::EmplaceBackUnsafe(Args&&... args)
+constexpr inline T* Vector<T>::EmplaceBackUnsafe(Args&&... args)
 {
   check(Size() < Capacity(), "Vector EmplaceBackUnsafe(Args) out of bounds insertion.");
   T* pos = Mem_ + Size_++;
@@ -793,7 +793,7 @@ inline T* Vector<T>::EmplaceBackUnsafe(Args&&... args)
 }
 
 template <typename T>
-inline T* Vector<T>::Erase(T* position)
+constexpr inline T* Vector<T>::Erase(T* position)
 {
   check(begin() <= position && position <= end(), "Vector Erase(position) has an invalid position.");
   if (IsEmpty() || position == end())
@@ -802,7 +802,7 @@ inline T* Vector<T>::Erase(T* position)
 }
 
 template <typename T>
-inline T* Vector<T>::Erase(T* begin, T* end)
+constexpr inline T* Vector<T>::Erase(T* begin, T* end)
 {
   check(begin <= end && Mem_ <= begin && end <= Mem_ + Size_, "Vector Erase(begin, end) has an invalid range.");
   if (IsEmpty() || begin == end)
@@ -826,20 +826,20 @@ inline T* Vector<T>::Erase(T* begin, T* end)
 }
 
 template <typename T>
-inline T* Vector<T>::Erase(i32 const position)
+constexpr inline T* Vector<T>::Erase(i32 const position)
 {
   return Erase(Mem_ + position);
 }
 
 template <typename T>
-inline T* Vector<T>::Erase(i32 const position, i32 const count)
+constexpr inline T* Vector<T>::Erase(i32 const position, i32 const count)
 {
   return Erase(Mem_ + position, Mem_ + position + count);
 }
 
 template <typename T>
 template <std::predicate<T const&> Comparer>
-T* Vector<T>::EraseIf(Comparer&& comparer)
+constexpr T* Vector<T>::EraseIf(Comparer&& comparer)
 {
   T* curr = begin();
   while (curr != end())
@@ -848,7 +848,7 @@ T* Vector<T>::EraseIf(Comparer&& comparer)
 }
 
 template <typename T>
-inline void Vector<T>::PopBack()
+constexpr inline void Vector<T>::PopBack()
 {
   if (!IsEmpty())
     Mem_[--Size_].~T();
@@ -856,21 +856,21 @@ inline void Vector<T>::PopBack()
 
 template <typename T>
 template <typename U>
-inline bool Vector<T>::Contains(U const& value) const
+constexpr inline bool Vector<T>::Contains(U const& value) const
 {
   return Find(value) != end();
 }
 
 template <typename T>
 template <std::predicate<T const&> Comparer>
-inline bool Vector<T>::Contains(Comparer&& comparer) const
+constexpr inline bool Vector<T>::Contains(Comparer&& comparer) const
 {
   return Find(std::forward<Comparer>(comparer)) != end();
 }
 
 template <typename T>
 template <typename U>
-inline T* Vector<T>::Find(U const& value)
+constexpr inline T* Vector<T>::Find(U const& value)
 {
   auto const* selfConst = this;
   return const_cast<T*>(selfConst->Find(value));
@@ -878,7 +878,7 @@ inline T* Vector<T>::Find(U const& value)
 
 template <typename T>
 template <typename U>
-inline T const* Vector<T>::Find(U const& value) const
+constexpr inline T const* Vector<T>::Find(U const& value) const
 {
   static_assert(std::equality_comparable_with<decltype(*begin()), decltype(value)>, "Vector Find(value) cannot compare T == U");
   for (auto const& item : *this)
@@ -891,7 +891,7 @@ inline T const* Vector<T>::Find(U const& value) const
 
 template <typename T>
 template <std::predicate<T const&> Comparer>
-inline T* Vector<T>::Find(Comparer&& comparer)
+constexpr inline T* Vector<T>::Find(Comparer&& comparer)
 {
   auto const* selfConst = this;
   return const_cast<T*>(selfConst->Find(std::forward<Comparer>(comparer)));
@@ -899,7 +899,7 @@ inline T* Vector<T>::Find(Comparer&& comparer)
 
 template <typename T>
 template <std::predicate<T const&> Comparer>
-inline T const* Vector<T>::Find(Comparer&& comparer) const
+constexpr inline T const* Vector<T>::Find(Comparer&& comparer) const
 {
   for (auto const& item : *this)
   {
@@ -911,7 +911,7 @@ inline T const* Vector<T>::Find(Comparer&& comparer) const
 
 template <typename T>
 template <typename U>
-inline bool Vector<T>::operator==(Vector<U> const& other)
+constexpr inline bool Vector<T>::operator==(Vector<U> const& other)
 {
   static_assert(std::equality_comparable_with<T const&, U const&>, "Vector operator==(Vector<U>) cannot compare T == U");
   if (Size() != other.Size())
