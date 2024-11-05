@@ -202,10 +202,170 @@ public:
     if (Super::IsEmpty() && !other.IsEmpty())
       return true;
 
-    if(!Super::IsEmpty() && other.IsEmpty())
+    if (!Super::IsEmpty() && other.IsEmpty())
       return false;
 
     return memcmp(Super::Data(), other.Data(), Super::AllocSize()) == -1;
   }
+};
+
+template <typename CharT>
+class String
+{
+  inline static constexpr CharT Terminator = CharT('\0');
+
+  Vector<CharT> Mem_;
+
+public:
+  constexpr String(IAllocator* allocator = globalAllocator)
+      : Mem_(allocator)
+  {
+  }
+
+  constexpr String(CharT const c, i32 const count, IAllocator* allocator = globalAllocator)
+      : String(allocator)
+  {
+    Assign(c, count);
+  }
+
+  constexpr String(StringView<CharT> view, IAllocator* allocator = globalAllocator)
+      : String(allocator)
+  {
+    Assign(view);
+  }
+
+  constexpr String(String const& other)
+      : Mem_(other.Mem_)
+  {
+  }
+
+  constexpr String(String&& other)
+      : Mem_(std::move(other.Mem_))
+  {
+  }
+
+  constexpr IAllocator* Allocator() const
+  {
+    return Mem_.Allocator();
+  }
+
+  constexpr bool IsEmpty() const
+  {
+    return Mem_.IsEmpty();
+  }
+
+  constexpr i32 Size() const
+  {
+    return Mem_.Size();
+  }
+
+  constexpr i32 Capacity() const
+  {
+    return Mem_.Capacity();
+  }
+
+  constexpr i32 AllocSize() const
+  {
+    return Mem_.AllocSize();
+  }
+
+  constexpr CharT* Data()
+  {
+    return Mem_.Data();
+  }
+  constexpr CharT const* Data() const
+  {
+    return Mem_.Data();
+  }
+
+  constexpr CharT* begin()
+  {
+    return Mem_.begin();
+  }
+  constexpr CharT const* begin() const
+  {
+    return Mem_.begin();
+  }
+
+  constexpr CharT* end()
+  {
+    return Mem_.end();
+  }
+  constexpr CharT const* end() const
+  {
+    return Mem_.end();
+  }
+
+  constexpr CharT& Front()
+  {
+    return Mem_.Front();
+  }
+  constexpr CharT const& Front() const
+  {
+    return Mem_.Front();
+  }
+
+  constexpr CharT& Back()
+  {
+    return Mem_.Back();
+  }
+  constexpr CharT const& Back() const
+  {
+    return Mem_.Back();
+  }
+
+  constexpr CharT& operator[](i32 const pos)
+  {
+    return Mem_[pos];
+  }
+  constexpr CharT const& operator[](i32 const pos) const
+  {
+    return Mem_[pos];
+  }
+
+  constexpr operator StringView<CharT>() const&
+  {
+    return StringView<CharT>(Data(), Size());
+  }
+
+  constexpr StringView<CharT>() AsView() const
+  {
+    return StringView<CharT>(Data(), Size());
+  }
+
+  constexpr void Assign(StringView<CharT> view)
+  {
+    bool const needsTerminator = !view.IsEmpty() && view.Back() != Terminator;
+    Mem_.Reserve(view.Size() + needsTerminator ? 1 : 0);
+    Mem_.Assign(view.begin(), view.end());
+    Mem_.EmplaceBackUnsafe(Terminator);
+  }
+
+  constexpr void Assign(CharT const c, i32 const count)
+  {
+    bool const needsTerminator = c != Terminator;
+    Mem_.Reserve(count + needsTerminator ? 1 : 0);
+    Mem_.Assign(count, c);
+    Mem_.EmplaceBackUnsafe(Terminator);
+  }
+
+  constexpr void Resize(i32 const newSize, CharT const c = Terminator)
+  {
+    Mem_.Resize(newSize, c);
+  }
+
+  constexpr void Reserve(i32 const newCapacity)
+  {
+    Mem_.Reserve(newCapacity);
+  }
+
+  constexpr void Clear()
+  {
+    Mem_.Clear();
+  }
+
+  // TODO: Insert/Erase/PushBack/PopBack
+  // TODO: Append/operator+=/operator+
+  // TODO: Replace (create a temporary Vector<offset, count> then Resize(curr + vec.Sum(count)) then replace from the end so we do less shifts)
 };
 } // namespace Core
