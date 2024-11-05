@@ -76,8 +76,6 @@ public:
     return StringView(span.Data(), span.Size());
   }
 
-  // TODO: StringView - Add case insensitive handling
-
   constexpr bool StartsWith(StringView const other) const
   {
     if (Super::Size() < other.Size() || Super::IsEmpty() || other.IsEmpty())
@@ -92,8 +90,9 @@ public:
 
   constexpr bool EndsWith(StringView const other) const
   {
-    if (Super::Size() < other.Size() || other.IsEmpty())
+    if (Super::Size() < other.Size() || Super::IsEmpty() || other.IsEmpty())
       return false;
+    auto* p = Super::Data() + Super::Size() - other.Size();
     return memcmp(Super::Data() + Super::Size() - other.Size(), other.Data(), other.AllocSize()) == 0;
   }
 
@@ -104,27 +103,12 @@ public:
 
   constexpr bool Contains(CharT const c) const
   {
-    return Super::Find(c);
+    return Find(c) != NotFound;
   }
 
   constexpr bool Contains(StringView const other)
   {
-    if (Super::Size() < other.Size() || Super::IsEmpty() || other.IsEmpty())
-      return false;
-
-    CharT* p;
-    if constexpr (std::same_as<CharT, char>)
-    {
-      p = memchr(Super::Data(), other[0], Super::Size());
-    }
-    else
-    {
-      p = wmemchr(Super::Data(), other[0], Super::Size());
-    }
-
-    if (p + other.Size() < Super::Data() + Super::Size())
-      return memcmp(p, other.Data(), other.AllocSize()) == 0;
-    return false;
+    return Find(other) != NotFound;
   }
 
   constexpr i32 Find(CharT const c, i32 const offset = 0) const
@@ -132,35 +116,39 @@ public:
     if (Super::IsEmpty() || u32(offset) >= u32(Super::Size()))
       return NotFound;
 
-    CharT* p;
+    CharT const* p;
     if constexpr (std::same_as<CharT, char>)
     {
-      p = memchr(Super::Data() + offset, c, Super::Size());
+      p = (CharT const*)memchr(Super::Data() + offset, c, Super::Size());
     }
     else
     {
       p = wmemchr(Super::Data() + offset, c, Super::Size());
     }
-    return p ? p - Super::Data() : NotFound;
+    return p ? i32(p - Super::Data()) : NotFound;
   }
 
   constexpr i32 Find(StringView const other, i32 const offset = 0) const
   {
-    if (Super::IsEmpty() || u32(offset) >= u32(Super::Size()) || u32(Super::Size()) < other.Size() + u32(offset))
+    if (Super::IsEmpty() || other.IsEmpty() || u32(offset) >= u32(Super::Size()) || u32(Super::Size()) < other.Size() + u32(offset))
       return NotFound;
 
-    CharT* p;
-    if constexpr (std::same_as<CharT, char>)
+    i32 pos = 0;
+    while (true)
     {
-      p = memchr(Super::Data() + offset, other[0], Super::Size());
+      i32 const foundPos = Find(other[0], pos);
+      if (NotFound == foundPos)
+        return NotFound;
+
+      if (foundPos + other.Size() > Super::Size())
+        return NotFound;
+
+      CharT const* p = Super::Data() + foundPos;
+      if (memcmp(p, other.Data(), other.AllocSize()) == 0)
+        return foundPos;
+
+      pos = foundPos + 1;
     }
-    else
-    {
-      p = wmemchr(Super::Data() + offset, other[0], Super::Size());
-    }
-    if (p && memcmp(p, other.Data(), other.AllocSize()) == 0)
-      return p - Super::Data();
-    return NotFound;
   }
 
   constexpr i32 FindFirstOf(CharT const c, i32 const offset = 0) const
@@ -191,31 +179,11 @@ public:
     if (Super::IsEmpty() || other.IsEmpty() || u32(Super::Size()) < u32(other.Size() + offset))
       return NotFound;
 
-    for (i32 i = Super::Size() - other.Size() - 1; i >= offset; --i)
+    for (i32 i = Super::Size() - other.Size(); i >= offset; --i)
     {
-      if ((*this)[i] == other[i] && memcmp(Super::Data() + i, other.Data(), other.AllocSize()) == 0)
+      if ((*this)[i] == other[0] && memcmp(Super::Data() + i, other.Data(), other.AllocSize()) == 0)
         return i;
     }
-    return NotFound;
-  }
-
-  constexpr i32 FindFirstNotOf(CharT const c, i32 const offset = 0) const
-  {
-    return NotFound;
-  }
-
-  constexpr i32 FindFirstNotOf(StringView const other, i32 const offset = 0) const
-  {
-    return NotFound;
-  }
-
-  constexpr i32 FindLastNotOf(CharT const c, i32 const offset = 0) const
-  {
-    return NotFound;
-  }
-
-  constexpr i32 FindLastNotOf(StringView const other, i32 const offset = 0) const
-  {
     return NotFound;
   }
 
@@ -231,16 +199,13 @@ public:
 
   constexpr bool operator<(StringView const other) const
   {
-    if (Super::IsEmpty() && other.IsEmpty())
-      return false;
-
-    if (Super::IsEmpty())
+    if (Super::IsEmpty() && !other.IsEmpty())
       return true;
 
-    if (other.IsEmpty())
+    if(!Super::IsEmpty() && other.IsEmpty())
       return false;
 
-    return memcmp(Super::Data(), other.Data(), Super::AllocSize());
+    return memcmp(Super::Data(), other.Data(), Super::AllocSize()) == -1;
   }
 };
 } // namespace Core
