@@ -22,8 +22,8 @@ private:
 
   IAllocator* Allocator_;
   T*          Mem_;
-  T*          Size_;
-  T*          Capacity_;
+  i32         Size_;
+  i32         Capacity_;
 
   // Vector's state will now be 1:1 as a default constructed Vector, with the custom allocator.
   void Reset();
@@ -201,9 +201,10 @@ public:
 template <typename T>
 inline void Vector<T>::Reset()
 {
-  Destroy(Mem_, Size_);
+  Destroy(begin(), end());
   Allocator_->Free(Mem_, alignof(T));
-  Mem_ = Size_ = Capacity_ = nullptr;
+  Mem_  = nullptr;
+  Size_ = Capacity_ = 0;
 }
 
 template <typename T>
@@ -219,8 +220,8 @@ inline void Vector<T>::Realloc(i32 const newCapacity)
     if (T* newMem = (T*)Allocator_->Realloc(Mem_, newCapacity * sizeof(T), alignof(T)))
     {
       Mem_      = newMem;
-      Size_     = Mem_ + currSize;
-      Capacity_ = Mem_ + newCapacity;
+      Size_     = currSize;
+      Capacity_ = newCapacity;
       return;
     }
   }
@@ -229,16 +230,16 @@ inline void Vector<T>::Realloc(i32 const newCapacity)
   check(newMem, "Couldn't allocate Vector memory.");
 
   if (newCapacity >= currSize)
-    Algorithm::Move(Mem_, Size_, newMem);
+    Algorithm::Move(begin(), end(), newMem);
   else
-    Algorithm::Move(Mem_, Size_ - (currSize - newCapacity), newMem);
+    Algorithm::Move(begin(), end() - (currSize - newCapacity), newMem);
 
-  Destroy(Mem_, Size_);
+  Destroy(begin(), end());
   Allocator_->Free(Mem_, alignof(T));
 
   Mem_      = newMem;
-  Size_     = Mem_ + currSize;
-  Capacity_ = Mem_ + newCapacity;
+  Size_     = currSize;
+  Capacity_ = newCapacity;
 }
 
 template <typename T>
@@ -267,8 +268,8 @@ template <typename T>
 inline Vector<T>::Vector(IAllocator* allocator)
     : Allocator_(allocator)
     , Mem_(nullptr)
-    , Size_(nullptr)
-    , Capacity_(nullptr)
+    , Size_(0)
+    , Capacity_(0)
 {
   check(allocator, "Invalid allocator!");
 }
@@ -288,7 +289,7 @@ inline Vector<T>::Vector(i32 const initialSize, IAllocator* allocator)
     }
     else
     {
-      for (T* item = Mem_; item < Size_; ++item)
+      for (T* item = begin(); item < end(); ++item)
         new (item) T;
     }
   }
@@ -317,7 +318,7 @@ inline Vector<T>::Vector(i32 const initialSize, U const& initialValue, IAllocato
   }
   else
   {
-    for (T* item = Mem_; item < Size_; ++item)
+    for (T* item = begin(); item < end(); ++item)
       new (item) T(initialValue);
   }
 }
@@ -344,7 +345,7 @@ inline Vector<T>::Vector(Iterator begin, Iterator end, IAllocator* allocator)
   else
   {
     static_assert(std::constructible_from<T, decltype(*begin)>, "Vector(begin, end, allocator) requires T to be constructible from *begin.");
-    for (T* item = Mem_; item < Size_; ++item)
+    for (T* item = Mem_; item < Mem_ + Size_; ++item)
       new (item) T(*begin++);
   }
 }
@@ -357,7 +358,7 @@ inline Vector<T>::Vector(Vector const& other)
 
 template <typename T>
 inline Vector<T>::Vector(Vector const& other, IAllocator* allocator)
-    : Vector(other.Mem_, other.Size_, allocator)
+    : Vector(other.begin(), other.end(), allocator)
 {
 }
 
@@ -368,8 +369,8 @@ inline Vector<T>::Vector(Vector&& other)
   if (other.Allocator_->IsMovable())
   {
     Mem_       = std::exchange(other.Mem_, nullptr);
-    Capacity_  = std::exchange(other.Capacity_, nullptr);
-    Size_      = std::exchange(other.Size_, nullptr);
+    Capacity_  = std::exchange(other.Capacity_, 0);
+    Size_      = std::exchange(other.Size_, 0);
     Allocator_ = std::exchange(other.Allocator_, globalAllocator);
   }
   else
@@ -379,7 +380,7 @@ inline Vector<T>::Vector(Vector&& other)
     // We still allocate the entire capacity to keep the behavior as similar as possible
     Allocator_ = other.Allocator_->IsCopyable() ? other.Allocator_ : globalAllocator;
     Realloc(other.Capacity());
-    Algorithm::Move(other.Mem_, other.Size_, Mem_);
+    Algorithm::Move(other.begin(), other.end(), begin());
     other.Reset();
   }
 }
@@ -398,7 +399,7 @@ inline Vector<T>& Vector<T>::operator=(Vector const& other)
   Reset();
   Allocator_ = other.Allocator_->IsCopyable() ? other.Allocator_ : globalAllocator;
   Realloc(other.Capacity_);
-  Algorithm::Copy(other.Mem_, other.Size_, Mem_);
+  Algorithm::Copy(other.begin(), other.end(), begin());
   return *this;
 }
 template <typename T>
@@ -417,7 +418,7 @@ inline Vector<T>& Vector<T>::operator=(Vector&& other)
     // TODO: Add logging - Warn about a copy being done instead of a move
     Allocator_ = other.Allocator_->IsCopyable() ? other.Allocator_ : globalAllocator;
     Realloc(other.Capacity_);
-    Algorithm::Move(other.Mem_, other.Size_, Mem_);
+    Algorithm::Move(other.begin(), other.end(), begin());
     other.Reset();
   }
   return *this;
@@ -440,14 +441,14 @@ inline void Vector<T>::Assign(i32 const newSize, U const& newValue)
   if (newSize > currCap)
     Realloc(CalculateCapacity(currCap, newSize));
 
-  Size_ = Mem_ + newSize;
+  Size_ = newSize;
   if constexpr (CanFastInitialize<U>())
   {
     std::memset(Mem_, (int)newValue, AllocSize());
   }
   else
   {
-    for (T* item = Mem_; item < Size_; ++item)
+    for (T* item = begin(); item < end(); ++item)
       new (item) T(newValue);
   }
 }
@@ -464,7 +465,7 @@ inline void Vector<T>::Assign(Iterator begin, Iterator end)
   if (newSize >= currCap)
     Realloc(CalculateCapacity(currCap, newSize));
 
-  Size_ = Mem_ + newSize;
+  Size_ = newSize;
 
   constexpr bool canUseFastPath = std::is_trivially_copyable_v<T> && std::same_as<std::remove_cvref_t<Iterator>, T*>;
   if constexpr (canUseFastPath)
@@ -473,7 +474,7 @@ inline void Vector<T>::Assign(Iterator begin, Iterator end)
   }
   else
   {
-    for (T* item = Mem_; item < Size_; ++item)
+    for (T* item = Mem_; item < Mem_ + Size_; ++item)
       new (item) T(*begin++);
   }
 }
@@ -510,14 +511,14 @@ template <typename T>
 inline T& Vector<T>::Back()
 {
   check(!IsEmpty(), "Vector is empty, but Back() was called.");
-  return *(Size_ - 1);
+  return *(end() - 1);
 }
 
 template <typename T>
 inline T const& Vector<T>::Back() const
 {
   check(!IsEmpty(), "Vector is empty, but Back() was called.");
-  return *(Size_ - 1);
+  return *(end() - 1);
 }
 
 template <typename T>
@@ -547,31 +548,31 @@ inline T const* Vector<T>::begin() const
 template <typename T>
 inline T* Vector<T>::end()
 {
-  return Size_;
+  return Mem_ + Size_;
 }
 
 template <typename T>
 inline T const* Vector<T>::end() const
 {
-  return Size_;
+  return Mem_ + Size_;
 }
 
 template <typename T>
 inline bool Vector<T>::IsEmpty() const
 {
-  return Mem_ == Size_;
+  return Size_ == 0;
 }
 
 template <typename T>
 inline i32 Vector<T>::Size() const
 {
-  return i32(Size_ - Mem_);
+  return Size_;
 }
 
 template <typename T>
 inline i32 Vector<T>::Capacity() const
 {
-  return i32(Capacity_ - Mem_);
+  return Capacity_;
 }
 
 template <typename T>
@@ -599,25 +600,25 @@ inline void Vector<T>::Resize(i32 const newSize)
     Realloc(newSize);
 
   if (currSize == 0)
-    Size_ = Mem_ + newSize;
+    Size_ = newSize;
 
   if (currSize < newSize)
   {
     if constexpr (std::is_trivially_default_constructible_v<T>)
     {
-      std::memset(Mem_ + currSize, 0, (Size_ - (Mem_ + currSize)) * sizeof(T));
+      std::memset(begin() + currSize, 0, (end() - (Mem_ + currSize)) * sizeof(T));
     }
     else
     {
-      for (T* item = Mem_ + currSize; item < Size_; ++item)
+      for (T* item = begin() + currSize; item < end(); ++item)
         new (item) T;
     }
   }
   else if (currSize > newSize)
   {
     i32 const ds = currSize - newSize;
-    Destroy(Mem_ + ds, Size_);
-    Size_ -= ds;
+    Destroy(begin() + ds, end());
+    Size_ = ds;
   }
 }
 
@@ -635,21 +636,21 @@ inline void Vector<T>::Resize(i32 const newSize, U const& value)
     if (currCap < newSize)
       Realloc(newSize);
 
-    Size_ = Mem_ + newSize;
+    Size_ = newSize;
     if constexpr (CanFastInitialize<U>())
     {
-      std::memset(Mem_ + currSize, (int)value, (Size_ - (Mem_ + currSize)) * sizeof(T));
+      std::memset(begin() + currSize, (int)value, (end() - (begin() + currSize)) * sizeof(T));
     }
     else
     {
-      for (T* item = Mem_ + currSize; item < Size_; ++item)
+      for (T* item = begin() + currSize; item < end(); ++item)
         new (item) T(value);
     }
   }
   else if (currSize > newSize)
   {
     i32 const ds = currSize - newSize;
-    Destroy(Mem_ + ds, Size_);
+    Destroy(begin() + ds, end());
     Size_ -= ds;
   }
 }
@@ -677,8 +678,8 @@ inline void Vector<T>::Swap(Vector& other)
 template <typename T>
 inline void Vector<T>::Clear()
 {
-  Destroy(Mem_, Size_);
-  Size_ = Mem_;
+  Destroy(begin(), end());
+  Size_ = 0;
 }
 
 template <typename T>
@@ -693,7 +694,7 @@ template <typename U>
 inline T* Vector<T>::Insert(T const* position, i32 const count, U const& value)
 {
   static_assert(std::constructible_from<T, decltype(value)>, "Vector Insert(position, count, value) cannot construct T from value.");
-  check(Mem_ <= position && position <= Size_, "Vector Insert(position, count, value) has an invalid position.");
+  check(begin() <= position && position <= end(), "Vector Insert(position, count, value) has an invalid position.");
   if (position == end())
   {
     Assign(count, value);
@@ -708,7 +709,7 @@ inline T* Vector<T>::Insert(T const* position, i32 const count, U const& value)
     Realloc(CalculateCapacity(currCap, newSize));
 
   T* fromStart = Mem_ + posIndex;
-  T* fromEnd   = Size_;
+  T* fromEnd   = end();
   T* to        = fromStart + count;
   Algorithm::Move(fromStart, fromEnd, to);
   if constexpr (CanFastInitialize<U>())
@@ -721,7 +722,7 @@ inline T* Vector<T>::Insert(T const* position, i32 const count, U const& value)
       new (item) T(value);
   }
 
-  Size_ = Mem_ + newSize;
+  Size_ = newSize;
   return Mem_ + posIndex;
 }
 
@@ -730,7 +731,7 @@ template <std::input_iterator Iterator>
 inline T* Vector<T>::Insert(T const* position, Iterator begin, Iterator end)
 {
   static_assert(std::constructible_from<T, decltype(*begin)>, "Vector Insert(position, begin, end) cannot construct T from *begin.");
-  check(Mem_ <= position && position <= Size_, "Vector Insert(position, begin, end) has an invalid position.");
+  check(Mem_ <= position && position <= Mem_ + Size_, "Vector Insert(position, begin, end) has an invalid position.");
   if (position == this->end())
   {
     Assign(begin, end);
@@ -745,9 +746,9 @@ inline T* Vector<T>::Insert(T const* position, Iterator begin, Iterator end)
   if (currCap < newSize)
     Realloc(CalculateCapacity(currCap, newSize));
 
-  Algorithm::Move(Mem_ + posIndex, Size_, Mem_ + elemCount);
+  Algorithm::Move(Mem_ + posIndex, Mem_ + Size_, Mem_ + elemCount);
 
-  Size_ = Mem_ + newSize;
+  Size_ = newSize;
 
   constexpr bool canUseFastPath = std::is_trivially_copyable_v<T> && std::same_as<std::remove_cvref_t<Iterator>, T*>;
   if constexpr (canUseFastPath)
@@ -767,7 +768,7 @@ template <typename... Args>
 inline T* Vector<T>::Emplace(T const* position, Args&&... args)
 {
   static_assert(std::constructible_from<T, Args...>, "Vector Emplace(position, Args...) cannot construct T from Args.");
-  check(Mem_ <= position && position <= Size_, "Vector Emplace(position, Args...) has an invalid position.");
+  check(begin() <= position && position <= end(), "Vector Emplace(position, Args...) has an invalid position.");
   i32 const posIndex = i32(position - Mem_);
   i32 const size     = Size();
   i32 const cap      = Capacity();
@@ -775,7 +776,7 @@ inline T* Vector<T>::Emplace(T const* position, Args&&... args)
     Realloc(CalculateCapacity(cap, size + 1));
 
   T* pos = Mem_ + posIndex;
-  Algorithm::Move(pos, Size_, pos + 1);
+  Algorithm::Move(pos, end(), pos + 1);
   new (pos) T(std::forward<Args>(args)...);
   ++Size_;
   return pos;
@@ -786,7 +787,7 @@ template <typename... Args>
 inline T* Vector<T>::EmplaceBackUnsafe(Args&&... args)
 {
   check(Size() < Capacity(), "Vector EmplaceBackUnsafe(Args) out of bounds insertion.");
-  T* pos = Size_++;
+  T* pos = Mem_ + Size_++;
   new (pos) T(std::forward<Args>(args)...);
   return pos;
 }
@@ -794,7 +795,7 @@ inline T* Vector<T>::EmplaceBackUnsafe(Args&&... args)
 template <typename T>
 inline T* Vector<T>::Erase(T* position)
 {
-  check(Mem_ <= position && position <= Size_, "Vector Erase(position) has an invalid position.");
+  check(begin() <= position && position <= end(), "Vector Erase(position) has an invalid position.");
   if (IsEmpty() || position == end())
     return end();
   return Erase(position, position + 1);
@@ -803,9 +804,9 @@ inline T* Vector<T>::Erase(T* position)
 template <typename T>
 inline T* Vector<T>::Erase(T* begin, T* end)
 {
-  check(begin <= end && Mem_ <= begin && end <= Size_, "Vector Erase(begin, end) has an invalid range.");
+  check(begin <= end && Mem_ <= begin && end <= Mem_ + Size_, "Vector Erase(begin, end) has an invalid range.");
   if (IsEmpty() || begin == end)
-    return this->end();
+    return Mem_ + Size_;
 
   if constexpr (!std::is_trivially_destructible_v<T>)
   {
@@ -816,11 +817,11 @@ inline T* Vector<T>::Erase(T* begin, T* end)
     }
   }
   // It's safe to move as the range [begin, end) has moved-from objects
-  Algorithm::Move(end, this->end(), begin);
-  Size_ -= end - begin;
+  Algorithm::Move(end, Mem_ + Size_, begin);
+  Size_ -= i32(end - begin);
 
-  if (Size_ <= end)
-    return this->end();
+  if (Mem_ + Size_ <= end)
+    return Mem_ + Size_;
   return end - 1;
 }
 
@@ -840,8 +841,8 @@ template <typename T>
 template <std::predicate<T const&> Comparer>
 T* Vector<T>::EraseIf(Comparer&& comparer)
 {
-  T* curr = Mem_;
-  while (curr != Size_)
+  T* curr = begin();
+  while (curr != end())
     curr = comparer(*curr) ? Erase(curr) : curr + 1;
   return curr;
 }
@@ -850,7 +851,7 @@ template <typename T>
 inline void Vector<T>::PopBack()
 {
   if (!IsEmpty())
-    (--Size_)->~T();
+    Mem_[--Size_].~T();
 }
 
 template <typename T>
