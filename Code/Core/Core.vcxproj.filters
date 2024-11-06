@@ -42,13 +42,16 @@
     <ClInclude Include="include\Core\Reflection\Reflection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Core\Allocator\ArenaStackAllocator.h">
+    <ClInclude Include="include\Core\Allocator\ArenaAllocator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\Container\String.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\Container\Span.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Iterator\ContiguousIterator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

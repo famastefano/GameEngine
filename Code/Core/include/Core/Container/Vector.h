@@ -4,6 +4,7 @@
 #include <Core/Allocator/Allocator.h>
 #include <Core/Assert/Assert.h>
 #include <Core/Definitions.h>
+#include <Core/Iterator/ContiguousIterator.h>
 #include <cmath>
 #include <concepts>
 #include <cstring>
@@ -94,6 +95,12 @@ public:
 
   constexpr T*       end();
   constexpr T const* end() const;
+
+  constexpr ReverseContiguousIterator<T>       rbegin();
+  constexpr ReverseContiguousIterator<T const> rbegin() const;
+
+  constexpr ReverseContiguousIterator<T>       rend();
+  constexpr ReverseContiguousIterator<T const> rend() const;
 
   constexpr bool IsEmpty() const;
 
@@ -523,6 +530,33 @@ template <typename T>
 constexpr inline T const* Vector<T>::end() const
 {
   return Mem_ + Size_;
+}
+
+template <typename T>
+inline constexpr ReverseContiguousIterator<T> Vector<T>::rbegin()
+{
+  using It = ReverseContiguousIterator<T>;
+  return IsEmpty() ? It(nullptr) : It(end() - 1);
+}
+
+template <typename T>
+inline constexpr ReverseContiguousIterator<T const> Vector<T>::rbegin() const
+{
+  using It = ReverseContiguousIterator<T const>;
+  return IsEmpty() ? It(nullptr) : It(end() - 1);
+}
+template <typename T>
+inline constexpr ReverseContiguousIterator<T> Vector<T>::rend()
+{
+  using It = ReverseContiguousIterator<T>;
+  return IsEmpty() ? It(nullptr) : It(begin() - 1);
+}
+
+template <typename T>
+inline constexpr ReverseContiguousIterator<T const> Vector<T>::rend() const
+{
+  using It = ReverseContiguousIterator<T const>;
+  return IsEmpty() ? It(nullptr) : It(begin() - 1);
 }
 
 template <typename T>

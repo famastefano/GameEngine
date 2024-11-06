@@ -9,7 +9,7 @@
             <Item Name="OwnedByContainer">false</Item>
         </Expand>
     </Type>
-    <Type Name="Core::ArenaStackAllocator&lt;*,*&gt;">
+    <Type Name="Core::ArenaAllocator&lt;*,*&gt;">
         <DisplayString>{{ size=$T1, alignment=$T2 }}</DisplayString>
         <Expand>
             <Item Name="IsMovable">false</Item>

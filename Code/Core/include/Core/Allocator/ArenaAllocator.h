@@ -6,7 +6,7 @@
 namespace Core
 {
 template <i32 Bytes, i32 Alignment>
-class ArenaStackAllocator : public IAllocator
+class ArenaAllocator : public IAllocator
 {
   alignas(Alignment) u8 Mem_[Bytes] = {};
 

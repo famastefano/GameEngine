@@ -328,7 +328,7 @@ public:
     return StringView<CharT>(Data(), Size());
   }
 
-  constexpr StringView<CharT>() AsView() const
+  constexpr StringView<CharT> AsView() const
   {
     return StringView<CharT>(Data(), Size());
   }
@@ -338,7 +338,8 @@ public:
     bool const needsTerminator = !view.IsEmpty() && view.Back() != Terminator;
     Mem_.Reserve(view.Size() + needsTerminator ? 1 : 0);
     Mem_.Assign(view.begin(), view.end());
-    Mem_.EmplaceBackUnsafe(Terminator);
+    if (needsTerminator)
+      Mem_.EmplaceBackUnsafe(Terminator);
   }
 
   constexpr void Assign(CharT const c, i32 const count)
@@ -346,7 +347,8 @@ public:
     bool const needsTerminator = c != Terminator;
     Mem_.Reserve(count + needsTerminator ? 1 : 0);
     Mem_.Assign(count, c);
-    Mem_.EmplaceBackUnsafe(Terminator);
+    if (needsTerminator)
+      Mem_.EmplaceBackUnsafe(Terminator);
   }
 
   constexpr void Resize(i32 const newSize, CharT const c = Terminator)
@@ -364,8 +366,79 @@ public:
     Mem_.Clear();
   }
 
-  // TODO: Insert/Erase/PushBack/PopBack
-  // TODO: Append/operator+=/operator+
-  // TODO: Replace (create a temporary Vector<offset, count> then Resize(curr + vec.Sum(count)) then replace from the end so we do less shifts)
+  constexpr CharT* Insert(CharT const* pos, StringView<CharT> string)
+  {
+    return Mem_.Insert(pos == end() ? pos - 1 : pos, string.begin(), string.end());
+  }
+
+  constexpr CharT* Insert(i32 const pos, StringView<CharT> string)
+  {
+    return Insert(Data() + pos, string);
+  }
+
+  constexpr CharT* Erase(CharT* position)
+  {
+    if (IsEmpty() || position == end())
+      return end();
+
+    return Erase(position, position + 1);
+  }
+
+  constexpr CharT* Erase(CharT* begin, CharT* end)
+  {
+    check(Data() <= begin && end <= Data() + Size());
+    if (begin == end() || begin && *begin == Terminator)
+      return end();
+
+    return Mem_.Erase(begin, end);
+  }
+
+  constexpr CharT* Erase(i32 const position)
+  {
+    return Erase(begin() + position);
+  }
+
+  constexpr CharT* Erase(i32 const position, i32 const count)
+  {
+    return Erase(begin() + position, begin() + position + count);
+  }
+
+  constexpr void PushBack(StringView<CharT> string)
+  {
+    Insert(end(), string);
+  }
+
+  constexpr void PopBack()
+  {
+    Mem_.PopBack();
+  }
+
+  constexpr String&& operator+(StringView<CharT> other) const
+  {
+    String cpy(*this);
+    cpy += other;
+    return std::move(cpy);
+  }
+
+  constexpr String& operator+=(StringView<CharT> other) const
+  {
+    PushBack(other);
+    return *this;
+  }
+
+  constexpr bool operator==(StringView<CharT> other) const
+  {
+    return AsView() == other;
+  }
+
+  constexpr bool operator!=(StringView<CharT> other) const
+  {
+    return AsView() != other;
+  }
+
+  constexpr bool operator<(StringView<CharT> other) const
+  {
+    return AsView() < other;
+  }
 };
 } // namespace Core
