@@ -10,6 +10,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameEngineProjectTemplate",
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CoreTests", "CoreTests\CoreTests.vcxproj", "{C2ABE3E7-8710-4A72-B6E2-838C95BB3B9C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RapidJson", "ThirdParty\RapidJson\RapidJson.vcxproj", "{EB6C950B-7B01-4B6A-A443-EED1C3188112}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -32,6 +34,10 @@ Global
 		{C2ABE3E7-8710-4A72-B6E2-838C95BB3B9C}.Debug|x64.Build.0 = Debug|x64
 		{C2ABE3E7-8710-4A72-B6E2-838C95BB3B9C}.Release|x64.ActiveCfg = Release|x64
 		{C2ABE3E7-8710-4A72-B6E2-838C95BB3B9C}.Release|x64.Build.0 = Release|x64
+		{EB6C950B-7B01-4B6A-A443-EED1C3188112}.Debug|x64.ActiveCfg = Debug|x64
+		{EB6C950B-7B01-4B6A-A443-EED1C3188112}.Debug|x64.Build.0 = Debug|x64
+		{EB6C950B-7B01-4B6A-A443-EED1C3188112}.Release|x64.ActiveCfg = Release|x64
+		{EB6C950B-7B01-4B6A-A443-EED1C3188112}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
