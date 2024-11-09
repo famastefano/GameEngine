@@ -168,7 +168,7 @@ public:
 
     for (i32 i = Super::Size() - 1; i >= offset; --i)
     {
-      if (operator[](i) == c)
+      if (Super::operator[](i) == c)
         return i;
     }
     return NotFound;
@@ -222,7 +222,7 @@ public:
   {
   }
 
-  constexpr String(CharT const c, i32 const count, IAllocator* allocator = globalAllocator)
+  constexpr String(i32 const count, const char c, IAllocator* allocator = globalAllocator)
       : String(allocator)
   {
     Assign(c, count);
@@ -242,6 +242,18 @@ public:
   constexpr String(String&& other)
       : Mem_(std::move(other.Mem_))
   {
+  }
+
+  constexpr String& operator=(String const& other)
+  {
+    Mem_ = other.Mem_;
+    return *this;
+  }
+
+  constexpr String& operator=(String&& other)
+  {
+    Mem_ = std::move(other.Mem_);
+    return *this;
   }
 
   constexpr IAllocator* Allocator() const
@@ -336,7 +348,7 @@ public:
   constexpr void Assign(StringView<CharT> view)
   {
     bool const needsTerminator = !view.IsEmpty() && view.Back() != Terminator;
-    Mem_.Reserve(view.Size() + needsTerminator ? 1 : 0);
+    Mem_.Reserve(view.Size() + (needsTerminator ? 1 : 0));
     Mem_.Assign(view.begin(), view.end());
     if (needsTerminator)
       Mem_.EmplaceBackUnsafe(Terminator);
@@ -345,7 +357,7 @@ public:
   constexpr void Assign(CharT const c, i32 const count)
   {
     bool const needsTerminator = c != Terminator;
-    Mem_.Reserve(count + needsTerminator ? 1 : 0);
+    Mem_.Reserve(count + (needsTerminator ? 1 : 0));
     Mem_.Assign(count, c);
     if (needsTerminator)
       Mem_.EmplaceBackUnsafe(Terminator);
@@ -413,14 +425,14 @@ public:
     Mem_.PopBack();
   }
 
-  constexpr String&& operator+(StringView<CharT> other) const
+  constexpr String operator+(StringView<CharT> other) const
   {
     String cpy(*this);
     cpy += other;
-    return std::move(cpy);
+    return cpy;
   }
 
-  constexpr String& operator+=(StringView<CharT> other) const
+  constexpr String& operator+=(StringView<CharT> other)
   {
     PushBack(other);
     return *this;
@@ -439,6 +451,11 @@ public:
   constexpr bool operator<(StringView<CharT> other) const
   {
     return AsView() < other;
+  }
+
+  u64 CalculateHash() const
+  {
+    return AsView().CalculateHash();
   }
 };
 } // namespace Core

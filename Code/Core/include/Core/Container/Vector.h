@@ -383,9 +383,9 @@ constexpr inline Vector<T>& Vector<T>::operator=(Vector&& other)
   Reset();
   if (other.Allocator_->IsMovable())
   {
-    Mem_       = std::swap(other.Mem_);
-    Capacity_  = std::swap(other.Capacity_);
-    Size_      = std::swap(other.Size_);
+    Mem_       = std::exchange(other.Mem_, nullptr);
+    Capacity_  = std::exchange(other.Capacity_, 0);
+    Size_      = std::exchange(other.Size_, 0);
     Allocator_ = std::exchange(other.Allocator_, globalAllocator);
   }
   else
@@ -734,12 +734,7 @@ constexpr inline T* Vector<T>::Insert(T const* position, Iterator begin, Iterato
 {
   static_assert(std::constructible_from<T, decltype(*begin)>, "Vector Insert(position, begin, end) cannot construct T from *begin.");
   check(Mem_ <= position && position <= Mem_ + Size_, "Vector Insert(position, begin, end) has an invalid position.");
-  if (position == this->end())
-  {
-    Assign(begin, end);
-    return this->begin();
-  }
-
+  
   i32 const elemCount = (i32)std::distance(begin, end);
   i32 const posIndex  = i32(position - Mem_);
   i32 const currCap   = Capacity();
@@ -748,7 +743,7 @@ constexpr inline T* Vector<T>::Insert(T const* position, Iterator begin, Iterato
   if (currCap < newSize)
     Realloc(CalculateCapacity(currCap, newSize));
 
-  Algorithm::Move(Mem_ + posIndex, Mem_ + Size_, Mem_ + elemCount);
+  Algorithm::Move(Mem_ + posIndex, Mem_ + Size_, Mem_ + posIndex + elemCount);
 
   Size_ = newSize;
 

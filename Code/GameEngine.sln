@@ -12,6 +12,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CoreTests", "CoreTests\Core
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RapidJson", "ThirdParty\RapidJson\RapidJson.vcxproj", "{EB6C950B-7B01-4B6A-A443-EED1C3188112}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BuildSystem", "Tools\BuildSystem\BuildSystem.vcxproj", "{595E5C0D-D6DF-4FBA-B334-EECC262AB66C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xxhash", "ThirdParty\xxhash\xxhash.vcxproj", "{5FD0D603-860F-4457-B726-2CC63BA62990}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -38,6 +42,14 @@ Global
 		{EB6C950B-7B01-4B6A-A443-EED1C3188112}.Debug|x64.Build.0 = Debug|x64
 		{EB6C950B-7B01-4B6A-A443-EED1C3188112}.Release|x64.ActiveCfg = Release|x64
 		{EB6C950B-7B01-4B6A-A443-EED1C3188112}.Release|x64.Build.0 = Release|x64
+		{595E5C0D-D6DF-4FBA-B334-EECC262AB66C}.Debug|x64.ActiveCfg = Debug|x64
+		{595E5C0D-D6DF-4FBA-B334-EECC262AB66C}.Debug|x64.Build.0 = Debug|x64
+		{595E5C0D-D6DF-4FBA-B334-EECC262AB66C}.Release|x64.ActiveCfg = Release|x64
+		{595E5C0D-D6DF-4FBA-B334-EECC262AB66C}.Release|x64.Build.0 = Release|x64
+		{5FD0D603-860F-4457-B726-2CC63BA62990}.Debug|x64.ActiveCfg = Debug|x64
+		{5FD0D603-860F-4457-B726-2CC63BA62990}.Debug|x64.Build.0 = Debug|x64
+		{5FD0D603-860F-4457-B726-2CC63BA62990}.Release|x64.ActiveCfg = Release|x64
+		{5FD0D603-860F-4457-B726-2CC63BA62990}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

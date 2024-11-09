@@ -3,6 +3,7 @@
 #include <Core/Assert/Assert.h>
 #include <Core/Container/Vector.h>
 #include <Core/Definitions.h>
+#include <Core/Hash/Hash.h>
 #include <iterator>
 #include <memory>
 #include <type_traits>
@@ -184,6 +185,11 @@ public:
   {
     check(!IsEmpty() && u32(offset) < u32(Size()));
     return Data_[offset];
+  }
+
+  u64 CalculateHash() const
+  {
+    return Core::CalculateHash(Data_, AllocSize());
   }
 };
 
