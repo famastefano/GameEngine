@@ -234,5 +234,20 @@ public:
     Values_.Emplace(pos, std::forward<Args>(args)...);
     return true;
   }
+
+  template <typename U = Key>
+  constexpr bool TryRemove(U&& key)
+  {
+    auto begin = Keys_.begin();
+    auto end   = Keys_.end();
+    auto it    = std::lower_bound(begin, end, key);
+    if (it != end || *it != key)
+      return false;
+
+    i32 const pos = i32(it - begin);
+    Keys_.Erase(pos);
+    Values_.Erase(pos);
+    return true;
+  }
 };
 } // namespace Core
