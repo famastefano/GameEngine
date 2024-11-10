@@ -236,6 +236,12 @@ constexpr inline void Vector<T>::Realloc(i32 const newCapacity)
   T* newMem = (T*)Allocator_->Alloc(newCapacity * sizeof(T), alignof(T));
   check(newMem, "Couldn't allocate Vector memory.");
 
+  if constexpr (!std::is_trivially_default_constructible_v<T>)
+  {
+    for (T* item = newMem; item < newMem + currSize; ++item)
+      new (item) T();
+  }
+
   if (newCapacity >= currSize)
     Algorithm::Move(begin(), end(), newMem);
   else
@@ -734,7 +740,7 @@ constexpr inline T* Vector<T>::Insert(T const* position, Iterator begin, Iterato
 {
   static_assert(std::constructible_from<T, decltype(*begin)>, "Vector Insert(position, begin, end) cannot construct T from *begin.");
   check(Mem_ <= position && position <= Mem_ + Size_, "Vector Insert(position, begin, end) has an invalid position.");
-  
+
   i32 const elemCount = (i32)std::distance(begin, end);
   i32 const posIndex  = i32(position - Mem_);
   i32 const currCap   = Capacity();
