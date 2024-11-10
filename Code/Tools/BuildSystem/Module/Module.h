@@ -17,6 +17,9 @@ struct ModuleConfiguration
     Executable,
   };
 
+  // If it was part of the JSON or not
+  bool Parsed = false;
+
   // Configuration's name.
   // All of those will then allow the IDE/Build System to know which config to apply.
   String            Name;
@@ -54,7 +57,7 @@ struct ModuleConfiguration
   bool DisableUnityBuild    = false;
 };
 
-struct ModuleDefinition
+struct Module
 {
   // Filled when discovering and parsing the module definition files.
   String     AbsoluteModuleFilePath;

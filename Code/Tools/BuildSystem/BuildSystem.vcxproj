@@ -20,9 +20,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Module\Parser.cpp" />
+    <ClCompile Include="Module\Resolver.cpp" />
+    <ClCompile Include="Module\Validator.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ModuleDefinition.h" />
+    <ClInclude Include="Helpers.h" />
+    <ClInclude Include="Module\Module.h" />
+    <ClInclude Include="Module\Parser.h" />
+    <ClInclude Include="Module\Resolver.h" />
+    <ClInclude Include="Module\Validator.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
