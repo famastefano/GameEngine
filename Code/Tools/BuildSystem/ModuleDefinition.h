@@ -10,6 +10,7 @@ struct ModuleConfiguration
 {
   enum class ConfigurationType
   {
+    ConfigOnly,
     HeaderOnlyLibrary,
     SharedLibrary,
     StaticLibrary,
