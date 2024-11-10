@@ -222,7 +222,7 @@ public:
   {
   }
 
-  constexpr String(i32 const count, const char c, IAllocator* allocator = globalAllocator)
+  constexpr String(i32 const count, char const c, IAllocator* allocator = globalAllocator)
       : String(allocator)
   {
     Assign(c, count);
@@ -268,7 +268,7 @@ public:
 
   constexpr i32 Size() const
   {
-    return Mem_.Size();
+    return Mem_.IsEmpty() ? 0 : Mem_.Size() - 1; // we exclude the terminator
   }
 
   constexpr i32 Capacity() const
