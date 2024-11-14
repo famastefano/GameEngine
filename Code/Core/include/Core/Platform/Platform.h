@@ -4,5 +4,5 @@
 
 namespace Core
 {
-bool CORE_API IsDebuggerAttached();
+CORE_API bool IsDebuggerAttached();
 }
