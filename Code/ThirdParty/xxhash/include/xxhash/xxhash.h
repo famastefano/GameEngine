@@ -795,7 +795,6 @@ XXH_PUBLIC_API XXH_PUREF XXH32_hash_t XXH32_hashFromCanonical(const XXH32_canoni
 /*
  * C23 __STDC_VERSION__ number hasn't been specified yet. For now
  * leave as `201711L` (C17 + 1).
- * TODO: Update to correct value when its been specified.
  */
 #define XXH_C23_VN 201711L
 /*! @endcond */
@@ -3915,7 +3914,7 @@ enum XXH_VECTOR_TYPE /* fake enum */ {
 #    define XXH_VECTOR XXH_SSE2
 #  elif (defined(__PPC64__) && defined(__POWER8_VECTOR__)) \
      || (defined(__s390x__) && defined(__VEC__)) \
-     && defined(__GNUC__) /* TODO: IBM XL */
+     && defined(__GNUC__)
 #    define XXH_VECTOR XXH_VSX
 #  else
 #    define XXH_VECTOR XXH_SCALAR

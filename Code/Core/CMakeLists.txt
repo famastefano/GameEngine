@@ -27,6 +27,11 @@ add_library(ge_engine_core ${GE_BUILD_ADD_LIBRARY_TYPE}
 
     "include/Core/Iterator/ContiguousIterator.h"
 
+    "include/Core/Logging/Logging.h"
+    "src/Logging/Logging.cpp"
+    "include/Core/Logging/Private/CoreLogging.h"
+    "src/Logging/CoreLogging.cpp"
+
     "include/Core/Platform/Platform.h"
     "src/Platform/Platform.cpp"
 

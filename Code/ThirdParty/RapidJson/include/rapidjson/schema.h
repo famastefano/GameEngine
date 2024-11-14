@@ -2202,7 +2202,6 @@ public:
     }
 
     // Changed by PR #1393
-    // TODO should this return a UriType& ?
     bool HandleRefSchema(const PointerType& source, const SchemaType** schema, const ValueType& v, const ValueType& document, const UriType& id) {
         typename ValueType::ConstMemberIterator itr = v.FindMember(SchemaType::GetRefString());
         if (itr == v.MemberEnd())
@@ -2276,7 +2275,6 @@ public:
                                     SchemaErrorValue(kSchemaErrorRefCyclical, source, ref.GetString(), ref.GetStringLength());
                                 else {
                                     // Call CreateSchema recursively, but first compute the in-scope id for the $ref target as we have jumped there
-                                    // TODO: cache pointer <-> id mapping
                                     size_t unresolvedTokenIndex;
                                     scopeId = pointer.GetUri(document, docId_, &unresolvedTokenIndex, allocator_);
                                     CreateSchema(schema, pointer, *pv, document, scopeId);
@@ -2298,7 +2296,6 @@ public:
                                 SchemaErrorValue(kSchemaErrorRefCyclical, source, ref.GetString(), ref.GetStringLength());
                             else {
                                 // Call CreateSchema recursively, but first compute the in-scope id for the $ref target as we have jumped there
-                                // TODO: cache pointer <-> id mapping
                                 size_t unresolvedTokenIndex;
                                 scopeId = pointer.GetUri(document, docId_, &unresolvedTokenIndex, allocator_);
                                 CreateSchema(schema, pointer, *pv, document, scopeId);
@@ -2321,7 +2318,6 @@ public:
     //! Find the first subschema with a resolved 'id' that matches the specified URI.
     // If full specified use all URI else ignore fragment.
     // If found, return a pointer to the subschema and its JSON pointer.
-    // TODO cache pointer <-> id mapping
     ValueType* FindId(const ValueType& doc, const UriType& finduri, PointerType& resptr, const UriType& baseuri, bool full, const PointerType& here = PointerType()) const {
         SizeType i = 0;
         ValueType* resval = 0;

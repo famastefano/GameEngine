@@ -356,8 +356,6 @@ constexpr inline Vector<T>::Vector(Vector&& other)
   }
   else
   {
-    // TODO: Add logging - Warn about a copy being done instead of a move
-
     // We still allocate the entire capacity to keep the behavior as similar as possible
     Allocator_ = other.Allocator_->IsCopyable() ? other.Allocator_ : globalAllocator;
     Realloc(other.Capacity());
@@ -396,7 +394,6 @@ constexpr inline Vector<T>& Vector<T>::operator=(Vector&& other)
   }
   else
   {
-    // TODO: Add logging - Warn about a copy being done instead of a move
     Allocator_ = other.Allocator_->IsCopyable() ? other.Allocator_ : globalAllocator;
     Realloc(other.Capacity_);
     Algorithm::Move(other.begin(), other.end(), begin());
