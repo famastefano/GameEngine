@@ -1,5 +1,4 @@
-#include "Platform.h"
-
+#include <Core/Platform/Platform.h>
 #include <Windows.h>
 
 namespace Core

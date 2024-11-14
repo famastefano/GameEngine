@@ -1,0 +1,87 @@
+{
+    "version": 9,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 31
+    },
+    "configurePresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "generator": "Ninja",
+            "architecture": {
+                "strategy": "external",
+                "value": "x64"
+            },
+            "binaryDir": "${sourceDir}/build/bin/${presetName}",
+            "cacheVariables": {
+                "VS_INSTALLATION_PATH": "$env{VSINSTALLDIR}"
+            },
+            "toolchainFile": "cmake/Windows.MSVC.toolchain.cmake",
+            "vendor": {
+                "microsoft.com/VisualStudioSettings/CMake/1.0": {
+                    "hostOS": [ "Windows" ]
+                }
+            }
+        },
+        {
+            "name": "dbg",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "GE_BUILD_CONFIG": "DEBUG",
+                "GE_BUILD_ENABLE_TESTS": true,
+                "GE_BUILD_ENABLE_MONOLITHIC": false
+            }
+        },
+        {
+            "name": "dev",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "GE_BUILD_CONFIG": "DEVELOPMENT",
+                "GE_BUILD_ENABLE_TESTS": true,
+                "GE_BUILD_ENABLE_MONOLITHIC": false
+            }
+        },
+        {
+            "name": "rel",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "GE_BUILD_CONFIG": "RELEASE",
+                "GE_BUILD_ENABLE_TESTS": false,
+                "GE_BUILD_ENABLE_MONOLITHIC": true
+            }
+        },
+        {
+            "name": "win64-dbg-all",
+            "inherits": [ "base", "dbg" ]
+        },
+        {
+            "name": "win64-dev-all",
+            "inherits": [ "base", "dev" ]
+        },
+        {
+            "name": "win64-rel-all",
+            "inherits": [ "base", "rel" ]
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "win64-dbg-all",
+            "cleanFirst": false,
+            "configurePreset": "win64-dbg-all"
+        },
+        {
+            "name": "win64-rel-all",
+            "cleanFirst": false,
+            "configurePreset": "win64-rel-all"
+        },
+        {
+            "name": "win64-dev-all",
+            "cleanFirst": false,
+            "configurePreset": "win64-dev-all"
+        }
+    ]
+}
