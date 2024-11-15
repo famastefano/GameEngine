@@ -234,7 +234,7 @@ constexpr inline void Vector<T>::Realloc(i32 const newCapacity)
   }
 
   T* newMem = (T*)Allocator_->Alloc(newCapacity * sizeof(T), alignof(T));
-  check(newMem, "Couldn't allocate Vector memory.");
+  checkf(newMem, "Couldn't allocate Vector memory.");
 
   if constexpr (!std::is_trivially_default_constructible_v<T>)
   {
@@ -258,7 +258,7 @@ constexpr inline void Vector<T>::Realloc(i32 const newCapacity)
 template <typename T>
 constexpr inline void Vector<T>::Destroy(T* from, T* to)
 {
-  check(from <= to, "Vector Destroy called with invalid range.");
+  checkf(from <= to, "Vector Destroy called with invalid range.");
   if constexpr (!std::is_trivially_destructible_v<T>)
   {
     while (from != to)
@@ -284,7 +284,7 @@ constexpr inline Vector<T>::Vector(IAllocator* allocator)
     , Size_(0)
     , Capacity_(0)
 {
-  check(allocator, "Invalid allocator!");
+  checkf(allocator, "Invalid allocator!");
 }
 
 template <typename T>
@@ -460,42 +460,42 @@ constexpr inline void Vector<T>::Assign(Iterator begin, Iterator end)
 template <typename T>
 constexpr inline T& Vector<T>::operator[](i32 const pos)
 {
-  check(u32(pos) < u32(Size()), "Vector operator[] out-of-bounds access.");
+  checkf(u32(pos) < u32(Size()), "Vector operator[] out-of-bounds access.");
   return Mem_[pos];
 }
 
 template <typename T>
 constexpr inline T const& Vector<T>::operator[](i32 const pos) const
 {
-  check(u32(pos) < u32(Size()), "Vector operator[] out-of-bounds access.");
+  checkf(u32(pos) < u32(Size()), "Vector operator[] out-of-bounds access.");
   return Mem_[pos];
 }
 
 template <typename T>
 constexpr inline T& Vector<T>::Front()
 {
-  check(!IsEmpty(), "Vector is empty, but Front() was called.");
+  checkf(!IsEmpty(), "Vector is empty, but Front() was called.");
   return Mem_[0];
 }
 
 template <typename T>
 constexpr inline T const& Vector<T>::Front() const
 {
-  check(!IsEmpty(), "Vector is empty, but Front() was called.");
+  checkf(!IsEmpty(), "Vector is empty, but Front() was called.");
   return Mem_[0];
 }
 
 template <typename T>
 constexpr inline T& Vector<T>::Back()
 {
-  check(!IsEmpty(), "Vector is empty, but Back() was called.");
+  checkf(!IsEmpty(), "Vector is empty, but Back() was called.");
   return *(end() - 1);
 }
 
 template <typename T>
 constexpr inline T const& Vector<T>::Back() const
 {
-  check(!IsEmpty(), "Vector is empty, but Back() was called.");
+  checkf(!IsEmpty(), "Vector is empty, but Back() was called.");
   return *(end() - 1);
 }
 
@@ -663,9 +663,7 @@ constexpr inline void Vector<T>::Resize(i32 const newSize, U const& value)
 template <typename T>
 constexpr inline void Vector<T>::Swap(Vector& other)
 {
-  bool const canMove = Allocator_->IsMovable() && other.Allocator_->IsMovable();
-  check(canMove, "Cannot swap Vector with immovable allocators, will fallback to a deep-copy without an allocator swap!");
-  if (canMove)
+  if (verifyf(Allocator_->IsMovable() && other.Allocator_->IsMovable(), "Cannot swap Vector with immovable allocators, will fallback to a deep-copy without an allocator swap!"))
   {
     std::swap(Mem_, other.Mem_);
     std::swap(Size_, other.Size_);
@@ -699,7 +697,7 @@ template <typename U>
 constexpr inline T* Vector<T>::Insert(T const* position, i32 const count, U const& value)
 {
   static_assert(std::constructible_from<T, decltype(value)>, "Vector Insert(position, count, value) cannot construct T from value.");
-  check(begin() <= position && position <= end(), "Vector Insert(position, count, value) has an invalid position.");
+  checkf(begin() <= position && position <= end(), "Vector Insert(position, count, value) has an invalid position.");
   if (position == end())
   {
     Assign(count, value);
@@ -736,7 +734,7 @@ template <std::input_iterator Iterator>
 constexpr inline T* Vector<T>::Insert(T const* position, Iterator begin, Iterator end)
 {
   static_assert(std::constructible_from<T, decltype(*begin)>, "Vector Insert(position, begin, end) cannot construct T from *begin.");
-  check(Mem_ <= position && position <= Mem_ + Size_, "Vector Insert(position, begin, end) has an invalid position.");
+  checkf(Mem_ <= position && position <= Mem_ + Size_, "Vector Insert(position, begin, end) has an invalid position.");
 
   i32 const elemCount = (i32)std::distance(begin, end);
   i32 const posIndex  = i32(position - Mem_);
@@ -768,7 +766,7 @@ template <typename... Args>
 constexpr inline T* Vector<T>::Emplace(T const* position, Args&&... args)
 {
   static_assert(std::constructible_from<T, Args...>, "Vector Emplace(position, Args...) cannot construct T from Args.");
-  check(begin() <= position && position <= end(), "Vector Emplace(position, Args...) has an invalid position.");
+  checkf(begin() <= position && position <= end(), "Vector Emplace(position, Args...) has an invalid position.");
   i32 const posIndex = i32(position - Mem_);
   i32 const size     = Size();
   i32 const cap      = Capacity();
@@ -786,7 +784,7 @@ template <typename T>
 template <typename... Args>
 constexpr inline T* Vector<T>::EmplaceBackUnsafe(Args&&... args)
 {
-  check(Size() < Capacity(), "Vector EmplaceBackUnsafe(Args) out of bounds insertion.");
+  checkf(Size() < Capacity(), "Vector EmplaceBackUnsafe(Args) out of bounds insertion.");
   T* pos = Mem_ + Size_++;
   new (pos) T(std::forward<Args>(args)...);
   return pos;
@@ -795,7 +793,7 @@ constexpr inline T* Vector<T>::EmplaceBackUnsafe(Args&&... args)
 template <typename T>
 constexpr inline T* Vector<T>::Erase(T* position)
 {
-  check(begin() <= position && position <= end(), "Vector Erase(position) has an invalid position.");
+  checkf(begin() <= position && position <= end(), "Vector Erase(position) has an invalid position.");
   if (IsEmpty() || position == end())
     return end();
   return Erase(position, position + 1);
@@ -804,7 +802,7 @@ constexpr inline T* Vector<T>::Erase(T* position)
 template <typename T>
 constexpr inline T* Vector<T>::Erase(T* begin, T* end)
 {
-  check(begin <= end && Mem_ <= begin && end <= Mem_ + Size_, "Vector Erase(begin, end) has an invalid range.");
+  checkf(begin <= end && Mem_ <= begin && end <= Mem_ + Size_, "Vector Erase(begin, end) has an invalid range.");
   if (IsEmpty() || begin == end)
     return Mem_ + Size_;
 

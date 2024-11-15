@@ -34,10 +34,10 @@ CORE_API wchar_t const* ToString(Verbosity Verbosity, wchar_t const*);
 #undef GE_DEFINE_LOG_CATEGORY
 
 #define GE_LOG(Category, Verbosity, Format, ...) \
-  Core::Log(Category, Verbosity, "[%s] " Format " at " __FUNCTION__ " " __FILE__ ":%d\n", Core::Private::ToString(Verbosity, Format), __LINE__ __VA_OPT__(, ) __VA_ARGS__)
+  Core::Log(Category, Verbosity, "[%s][%s] " Format " at " __FUNCTION__ " " __FILE__ ":%d\n", Category.Category_, Core::Private::ToString(Verbosity, Format) __VA_OPT__(, ) __VA_ARGS__, __LINE__)
 
 #define GE_LOGW(Category, Verbosity, Format, ...) \
-  Core::Log(Category, Verbosity, L"[%s] " Format L" at " __FUNCTIONW__ L" " __FILEW__ L":%d\n", Core::Private::ToString(Verbosity, Format), __LINE__ __VA_OPT__(, ) __VA_ARGS__)
+  Core::Log(Category, Verbosity, L"[%s][%s] " Format L" at " __FUNCTIONW__ L" " __FILEW__ L":%d\n", Category.Category_, Core::Private::ToString(Verbosity, Format) __VA_OPT__(, ) __VA_ARGS__, __LINE__)
 
 #ifndef GE_BUILD_CONFIG_RELEASE
 #  define GE_DECLARE_LOG_CATEGORY(Category)                             \
@@ -56,7 +56,7 @@ CORE_API wchar_t const* ToString(Verbosity Verbosity, wchar_t const*);
 #  define GE_DEFINE_INLINE_LOG_CATEGORY(Category, DefaultVerbosity)     \
     inline struct LogCategory_##Category : public Core::LogCategoryBase \
     {                                                                   \
-      inline static char const* Category_;                              \
+      inline static char const* Category_ = #Category;                  \
     } Category{DefaultVerbosity};
 #else
 #  define GE_LOG(Category_, Verbosity_, Format_, ...)

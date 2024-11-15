@@ -26,7 +26,7 @@ constexpr void* FromAlignedPointer(void* p, i32 const alignment)
 
 void* GlobalAllocator::Alloc(i64 size, i32 const alignment)
 {
-  check((alignment == 1 || !(alignment & 0x1)), "Alignment must be a power of 2.");
+  checkf((alignment == 1 || !(alignment & 0x1)), "Alignment must be a power of 2.");
   if (alignment <= MEMORY_ALLOCATION_ALIGNMENT)
     return HeapAlloc(MemHandle, HEAP_ZERO_MEMORY, size);
 
@@ -42,7 +42,7 @@ void* GlobalAllocator::Alloc(i64 size, i32 const alignment)
 
 void* GlobalAllocator::Realloc(void* toRealloc, i64 size, i32 const alignment)
 {
-  check((alignment == 1 || !(alignment & 0x1)), "Alignment must be a power of 2.");
+  checkf((alignment == 1 || !(alignment & 0x1)), "Alignment must be a power of 2.");
   if (alignment <= MEMORY_ALLOCATION_ALIGNMENT)
     return HeapReAlloc(MemHandle, HEAP_REALLOC_IN_PLACE_ONLY | HEAP_ZERO_MEMORY, toRealloc, size);
 

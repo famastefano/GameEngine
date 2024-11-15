@@ -9,18 +9,29 @@ GE_DEFINE_INLINE_LOG_CATEGORY(LogAssert, Core::Verbosity::Warning)
 
 #undef assert
 
-#define check(cnd, ...)                                                                               \
-  if (!(cnd))                                                                                         \
-  {                                                                                                   \
-    GE_LOG(LogAssert, Core::Verbosity::Error, "Check failed: `" #cnd "`" __VA_OPT__(, ) __VA_ARGS__); \
-    if (Core::IsDebuggerAttached())                                                                   \
-      __debugbreak();                                                                                 \
+#define checkf(Condition, Format, ...)                                                                              \
+  if (!(Condition))                                                                                                 \
+  {                                                                                                                 \
+    GE_LOG(LogAssert, Core::Verbosity::Error, "Check failed: `" #Condition "` " Format __VA_OPT__(, ) __VA_ARGS__); \
+    if (Core::IsDebuggerAttached())                                                                                 \
+      __debugbreak();                                                                                               \
   }
+#define check(Condition) checkf(Condition, "")
 
-#define verify(cnd, ...) [](const bool v) {                                                              \
-  if (!v)                                                                                                \
-    GE_LOG(LogAssert, Core::Verbosity::Warning, "Verify failed: `" #cnd "`" __VA_OPT__(, ) __VA_ARGS__); \
-  return v;                                                                                              \
-}((cnd))
+#define verifyf(Condition, Format, ...) [](const bool v) {                                                             \
+  if (!v)                                                                                                              \
+    GE_LOG(LogAssert, Core::Verbosity::Warning, "Verify failed: `" #Condition "` " Format __VA_OPT__(, ) __VA_ARGS__); \
+  return v;                                                                                                            \
+}((Condition))
+#define verify(Condition) verifyf(Condition, "")
 
-#define assert(...) check(__VA_ARGS__)
+#define verifyOncef(Condition, Format, ...) [](const bool v) {                                                         \
+  static bool alreadyVerified = false;                                                                                 \
+  if (!v && !alreadyVerified)                                                                                          \
+    GE_LOG(LogAssert, Core::Verbosity::Warning, "Verify failed: `" #Condition "` " Format __VA_OPT__(, ) __VA_ARGS__); \
+  alreadyVerified = true;                                                                                              \
+  return v;                                                                                                            \
+}((Condition))
+#define verifyOnce(Condition) verifyOncef(Condition, "")
+
+#define assert(Condition) check(Condition)
