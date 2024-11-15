@@ -1,7 +1,11 @@
 #pragma once
 
-#ifdef CORE_API_EXPORTS
-#  define CORE_API __declspec(dllexport)
+#if GE_BUILD_ENABLE_MONOLITHIC
+#  define CORE_API
 #else
-#  define CORE_API __declspec(dllimport)
+#  ifdef CORE_API_EXPORTS
+#    define CORE_API __declspec(dllexport)
+#  else
+#    define CORE_API __declspec(dllimport)
+#  endif
 #endif
