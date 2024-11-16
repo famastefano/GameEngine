@@ -5,6 +5,7 @@ add_library(ge_engine_core ${GE_BUILD_ADD_LIBRARY_TYPE}
 
     "include/Core/API.h"
     "include/Core/Definitions.h"
+    "include/Core/Helpers.h"
 
     "include/Core/Algorithm/Algorithm.h"
     
