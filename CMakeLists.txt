@@ -27,5 +27,6 @@ add_subdirectory("Code/UnitTestFramework")
 
 # Engine modules
 add_subdirectory("Code/Core")
+add_subdirectory("Code/Input")
 
 # TODO: natvis should go in the output folder as we can't embed them for now
