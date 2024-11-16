@@ -47,7 +47,7 @@ CORE_API wchar_t const* ToString(Verbosity Verbosity, wchar_t const*);
     } Category;
 
 #  define GE_DEFINE_LOG_CATEGORY(Category, DefaultVerbosity)            \
-    static struct LogCategory_##Category : public Core::LogCategoryBase \
+    struct LogCategory_##Category : public Core::LogCategoryBase \
     {                                                                   \
       static char const* Category_;                                     \
     } Category{DefaultVerbosity};                                       \
