@@ -20,6 +20,11 @@ target_compile_definitions(ge_root_config_target INTERFACE
 )
 target_compile_features(ge_root_config_target INTERFACE cxx_std_20)
 
+if(${GE_BUILD_CONFIG} STREQUAL "DEBUG")
+    target_compile_options(ge_root_config_target INTERFACE /fsanitize=address)
+    target_link_options(ge_root_config_target INTERFACE /fsanitize=address)
+endif()
+
 # 3rd-party libs - Before any other project as those are self-contained and possibly consumed by other projects
 add_subdirectory("Code/ThirdParty/xxhash")
 add_subdirectory("Code/ThirdParty/RapidJson")
