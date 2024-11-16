@@ -8,8 +8,10 @@ enum class Kind : u8
 {
   Mouse_Press,
   Mouse_Release,
+  Mouse_Move,
+  Mouse_Wheel,
   Key_Press,
-  Key_Release
+  Key_Release,
 };
 
 struct MouseEvent
@@ -18,12 +20,12 @@ struct MouseEvent
   i16 WheelY;
   enum Button : i16
   {
+    NoButton,
     Mouse0,
     Mouse1,
     Mouse2,
     Mouse3,
     Mouse4,
-    MouseWheel,
   } Button_;
 };
 

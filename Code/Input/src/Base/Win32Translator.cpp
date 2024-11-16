@@ -1,5 +1,4 @@
 #include <Core/Assert/Assert.h>
-#include <Core/Helpers.h>
 #include <Input/Base/Translator.h>
 #include <Windows.h>
 #include <bit>
@@ -26,7 +25,8 @@ bool Input::Private::TranslateWin32_WM_INPUT(NativeEvent const event, InputEvent
 
   HRAWINPUT hraw = (HRAWINPUT)event.windows.LParam_;
   RAWINPUT  rawData{};
-  if (0 != GetRawInputData(hraw, RID_INPUT, &rawData, nullptr, sizeof(RAWINPUTHEADER)) || rawData.header.dwType == RIM_TYPEHID)
+  UINT      pcbSize = sizeof(RAWINPUT);
+  if (GetRawInputData(hraw, RID_INPUT, &rawData, &pcbSize, sizeof(RAWINPUTHEADER)) <= 0 || rawData.header.dwType == RIM_TYPEHID)
     return false;
 
   if (rawData.header.dwType == RIM_TYPEMOUSE)
@@ -47,8 +47,13 @@ bool Input::Private::TranslateWin32_WM_INPUT(NativeEvent const event, InputEvent
         {Kind::Mouse_Release, MouseEvent::Mouse3},
         {Kind::Mouse_Press, MouseEvent::Mouse4},
         {Kind::Mouse_Release, MouseEvent::Mouse4},
-        {Kind::Mouse_Press, MouseEvent::MouseWheel},
-        {Kind::Mouse_Press, MouseEvent::MouseWheel},
+        {Kind::Mouse_Wheel, MouseEvent::NoButton},
+        {Kind::Mouse_Wheel, MouseEvent::NoButton},
+        {Kind::Mouse_Move, MouseEvent::NoButton},
+        {Kind::Mouse_Move, MouseEvent::NoButton},
+        {Kind::Mouse_Move, MouseEvent::NoButton},
+        {Kind::Mouse_Move, MouseEvent::NoButton},
+        {Kind::Mouse_Move, MouseEvent::NoButton},
     };
     const RAWMOUSE& mouse = rawData.data.mouse;
     int const       index = std::countr_zero(mouse.usButtonFlags);
@@ -57,7 +62,7 @@ bool Input::Private::TranslateWin32_WM_INPUT(NativeEvent const event, InputEvent
     MouseEvent ev{};
     ev.Button_ = infos[index].Button_;
     ev.WheelY  = mouse.usButtonFlags & RI_MOUSE_WHEEL ? mouse.usButtonData : 0;
-    if (mouse.usFlags & MOUSE_MOVE_RELATIVE)
+    if (mouse.usFlags == MOUSE_MOVE_RELATIVE)
     {
       ev.MoveX_ = mouse.lLastX;
       ev.MoveY_ = mouse.lLastY;
@@ -87,8 +92,8 @@ bool Input::Private::TranslateWin32_WM_INPUT(NativeEvent const event, InputEvent
       ev.ScanCode_ = LOWORD(MapVirtualKeyEx(kbd.VKey, MAPVK_VK_TO_VSC_EX, kbdLayout));
     }
 
-    BYTE* kbdState{};
-    if (GetKeyboardState(kbdState) && ToUnicodeEx(kbd.VKey, ev.ScanCode_, kbdState, &ev.Char_, 1, GE_BIT(2), kbdLayout) <= 0)
+    BYTE kbdState[256];
+    if (GetKeyboardState(kbdState) && ToUnicodeEx(kbd.VKey, kbd.MakeCode, kbdState, &ev.Char_, 1, 0, kbdLayout) <= 0)
       ev.Char_ = 0;
 
     constexpr Kind kinds[] = {Kind::Key_Press, Kind::Key_Release};

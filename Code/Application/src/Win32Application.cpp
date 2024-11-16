@@ -2,8 +2,11 @@
 #include <Core/Assert/Assert.h>
 #include <Input/Base/Translator.h>
 #include <Windows.h>
+#include <hidusage.h>
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+bool InitRawInput();
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 {
@@ -34,6 +37,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
   );
   if (!verifyf(hwnd, "Couldn't create main window."))
     return -1;
+
+  if (!verifyf(InitRawInput(), "Couldn't initialize raw input."))
+    return -2;
 
   ShowWindow(hwnd, nCmdShow);
 
@@ -85,27 +91,35 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     Input::InputEvent ev;
     if (Input::TranslateNativeEvent(nev, ev))
     {
-      wchar_t const* kinds[] = {
-          L"Mouse_Press",
-          L"Mouse_Release",
-          L"Key_Press",
-          L"Key_Release",
+      char const* kinds[] = {
+          "Mouse_Press",
+          "Mouse_Release",
+          "Mouse_Move",
+          "Mouse_Wheel",
+          "Key_Press",
+          "Key_Release",
       };
       if (ev.Kind_ == Input::Kind::Key_Press || ev.Kind_ == Input::Kind::Key_Release)
       {
-        GE_LOGW(LogApplication, Core::Verbosity::Debug, L"%s %ud %c", kinds[(u8)ev.Kind_], ev.Keyboard_.ScanCode_, ev.Keyboard_.Char_);
+        if (ev.Keyboard_.Char_)
+          GE_LOG(LogApplication, Core::Verbosity::Debug, "%s %u %u %C", kinds[(u8)ev.Kind_], ev.Keyboard_.ScanCode_, ev.Keyboard_.NativeVirtualKey_, ev.Keyboard_.Char_);
+        else
+          GE_LOG(LogApplication, Core::Verbosity::Debug, "%s %u %u", kinds[(u8)ev.Kind_], ev.Keyboard_.ScanCode_, ev.Keyboard_.NativeVirtualKey_);
       }
       else
       {
         char const* buttons[] = {
-            "Mouse0"
-            "Mouse1"
-            "Mouse2"
-            "Mouse3"
-            "Mouse4"
-            "MouseWheel"};
+            "NoButton",
+            "Mouse0",
+            "Mouse1",
+            "Mouse2",
+            "Mouse3",
+            "Mouse4",
+            "MouseWheel",
+        };
         GE_LOG(LogApplication, Core::Verbosity::Debug,
-               "%s (%d, %d) %d",
+               "%s %s (%d, %d) %d",
+               kinds[(u8)ev.Kind_],
                buttons[(i16)ev.Mouse_.Button_],
                (i32)ev.Mouse_.MoveX_,
                (i32)ev.Mouse_.MoveY_,
@@ -116,4 +130,21 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
   }
   }
   return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+
+bool InitRawInput()
+{
+  RAWINPUTDEVICE rid[2] = {};
+
+  rid[0].dwFlags     = 0;
+  rid[0].usUsagePage = HID_USAGE_PAGE_GENERIC;
+  rid[0].usUsage     = HID_USAGE_GENERIC_MOUSE;
+  rid[0].hwndTarget  = NULL;
+
+  rid[1].dwFlags     = 0;
+  rid[1].usUsagePage = HID_USAGE_PAGE_GENERIC;
+  rid[1].usUsage     = HID_USAGE_GENERIC_KEYBOARD;
+  rid[1].hwndTarget  = NULL;
+
+  return RegisterRawInputDevices(rid, 2, sizeof(RAWINPUTDEVICE));
 }
