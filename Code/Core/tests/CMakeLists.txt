@@ -1,5 +1,7 @@
 include_guard()
 
+include("${PROJECT_SOURCE_DIR}/cmake/Utils.cmake")
+
 add_executable(ge_engine_core_tests
     "Main.cpp"
 
@@ -16,7 +18,4 @@ target_link_libraries(ge_engine_core_tests
         GE::Engine::UnitTestFramework
         GE::Engine::Core
 )
-add_custom_command(TARGET ge_engine_core_tests
-    POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:ge_engine_core> $<TARGET_FILE_DIR:ge_engine_core_tests>
-)
+ge_copyLibrariesOnPostBuild(ge_engine_core_tests GE::Engine::Core)
