@@ -8,8 +8,10 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 bool InitRawInput();
 
-int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
+int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nShowCmd)
 {
+  (void)hPrevInstance;
+
   wchar_t const CLASS_NAME[] = L"GE_MAIN_WINDOW_CLASS";
 
   WNDCLASS wc{};
@@ -41,7 +43,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
   if (!verifyf(InitRawInput(), "Couldn't initialize raw input."))
     return -2;
 
-  ShowWindow(hwnd, nCmdShow);
+  ShowWindow(hwnd, nShowCmd);
 
   bool shutdown = false;
   while (!shutdown)

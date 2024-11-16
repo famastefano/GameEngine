@@ -157,13 +157,13 @@ UNIT_TEST_SUITE(StringView)
     StringView<char> cs("1234");
     i32 const        csCopied = cs.Copy(vcs.Data(), cs.Size());
     UNIT_TEST_REQUIRE(csCopied == cs.Size());
-    UNIT_TEST_REQUIRE(memcmp(vcs.Data(), cs.Data(), cs.Size()) == 0);
+    UNIT_TEST_REQUIRE(memcmp(vcs.Data(), cs.Data(), (u64)cs.Size()) == 0);
 
     Vector<wchar_t>     vwcs(10, '\0');
     StringView<wchar_t> wcs(L"1234");
     i32 const           wcsCopied = wcs.Copy(vwcs.Data(), wcs.Size());
     UNIT_TEST_REQUIRE(wcsCopied == wcs.Size());
-    UNIT_TEST_REQUIRE(memcmp(vwcs.Data(), wcs.Data(), wcs.Size()) == 0);
+    UNIT_TEST_REQUIRE(memcmp(vwcs.Data(), wcs.Data(), (u64)wcs.Size()) == 0);
   }
 
   UNIT_TEST(StringView_CopySubstr)
@@ -172,13 +172,13 @@ UNIT_TEST_SUITE(StringView)
     StringView<char> cs("01234");
     i32 const        csCopied = cs.Copy(vcs.Data(), vcs.Size(), 1);
     UNIT_TEST_REQUIRE(csCopied == vcs.Size());
-    UNIT_TEST_REQUIRE(memcmp(vcs.Data(), cs.Data() + 1, vcs.Size()) == 0);
+    UNIT_TEST_REQUIRE(memcmp(vcs.Data(), cs.Data() + 1, (u64)vcs.Size()) == 0);
 
     Vector<wchar_t>     vwcs(2, '\0');
     StringView<wchar_t> wcs(L"01234");
     i32 const           wcsCopied = wcs.Copy(vwcs.Data(), vwcs.Size(), 1);
     UNIT_TEST_REQUIRE(wcsCopied == vwcs.Size());
-    UNIT_TEST_REQUIRE(memcmp(vwcs.Data(), wcs.Data() + 1, vwcs.Size()) == 0);
+    UNIT_TEST_REQUIRE(memcmp(vwcs.Data(), wcs.Data() + 1, (u64)vwcs.Size()) == 0);
   }
 
   UNIT_TEST(StringView_SubStrOfEmptyReturnsAnotherEmpty)
@@ -309,7 +309,7 @@ UNIT_TEST_SUITE(StringView)
     UNIT_TEST_REQUIRE_FALSE(wcs.Contains(L"Hello World Hello World"));
     UNIT_TEST_REQUIRE(wcs.Contains(L"lo Wo"));
     UNIT_TEST_REQUIRE(wcs.Contains(L"Hello World"));
-    for (wchar_t c : cs)
+    for (wchar_t c : wcs)
       UNIT_TEST_REQUIRE(wcs.Contains(c));
   }
 
@@ -363,13 +363,13 @@ UNIT_TEST_SUITE(StringView)
   {
     StringView<char> cs("Hello Hello Hello");
     UNIT_TEST_REQUIRE(cs.FindLastOf("o") == cs.Size() - 1);
-    UNIT_TEST_REQUIRE(cs.FindLastOf("Hello") == strlen("Hello ") * 2);
+    UNIT_TEST_REQUIRE(cs.FindLastOf("Hello") == (i32)strlen("Hello ") * 2);
     UNIT_TEST_REQUIRE(cs.FindLastOf(cs) == 0);
     UNIT_TEST_REQUIRE(cs.FindLastOf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA") == cs.NotFound);
 
     StringView<wchar_t> wcs(L"Hello Hello Hello");
     UNIT_TEST_REQUIRE(wcs.FindLastOf(L"o") == cs.Size() - 1);
-    UNIT_TEST_REQUIRE(wcs.FindLastOf(L"Hello") == wcslen(L"Hello ") * 2);
+    UNIT_TEST_REQUIRE(wcs.FindLastOf(L"Hello") == (i32)wcslen(L"Hello ") * 2);
     UNIT_TEST_REQUIRE(wcs.FindLastOf(wcs) == 0);
     UNIT_TEST_REQUIRE(wcs.FindLastOf(L"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA") == wcs.NotFound);
   }

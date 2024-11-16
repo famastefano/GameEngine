@@ -224,7 +224,7 @@ constexpr inline void Vector<T>::Realloc(i32 const newCapacity)
 
   if (Mem_)
   {
-    if (T* newMem = (T*)Allocator_->Realloc(Mem_, newCapacity * sizeof(T), alignof(T)))
+    if (T* newMem = (T*)Allocator_->Realloc(Mem_, newCapacity * (i64)sizeof(T), alignof(T)))
     {
       Mem_      = newMem;
       Size_     = currSize;
@@ -233,7 +233,7 @@ constexpr inline void Vector<T>::Realloc(i32 const newCapacity)
     }
   }
 
-  T* newMem = (T*)Allocator_->Alloc(newCapacity * sizeof(T), alignof(T));
+  T* newMem = (T*)Allocator_->Alloc(newCapacity * (i64)sizeof(T), alignof(T));
   checkf(newMem, "Couldn't allocate Vector memory.");
 
   if constexpr (!std::is_trivially_default_constructible_v<T>)
@@ -298,7 +298,7 @@ constexpr inline Vector<T>::Vector(i32 const initialSize, IAllocator* allocator)
     Size_ = Capacity_;
     if constexpr (std::is_trivially_default_constructible_v<T>)
     {
-      std::memset(Mem_, 0, AllocSize());
+      std::memset(Mem_, 0, (u64)AllocSize());
     }
     else
     {
@@ -422,11 +422,12 @@ constexpr inline void Vector<T>::Assign(i32 const newSize, U const& newValue)
   Size_ = newSize;
   if constexpr (CanFastInitialize<U>())
   {
-    std::memset(Mem_, (int)newValue, AllocSize());
+    std::memset(Mem_, (int)newValue, (u64)AllocSize());
   }
   else
   {
     for (T* item = begin(); item < end(); ++item)
+#pragma warning(suppress : 4'365) // 'initializing': conversion from '' to '', signed/unsigned mismatch
       new (item) T(newValue);
   }
 }
@@ -448,11 +449,12 @@ constexpr inline void Vector<T>::Assign(Iterator begin, Iterator end)
   constexpr bool canUseFastPath = std::is_trivially_copyable_v<T> && std::same_as<std::remove_cvref_t<Iterator>, T*>;
   if constexpr (canUseFastPath)
   {
-    std::memcpy(Mem_, begin, AllocSize());
+    std::memcpy(Mem_, begin, (u64)AllocSize());
   }
   else
   {
     for (T* item = Mem_; item < Mem_ + Size_; ++item)
+#pragma warning(suppress : 4'365) // 'initializing': conversion from '' to '', signed/unsigned mismatch
       new (item) T(*begin++);
   }
 }
@@ -583,7 +585,7 @@ constexpr inline i32 Vector<T>::Capacity() const
 template <typename T>
 constexpr inline i32 Vector<T>::AllocSize() const
 {
-  return Size() * sizeof(T);
+  return Size() * (i32)sizeof(T);
 }
 
 template <typename T>
@@ -917,12 +919,13 @@ constexpr inline bool Vector<T>::operator==(Vector<U> const& other)
 
   if constexpr (std::is_trivially_copyable_v<T> && std::is_trivially_copyable_v<U> && sizeof(T) == sizeof(U))
   {
-    return std::memcmp(Mem_, other.Data(), AllocSize()) == 0;
+    return std::memcmp(Mem_, other.Data(), (u64)AllocSize()) == 0;
   }
   else
   {
     for (i32 i = 0; i < Size(); ++i)
     {
+#pragma warning(suppress : 4'388) // '==': signed/unsigned mismatch
       if (!((*this)[i] == other[i]))
         return false;
     }

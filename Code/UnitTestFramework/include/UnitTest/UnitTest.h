@@ -37,12 +37,12 @@ extern std::atomic<int> GlobalFailedTestsCounter;
 } // namespace Private
 } // namespace UnitTest
 
-#define UNIT_TEST_SUITE(Name)                        \
-  namespace UnitTest::##Name::Private                \
-  {                                                  \
-    constexpr char const* InternalSuiteName = #Name; \
-  }                                                  \
-  namespace UnitTest::##Name
+#define UNIT_TEST_SUITE(Name)                      \
+  namespace UnitTest::Name::Private                \
+  {                                                \
+  constexpr char const* InternalSuiteName = #Name; \
+  }                                                \
+  namespace UnitTest::Name
 
 #define UNIT_TEST(Name)                                                  \
   class AutoRegisteringTest_##Name final : UnitTest::Private::TestBase   \

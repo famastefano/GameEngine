@@ -109,7 +109,7 @@ public:
 
   constexpr i32 AllocSize() const
   {
-    return Size() * sizeof(T);
+    return Size() * (i32)sizeof(T);
   }
 
   constexpr T* Data() const

@@ -7,15 +7,15 @@ UNIT_TEST_SUITE(Container)
 
   struct NullAllocator : Core::IAllocator
   {
-    void* Alloc(i64 const size, i32 const alignment)
+    void* Alloc(i64 const, i32 const)
     {
       return nullptr;
     }
-    void* Realloc(void* p, i64 const size, i32 const alignment)
+    void* Realloc(void*, i64 const, i32 const)
     {
       return nullptr;
     }
-    void Free(void* p, i32 const alignment)
+    void Free(void*, i32 const)
     {
     }
     bool IsMovable()
@@ -149,7 +149,7 @@ UNIT_TEST_SUITE(Container)
     UNIT_TEST_REQUIRE(v0.Size() == v1.Size());
     UNIT_TEST_REQUIRE(v0.Capacity() == v1.Capacity());
     UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
-    UNIT_TEST_REQUIRE(memcmp(v0.Data(), v1.Data(), v0.AllocSize()) == 0);
+    UNIT_TEST_REQUIRE(memcmp(v0.Data(), v1.Data(), (u64)v0.AllocSize()) == 0);
   }
   UNIT_TEST(Vector_TrivialType_MoveAssignFromEmpty)
   {
@@ -675,7 +675,7 @@ UNIT_TEST_SUITE(Container)
     UNIT_TEST_REQUIRE(v0.Size() == v1.Size());
     UNIT_TEST_REQUIRE(v0.Capacity() == v1.Capacity());
     UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
-    UNIT_TEST_REQUIRE(memcmp(v0.Data(), v1.Data(), v0.AllocSize()) == 0);
+    UNIT_TEST_REQUIRE(memcmp(v0.Data(), v1.Data(), (u64)v0.AllocSize()) == 0);
   }
   UNIT_TEST(Vector_NonTrivialCopyable_MoveAssignFromEmpty)
   {

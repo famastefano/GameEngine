@@ -44,7 +44,7 @@ int main(int argc, char** argv)
   }
   else
   {
-    Core::Vector<std::jthread> workers(std::thread::hardware_concurrency());
+    Core::Vector<std::jthread> workers((i32)std::thread::hardware_concurrency());
     std::atomic<int>           testId = 0;
     for (auto& worker : workers)
     {

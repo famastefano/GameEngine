@@ -26,7 +26,7 @@ UNIT_TEST_SUITE(Allocator)
     {
       void* p = Core::globalAllocator->Alloc(allocSize, 8);
       UNIT_TEST_REQUIRE(p);
-      SecureZeroMemory(p, allocSize);
+      SecureZeroMemory(p, (u64)allocSize);
       Core::globalAllocator->Free(p, 8);
     }
   }
@@ -37,7 +37,7 @@ UNIT_TEST_SUITE(Allocator)
       void* p = Core::globalAllocator->Alloc(align * 2, align);
       UNIT_TEST_REQUIRE(p);
       ((u8*)p)[align * 2 - 1] = 0xFF;
-      SecureZeroMemory(p, align * 2);
+      SecureZeroMemory(p, u64(align * 2));
       Core::globalAllocator->Free(p, align);
     }
   }
@@ -47,7 +47,7 @@ UNIT_TEST_SUITE(Allocator)
     {
       void* p = Core::globalAllocator->Alloc(iterations, 32);
       UNIT_TEST_REQUIRE(p);
-      SecureZeroMemory(p, iterations);
+      SecureZeroMemory(p, (u64)iterations);
       Core::globalAllocator->Free(p, 32);
     }
   }

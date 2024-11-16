@@ -16,6 +16,9 @@ void Log(LogCategoryBase& Category, Verbosity Verbosity, CharT const* fmt, va_li
 {
   constexpr i32 MAX_SZ = GE_CORE_LOGGING_STATIC_FMT_BUFFER_SIZE;
 
+  if((i32)Category.Verbosity_ > (i32)Verbosity)
+    return;
+
   va_list postFmt;
   va_copy(postFmt, args);
 
@@ -30,12 +33,12 @@ void Log(LogCategoryBase& Category, Verbosity Verbosity, CharT const* fmt, va_li
     CharT buf[MAX_SZ] = {};
     if constexpr (std::same_as<CharT, char>)
     {
-      vsnprintf(buf, MAX_SZ, fmt, postFmt);
+      vsnprintf(buf, (u64)MAX_SZ, fmt, postFmt);
       OutputDebugStringA(buf);
     }
     else
     {
-      _vsnwprintf_s(buf, MAX_SZ, requiredSz, fmt, postFmt);
+      _vsnwprintf_s(buf, (u64)MAX_SZ, (u64)requiredSz, fmt, postFmt);
       OutputDebugStringW(buf);
     }
     return;
@@ -44,12 +47,12 @@ void Log(LogCategoryBase& Category, Verbosity Verbosity, CharT const* fmt, va_li
   Vector<CharT> buf(requiredSz + 1);
   if constexpr (std::same_as<CharT, char>)
   {
-    vsnprintf(buf.Data(), MAX_SZ, fmt, postFmt);
+    vsnprintf(buf.Data(), (u64)MAX_SZ, fmt, postFmt);
     OutputDebugStringA(buf.Data());
   }
   else
   {
-    _vsnwprintf_s(buf.Data(), buf.Size(), requiredSz, fmt, postFmt);
+    _vsnwprintf_s(buf.Data(), (u64)buf.Size(), (u64)requiredSz, fmt, postFmt);
     OutputDebugStringW(buf.Data());
   }
 }

@@ -1,6 +1,7 @@
 #include <Core/Allocator/GlobalAllocator.h>
 #include <Core/Assert/Assert.h>
 #include <Windows.h>
+#include <bit>
 #include <new>
 
 static Core::GlobalAllocator globalAllocatorInstance;
@@ -24,40 +25,40 @@ constexpr void* FromAlignedPointer(void* p, i32 const alignment)
   return alignment <= MEMORY_ALLOCATION_ALIGNMENT ? p : ((void**)p)[-1];
 }
 
-void* GlobalAllocator::Alloc(i64 size, i32 const alignment)
+__declspec(allocator) __declspec(restrict) void* GlobalAllocator::Alloc(i64 size, i32 const alignment)
 {
-  checkf((alignment == 1 || !(alignment & 0x1)), "Alignment must be a power of 2.");
+  checkf(std::has_single_bit((u32)alignment), "Alignment must be a power of 2.");
   if (alignment <= MEMORY_ALLOCATION_ALIGNMENT)
-    return HeapAlloc(MemHandle, HEAP_ZERO_MEMORY, size);
+    return HeapAlloc(MemHandle, HEAP_ZERO_MEMORY, (u64)size);
 
-  i32 const   offset    = sizeof(void*) + (alignment - 1);
-  void* const allocated = HeapAlloc(MemHandle, HEAP_ZERO_MEMORY, size + offset);
+  i32 const   offset    = i32(sizeof(void*) + (alignment - 1));
+  void* const allocated = HeapAlloc(MemHandle, HEAP_ZERO_MEMORY, u64(size + offset));
   if (!allocated)
     return nullptr;
 
-  void* aligned         = ToAlignedPointer(allocated, alignment);
+  void* aligned         = ToAlignedPointer(allocated, (u64)alignment);
   ((void**)aligned)[-1] = allocated;
   return aligned;
 }
 
-void* GlobalAllocator::Realloc(void* toRealloc, i64 size, i32 const alignment)
+__declspec(allocator) __declspec(restrict) __declspec(noalias) void* GlobalAllocator::Realloc(void* toRealloc, i64 size, i32 const alignment)
 {
   checkf((alignment == 1 || !(alignment & 0x1)), "Alignment must be a power of 2.");
   if (alignment <= MEMORY_ALLOCATION_ALIGNMENT)
-    return HeapReAlloc(MemHandle, HEAP_REALLOC_IN_PLACE_ONLY | HEAP_ZERO_MEMORY, toRealloc, size);
+    return HeapReAlloc(MemHandle, HEAP_REALLOC_IN_PLACE_ONLY | HEAP_ZERO_MEMORY, toRealloc, (u64)size);
 
   void*     actualPtr   = FromAlignedPointer(toRealloc, alignment);
-  i32 const offset      = sizeof(void*) + (alignment - 1);
-  void*     reallocated = HeapReAlloc(MemHandle, HEAP_REALLOC_IN_PLACE_ONLY | HEAP_ZERO_MEMORY, actualPtr, size + offset);
+  i32 const offset      = i32(sizeof(void*) + (alignment - 1));
+  void*     reallocated = HeapReAlloc(MemHandle, HEAP_REALLOC_IN_PLACE_ONLY | HEAP_ZERO_MEMORY, actualPtr, u64(size + offset));
   if (!reallocated)
     return nullptr;
 
-  void* aligned         = ToAlignedPointer(reallocated, alignment);
+  void* aligned         = ToAlignedPointer(reallocated, (u64)alignment);
   ((void**)aligned)[-1] = reallocated;
   return aligned;
 }
 
-void GlobalAllocator::Free(void* p, i32 const alignment)
+__declspec(noalias) void GlobalAllocator::Free(void* p, i32 const alignment)
 {
   if (p)
   {
@@ -87,35 +88,35 @@ bool GlobalAllocator::OwnedByContainer()
 
 void* operator new(std::size_t count)
 {
-  return globalAllocatorInstance.Alloc(count, MEMORY_ALLOCATION_ALIGNMENT);
+  return globalAllocatorInstance.Alloc((i64)count, MEMORY_ALLOCATION_ALIGNMENT);
 }
 void* operator new[](std::size_t count)
 {
-  return globalAllocatorInstance.Alloc(count, MEMORY_ALLOCATION_ALIGNMENT);
+  return globalAllocatorInstance.Alloc((i64)count, MEMORY_ALLOCATION_ALIGNMENT);
 }
 void* operator new(std::size_t count, std::align_val_t al)
 {
-  return globalAllocatorInstance.Alloc(count, (i32)al);
+  return globalAllocatorInstance.Alloc((i64)count, (i32)al);
 }
 void* operator new[](std::size_t count, std::align_val_t al)
 {
-  return globalAllocatorInstance.Alloc(count, (i32)al);
+  return globalAllocatorInstance.Alloc((i64)count, (i32)al);
 }
 void* operator new(std::size_t count, std::nothrow_t const&) noexcept
 {
-  return globalAllocatorInstance.Alloc(count, MEMORY_ALLOCATION_ALIGNMENT);
+  return globalAllocatorInstance.Alloc((i64)count, MEMORY_ALLOCATION_ALIGNMENT);
 }
 void* operator new[](std::size_t count, std::nothrow_t const&) noexcept
 {
-  return globalAllocatorInstance.Alloc(count, MEMORY_ALLOCATION_ALIGNMENT);
+  return globalAllocatorInstance.Alloc((i64)count, MEMORY_ALLOCATION_ALIGNMENT);
 }
 void* operator new(std::size_t count, std::align_val_t al, std::nothrow_t const&) noexcept
 {
-  return globalAllocatorInstance.Alloc(count, (i32)al);
+  return globalAllocatorInstance.Alloc((i64)count, (i32)al);
 }
 void* operator new[](std::size_t count, std::align_val_t al, std::nothrow_t const&) noexcept
 {
-  return globalAllocatorInstance.Alloc(count, (i32)al);
+  return globalAllocatorInstance.Alloc((i64)count, (i32)al);
 }
 
 // operator delete

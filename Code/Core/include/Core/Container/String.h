@@ -80,7 +80,7 @@ public:
   {
     if (Super::Size() < other.Size() || Super::IsEmpty() || other.IsEmpty())
       return false;
-    return memcmp(Super::Data(), other.Data(), other.AllocSize()) == 0;
+    return memcmp(Super::Data(), other.Data(), (u64)other.AllocSize()) == 0;
   }
 
   constexpr bool StartsWith(CharT const c) const
@@ -92,8 +92,7 @@ public:
   {
     if (Super::Size() < other.Size() || Super::IsEmpty() || other.IsEmpty())
       return false;
-    auto* p = Super::Data() + Super::Size() - other.Size();
-    return memcmp(Super::Data() + Super::Size() - other.Size(), other.Data(), other.AllocSize()) == 0;
+    return memcmp(Super::Data() + Super::Size() - other.Size(), other.Data(), (u64)other.AllocSize()) == 0;
   }
 
   constexpr bool EndsWith(CharT const c) const
@@ -119,11 +118,11 @@ public:
     CharT const* p;
     if constexpr (std::same_as<CharT, char>)
     {
-      p = (CharT const*)memchr(Super::Data() + offset, c, Super::Size());
+      p = (CharT const*)memchr(Super::Data() + offset, c, (u64)Super::Size());
     }
     else
     {
-      p = wmemchr(Super::Data() + offset, c, Super::Size());
+      p = wmemchr(Super::Data() + offset, c, (u64)Super::Size());
     }
     return p ? i32(p - Super::Data()) : NotFound;
   }
@@ -144,7 +143,7 @@ public:
         return NotFound;
 
       CharT const* p = Super::Data() + foundPos;
-      if (memcmp(p, other.Data(), other.AllocSize()) == 0)
+      if (memcmp(p, other.Data(), (u64)other.AllocSize()) == 0)
         return foundPos;
 
       pos = foundPos + 1;
@@ -181,7 +180,7 @@ public:
 
     for (i32 i = Super::Size() - other.Size(); i >= offset; --i)
     {
-      if ((*this)[i] == other[0] && memcmp(Super::Data() + i, other.Data(), other.AllocSize()) == 0)
+      if ((*this)[i] == other[0] && memcmp(Super::Data() + i, other.Data(), (u64)other.AllocSize()) == 0)
         return i;
     }
     return NotFound;
@@ -189,7 +188,7 @@ public:
 
   constexpr bool operator==(StringView const other) const
   {
-    return Super::Size() == other.Size() && memcmp(Super::Data(), other.Data(), Super::AllocSize()) == 0;
+    return Super::Size() == other.Size() && memcmp(Super::Data(), other.Data(), (u64)Super::AllocSize()) == 0;
   }
 
   constexpr bool operator!=(StringView const other) const

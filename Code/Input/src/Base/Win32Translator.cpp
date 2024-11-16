@@ -64,8 +64,8 @@ bool Input::Private::TranslateWin32_WM_INPUT(NativeEvent const event, InputEvent
     ev.WheelY  = mouse.usButtonFlags & RI_MOUSE_WHEEL ? mouse.usButtonData : 0;
     if (mouse.usFlags == MOUSE_MOVE_RELATIVE)
     {
-      ev.MoveX_ = mouse.lLastX;
-      ev.MoveY_ = mouse.lLastY;
+      ev.MoveX_ = (i16)mouse.lLastX;
+      ev.MoveY_ = (i16)mouse.lLastY;
     }
     translated.Mouse_ = ev;
   }
