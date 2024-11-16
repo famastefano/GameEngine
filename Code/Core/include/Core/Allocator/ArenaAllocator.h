@@ -15,29 +15,29 @@ class ArenaAllocator : public IAllocator
 public:
   __declspec(allocator) __declspec(restrict) virtual void* Alloc(i64 const size, i32 const alignment) override
   {
-    check(!Allocated, "Memory already in use.");
-    check(size > Bytes, "Can't allocate more memory.");
-    check(alignment > Alignment, "Can't overalign a pointer.");
-    check((alignment != 1 && (alignment & 0x1) != 0), "Invalid alignment.");
+    checkf(!Allocated, "Memory already in use.");
+    checkf(size > Bytes, "Can't allocate more memory.");
+    checkf(alignment > Alignment, "Can't overalign a pointer.");
+    checkf((alignment != 1 && (alignment & 0x1) != 0), "Invalid alignment.");
     return Mem_;
   }
 
   __declspec(allocator) __declspec(restrict) __declspec(noalias) virtual void* Realloc(void* p, i64 const size, i32 const alignment) override
   {
-    check(p == Mem_, "Invalid pointer.");
-    check(Allocated, "Called Realloc without a pointer returned by a previous Alloc.");
-    check(size > Bytes, "Can't allocate more memory.");
-    check(alignment > Alignment, "Can't overalign a pointer.");
-    check((alignment != 1 && (alignment & 0x1) != 0), "Invalid alignment.");
+    checkf(p == Mem_, "Invalid pointer.");
+    checkf(Allocated, "Called Realloc without a pointer returned by a previous Alloc.");
+    checkf(size > Bytes, "Can't allocate more memory.");
+    checkf(alignment > Alignment, "Can't overalign a pointer.");
+    checkf((alignment != 1 && (alignment & 0x1) != 0), "Invalid alignment.");
     return p == Mem_ && size <= Bytes ? p : nullptr;
   }
 
   __declspec(noalias) virtual void Free(void* p, i32 const alignment) override
   {
-    check(Allocated, "Called Realloc without a pointer returned by a previous Alloc.");
-    check(size > Bytes, "Can't allocate more memory.");
-    check(alignment > Alignment, "Can't overalign a pointer.");
-    check((alignment != 1 && (alignment & 0x1) != 0), "Invalid alignment.");
+    checkf(Allocated, "Called Realloc without a pointer returned by a previous Alloc.");
+    checkf(size > Bytes, "Can't allocate more memory.");
+    checkf(alignment > Alignment, "Can't overalign a pointer.");
+    checkf((alignment != 1 && (alignment & 0x1) != 0), "Invalid alignment.");
   }
 
   bool IsMovable() override
