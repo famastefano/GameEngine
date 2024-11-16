@@ -13,8 +13,10 @@ add_library(GE::RootConfig ALIAS ge_root_config_target)
 target_compile_definitions(ge_root_config_target INTERFACE
     WIN32_LEAN_AND_MEAN
     NOMINMAX
+    UNICODE
     GE_BUILD_CONFIG_${GE_BUILD_CONFIG}
     GE_BUILD_ENABLE_MONOLITHIC=$<BOOL:${GE_BUILD_ENABLE_MONOLITHIC}>
+    GE_BUILD_EDITOR=$<BOOL:${GE_BUILD_EDITOR}>
 )
 target_compile_features(ge_root_config_target INTERFACE cxx_std_20)
 
@@ -29,4 +31,5 @@ add_subdirectory("Code/UnitTestFramework")
 add_subdirectory("Code/Core")
 add_subdirectory("Code/Input")
 
-# TODO: natvis should go in the output folder as we can't embed them for now
+# Runners
+add_subdirectory("Code/Application")
