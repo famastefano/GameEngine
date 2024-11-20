@@ -20,14 +20,14 @@ struct Vec3D
   f32           Length() const;
   constexpr f32 LengthSquared() const;
 
-  f32 CosAngleBetween(Vec3D const& other) const;
+  f32 CosAngleBetween(Vec3D const& Other) const;
 
-  constexpr f32   Dot(Vec3D const& other) const;
-  constexpr Vec3D Cross(Vec3D const& other) const;
+  constexpr f32   Dot(Vec3D const& Other) const;
+  constexpr Vec3D Cross(Vec3D const& Other) const;
 
   constexpr friend Vec3D operator+(Vec3D const& v, Vec3D const& u);
   constexpr friend Vec3D operator-(Vec3D const& v, Vec3D const& u);
   constexpr friend f32   operator*(Vec3D const& v, Vec3D const& u);
-  constexpr friend Vec3D operator*(Vec3D const& v, f32 const scalar);
+  constexpr friend Vec3D operator*(Vec3D const& v, f32 const Scalar);
 };
 } // namespace Math

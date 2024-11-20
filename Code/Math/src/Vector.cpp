@@ -33,17 +33,17 @@ constexpr f32 Vec3D::LengthSquared() const
 {
   return *this * *this;
 }
-f32 Vec3D::CosAngleBetween(Vec3D const& other) const
+f32 Vec3D::CosAngleBetween(Vec3D const& Other) const
 {
-  return Normalized() * other.Normalized();
+  return Normalized() * Other.Normalized();
 }
-constexpr f32 Vec3D::Dot(Vec3D const& other) const
+constexpr f32 Vec3D::Dot(Vec3D const& Other) const
 {
-  return Vec3D(*this) * other;
+  return Vec3D(*this) * Other;
 }
-constexpr Vec3D Vec3D::Cross(Vec3D const& other) const
+constexpr Vec3D Vec3D::Cross(Vec3D const& Other) const
 {
-  return {Y_ * other.Z_ - Z_ * other.Y_, Z_ * other.X_ - X_ * other.Z_, X_ * other.Y_ - Y_ * other.X_};
+  return {Y_ * Other.Z_ - Z_ * Other.Y_, Z_ * Other.X_ - X_ * Other.Z_, X_ * Other.Y_ - Y_ * Other.X_};
 }
 constexpr Vec3D operator+(Vec3D const& v, Vec3D const& u)
 {
@@ -57,8 +57,8 @@ constexpr f32 operator*(Vec3D const& v, Vec3D const& u)
 {
   return v.X_ * u.X_ + v.Y_ * u.Y_ + v.Z_ + u.Z_;
 }
-constexpr Vec3D operator*(Vec3D const& v, f32 const scalar)
+constexpr Vec3D operator*(Vec3D const& v, f32 const Scalar)
 {
-  return {v.X_ * scalar, v.Y_ * scalar, v.Z_ * scalar};
+  return {v.X_ * Scalar, v.Y_ * Scalar, v.Z_ * Scalar};
 }
 } // namespace Math
