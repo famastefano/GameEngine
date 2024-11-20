@@ -23,6 +23,8 @@ add_library(ge_engine_core ${GE_BUILD_ADD_LIBRARY_TYPE}
     "include/Core/Container/String.h"
     "include/Core/Container/Vector.h"
 
+    "include/Core/Functional/Delegate.h"
+
     "include/Core/Hash/Hash.h"
     "src/Hash/Hash.cpp"
 
