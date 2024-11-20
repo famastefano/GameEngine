@@ -795,7 +795,7 @@ constexpr inline T* Vector<T>::EmplaceBackUnsafe(Args&&... args)
 template <typename T>
 constexpr inline T* Vector<T>::Erase(T* position)
 {
-  checkf(begin() <= position && position <= end(), "Vector Erase(position) has an invalid position.");
+  checkf(!position || begin() <= position && position <= end(), "Vector Erase(position) has an invalid position.");
   if (IsEmpty() || position == end())
     return end();
   return Erase(position, position + 1);
