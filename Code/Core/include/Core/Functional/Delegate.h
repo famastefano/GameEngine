@@ -9,7 +9,7 @@ namespace Core
 template <typename... Args>
 class Delegate
 {
-  Core::FlatMap<u64, std::function<void(Args...)>> Listeners_;
+  Core::CompactFlatMap<u64, std::function<void(Args...)>> Listeners_;
 
 public:
   constexpr Delegate()                           = default;
