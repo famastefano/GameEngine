@@ -28,6 +28,7 @@ endif()
 # 3rd-party libs - Before any other project as those are self-contained and possibly consumed by other projects
 add_subdirectory("Code/ThirdParty/xxhash")
 add_subdirectory("Code/ThirdParty/RapidJson")
+add_subdirectory("Code/ThirdParty/glad")
 
 # Standalone unit test framework used by any other library
 add_subdirectory("Code/UnitTestFramework")
