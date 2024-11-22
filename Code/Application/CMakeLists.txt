@@ -22,6 +22,7 @@ target_link_libraries(ge_runner_win32
     INTERFACE GE::RootConfig
     PRIVATE GE::Engine::Core
     PRIVATE GE::Engine::Input
+    PRIVATE GE::ThirdParty::glad
 )
 
 ge_copyLibrariesOnPostBuild(ge_runner_win32 GE::Engine::Core GE::Engine::Input)

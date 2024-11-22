@@ -2,67 +2,67 @@
 #include <Core/Assert/Assert.h>
 #include <Input/Base/Translator.h>
 #include <Windows.h>
+#include <glad/glad.h>
 #include <hidusage.h>
 
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+wchar_t const CLASS_NAME[]  = L"GE_MAIN_WINDOW_CLASS";
+HDC           GDICtx        = NULL;
+HGLRC         Ctx           = NULL;
+HWND          MainWindowHnd = NULL;
+HINSTANCE     hInstance;
 
-bool InitRawInput();
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+bool             CreateOpenGLWindow(wchar_t const* Title, int const Width, int const Height, int const Depth, bool const Fullscreen);
+bool             InitRawInput();
+bool             InitRawInput();
+void             ResizeViewport(int width, int height);
+bool             InitOpenGL();
+void             Render();
+void             ShutdownOpenGL();
+
+struct EngineShutdownOnExit
+{
+  ~EngineShutdownOnExit()
+  {
+    ShutdownOpenGL();
+  }
+};
 
 int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nShowCmd)
 {
   (void)hPrevInstance;
 
-  wchar_t const CLASS_NAME[] = L"GE_MAIN_WINDOW_CLASS";
+  ::hInstance = hInstance;
 
-  WNDCLASS wc{};
-  wc.lpfnWndProc   = WindowProc;
-  wc.hInstance     = hInstance;
-  wc.lpszClassName = CLASS_NAME;
+  EngineShutdownOnExit _;
 
-  RegisterClass(&wc);
-
-  // Create the window.
-
-  HWND hwnd = CreateWindowEx(
-      0,                           // Optional window styles.
-      CLASS_NAME,                  // Window class
-      L"Learn to Program Windows", // Window text
-      WS_OVERLAPPEDWINDOW,         // Window style
-
-      // Size and position
-      CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
-
-      NULL,      // Parent window
-      NULL,      // Menu
-      hInstance, // Instance handle
-      NULL       // Additional application data
-  );
-  if (!verifyf(hwnd, "Couldn't create main window."))
+  if (!verifyf(CreateOpenGLWindow(L"Game Engine - OpenGL Rendering", 640, 480, 8, false), "Couldn't create main window."))
     return -1;
 
-  if (!verifyf(InitRawInput(), "Couldn't initialize raw input."))
+  if (!verifyf(InitOpenGL(), "Couldn't initialize OpenGL."))
     return -2;
 
-  ShowWindow(hwnd, nShowCmd);
+  if (!verifyf(InitRawInput(), "Couldn't initialize raw input."))
+    return -3;
 
-  bool shutdown = false;
-  while (!shutdown)
+  ShowWindow(MainWindowHnd, nShowCmd);
+
+  while (true)
   {
     MSG msg{};
     while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
     {
       if (msg.message == WM_QUIT)
-      {
-        shutdown = true;
-        break;
-      }
+        return msg.wParam;
 
       if (msg.message != WM_INPUT)
         TranslateMessage(&msg);
       DispatchMessage(&msg);
     }
+
+    Render();
+    SwapBuffers(GDICtx);
   }
-  return 0;
 }
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -82,51 +82,14 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     PostQuitMessage(0);
     return 0;
 
-  case WM_PAINT: {
-    PAINTSTRUCT ps;
-    HDC         hdc = BeginPaint(hwnd, &ps);
-    FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
-    EndPaint(hwnd, &ps);
+  case WM_SIZE:
+    ResizeViewport(LOWORD(lParam), HIWORD(lParam));
     return 0;
-  }
+
   case WM_INPUT: {
     Input::InputEvent ev;
     if (Input::TranslateNativeEvent(nev, ev))
     {
-      char const* kinds[] = {
-          "Mouse_Press",
-          "Mouse_Release",
-          "Mouse_Move",
-          "Mouse_Wheel",
-          "Key_Press",
-          "Key_Release",
-      };
-      if (ev.Kind_ == Input::Kind::Key_Press || ev.Kind_ == Input::Kind::Key_Release)
-      {
-        if (ev.Keyboard_.Char_)
-          GE_LOG(LogApplication, Core::Verbosity::Debug, "%s %u %u %C", kinds[(u8)ev.Kind_], ev.Keyboard_.ScanCode_, ev.Keyboard_.NativeVirtualKey_, ev.Keyboard_.Char_);
-        else
-          GE_LOG(LogApplication, Core::Verbosity::Debug, "%s %u %u", kinds[(u8)ev.Kind_], ev.Keyboard_.ScanCode_, ev.Keyboard_.NativeVirtualKey_);
-      }
-      else
-      {
-        char const* buttons[] = {
-            "NoButton",
-            "Mouse0",
-            "Mouse1",
-            "Mouse2",
-            "Mouse3",
-            "Mouse4",
-            "MouseWheel",
-        };
-        GE_LOG(LogApplication, Core::Verbosity::Debug,
-               "%s %s (%d, %d) %d",
-               kinds[(u8)ev.Kind_],
-               buttons[(i16)ev.Mouse_.Button_],
-               (i32)ev.Mouse_.MoveX_,
-               (i32)ev.Mouse_.MoveY_,
-               (i32)ev.Mouse_.WheelY);
-      }
     }
     break;
   }
@@ -149,4 +112,151 @@ bool InitRawInput()
   rid[1].hwndTarget  = NULL;
 
   return RegisterRawInputDevices(rid, 2, sizeof(RAWINPUTDEVICE));
+}
+
+void ResizeViewport(int width, int height)
+{
+  glViewport(0, 0, width, height); // Reset The Current Viewport
+}
+
+bool InitOpenGL()
+{
+  if (!gladLoadGL())
+    return false;
+
+  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  glClearDepth(1.0f);
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LEQUAL);
+  return true;
+}
+
+void Render()
+{
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void ShutdownOpenGL()
+{
+  ChangeDisplaySettings(NULL, 0);
+  ShowCursor(TRUE);
+
+  if (Ctx)
+  {
+    wglMakeCurrent(NULL, NULL);
+    wglDeleteContext(Ctx);
+  }
+
+  if (GDICtx)
+    ReleaseDC(MainWindowHnd, GDICtx);
+
+  if (MainWindowHnd)
+    DestroyWindow(MainWindowHnd);
+
+  UnregisterClass(CLASS_NAME, hInstance);
+}
+
+bool CreateOpenGLWindow(wchar_t const* Title, int const Width, int const Height, int const Depth, bool const Fullscreen)
+{
+  GLuint PixelFormat{};
+  DWORD  dwExStyle{};
+  DWORD  dwStyle{};
+  RECT   WindowRect = {
+        .left   = 0,
+        .top    = 0,
+        .right  = Width,
+        .bottom = Height,
+  };
+  WNDCLASS wc{
+      .style         = CS_HREDRAW | CS_VREDRAW | CS_OWNDC,
+      .lpfnWndProc   = (WNDPROC)WindowProc,
+      .hInstance     = hInstance,
+      .hIcon         = LoadIcon(NULL, IDI_WINLOGO),
+      .hCursor       = LoadCursor(NULL, IDC_ARROW),
+      .lpszClassName = CLASS_NAME,
+  };
+
+  if (!RegisterClass(&wc))
+    return false;
+
+  if (Fullscreen)
+  {
+    DEVMODE dmScreenSettings{};
+    dmScreenSettings.dmSize       = sizeof(dmScreenSettings);
+    dmScreenSettings.dmPelsWidth  = Width;
+    dmScreenSettings.dmPelsHeight = Height;
+    dmScreenSettings.dmBitsPerPel = Depth;
+    dmScreenSettings.dmFields     = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
+    if (ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
+      return false;
+  }
+
+  if (Fullscreen)
+  {
+    dwExStyle = WS_EX_APPWINDOW; // Window Extended Style
+    dwStyle   = WS_POPUP;        // Windows Style
+  }
+  else
+  {
+    dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE; // Window Extended Style
+    dwStyle   = WS_OVERLAPPEDWINDOW;                // Windows Style
+  }
+
+  AdjustWindowRectEx(&WindowRect, dwStyle, FALSE, dwExStyle); // Adjust Window To True Requested Size
+
+  MainWindowHnd = CreateWindowEx(dwExStyle,
+                                 CLASS_NAME,
+                                 Title,
+                                 dwStyle | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
+                                 0, 0,
+                                 WindowRect.right - WindowRect.left,
+                                 WindowRect.bottom - WindowRect.top,
+                                 NULL,
+                                 NULL,
+                                 hInstance,
+                                 NULL);
+  if (!MainWindowHnd)
+    return false;
+
+  static PIXELFORMATDESCRIPTOR pfd = // pfd Tells Windows How We Want Things To Be
+      {
+          sizeof(PIXELFORMATDESCRIPTOR), // Size Of This Pixel Format Descriptor
+          1,                             // Version Number
+          PFD_DRAW_TO_WINDOW |           // Format Must Support Window
+              PFD_SUPPORT_OPENGL |       // Format Must Support OpenGL
+              PFD_DOUBLEBUFFER,          // Must Support Double Buffering
+          PFD_TYPE_RGBA,                 // Request An RGBA Format
+          Depth,                         // Select Our Color Depth
+          0, 0, 0, 0, 0, 0,              // Color Bits Ignored
+          0,                             // No Alpha Buffer
+          0,                             // Shift Bit Ignored
+          0,                             // No Accumulation Buffer
+          0, 0, 0, 0,                    // Accumulation Bits Ignored
+          16,                            // 16Bit Z-Buffer (Depth Buffer)
+          0,                             // No Stencil Buffer
+          0,                             // No Auxiliary Buffer
+          PFD_MAIN_PLANE,                // Main Drawing Layer
+          0,                             // Reserved
+          0, 0, 0                        // Layer Masks Ignored
+      };
+
+  if (!(GDICtx = GetDC(MainWindowHnd)))
+    return false;
+
+  if (!(PixelFormat = ChoosePixelFormat(GDICtx, &pfd)))
+    return false;
+
+  if (!SetPixelFormat(GDICtx, PixelFormat, &pfd))
+    return false;
+
+  if (!(Ctx = wglCreateContext(GDICtx)))
+    return false;
+
+  if (!wglMakeCurrent(GDICtx, Ctx))
+    return false;
+
+  SetForegroundWindow(MainWindowHnd);
+  SetFocus(MainWindowHnd);
+
+  return true;
 }
