@@ -289,6 +289,15 @@ public:
     return Mem_.Data();
   }
 
+  constexpr CharT** PData()
+  {
+    return Mem_.PData();
+  }
+  constexpr CharT const** PData() const
+  {
+    return Mem_.PData();
+  }
+
   constexpr CharT* begin()
   {
     return Mem_.begin();

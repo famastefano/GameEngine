@@ -117,6 +117,11 @@ public:
     return Data_;
   }
 
+  constexpr T* const* PData() const
+  {
+    return &Data_;
+  }
+
   constexpr T* begin() const
   {
     return Data_;

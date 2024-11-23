@@ -90,6 +90,9 @@ public:
   constexpr T*       Data();
   constexpr T const* Data() const;
 
+  constexpr T**       PData();
+  constexpr T const** PData() const;
+
   constexpr T*       begin();
   constexpr T const* begin() const;
 
@@ -511,6 +514,18 @@ template <typename T>
 constexpr inline T const* Vector<T>::Data() const
 {
   return Mem_;
+}
+
+template <typename T>
+constexpr inline T** Vector<T>::PData()
+{
+  return &Mem_;
+}
+
+template <typename T>
+constexpr inline T const** Vector<T>::PData() const
+{
+  return &Mem_;
 }
 
 template <typename T>
