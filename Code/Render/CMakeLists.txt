@@ -2,8 +2,8 @@ include_guard()
 
 add_library(ge_engine_render ${GE_BUILD_ADD_LIBRARY_TYPE}
     "src/Shaders.cpp"
-
     "src/LogRender.cpp"
+    "src/RenderingSystem.cpp"
 )
 add_library(GE::Engine::Render ALIAS ge_engine_render)
 target_include_directories(ge_engine_render PUBLIC "include/")

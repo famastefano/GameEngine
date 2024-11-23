@@ -112,7 +112,7 @@ Core::String<char> Shader::GetInfoLog() const
 Shader::Shader(Kind Kind, Core::StringView<char> Source)
 {
   GLenum const shaderType = KindToGLType(Kind);
-  Id_                     = glCreateShader(shaderType);
+  Id_                     = glad_glCreateShader(shaderType);
 
   GLint const len = Source.Size();
   glShaderSource(Id_, 1, Source.PData(), &len);
@@ -121,7 +121,7 @@ Shader::Shader(Kind Kind, Core::StringView<char> Source)
   if (Status::Compiled != GetStatus())
     GE_LOG(LogRender, Core::Verbosity::Error, "Couldn't compile shader.\n%s", GetInfoLog().Data());
 }
-Shader::Shader(Kind Kind, Core::Vector<Core::StringView<char>> Sources)
+Shader::Shader(Kind Kind, Core::Span<Core::StringView<char>> Sources)
 {
   Core::Vector<char const*> srcs;
   srcs.Reserve(Sources.Size());
@@ -147,14 +147,15 @@ Shader::~Shader()
   glDeleteShader(Id_);
 }
 
-Program::Program(Core::Span<Shader> Shaders)
+Program::Program(Core::Span<Shader const*> Shaders)
 {
   Id_ = glCreateProgram();
   for (auto const& shader : Shaders)
-    glAttachShader(Id_, shader.GetId());
+    glAttachShader(Id_, shader->GetId());
   glLinkProgram(Id_);
 
   if (GetStatus() != Status::Compiled)
+    GE_LOG(LogRender, Core::Verbosity::Error, "Couldn't compile program.\n%s", GetInfoLog().Data());
 }
 Program::~Program()
 {

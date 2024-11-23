@@ -91,7 +91,7 @@ public:
   }
 
   explicit(Size_ != DynamicSize) constexpr Span(std::initializer_list<T> il) noexcept
-      : Span(il.begin(), i32(il.size()))
+      : Span((T*)il.begin(), i32(il.size()))
   {
   }
 

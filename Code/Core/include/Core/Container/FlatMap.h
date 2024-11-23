@@ -375,7 +375,7 @@ public:
   template <typename U = Key>
   constexpr Value* Find(U const& u)
   {
-    FlatMap const& selfConst = *this;
+    CompactFlatMap const& selfConst = *this;
     return const_cast<Value*>(selfConst.Find(u));
   }
 

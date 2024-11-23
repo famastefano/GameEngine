@@ -7,6 +7,8 @@
 
 namespace Render
 {
+class RenderingSystem;
+
 enum class Status
 {
   Invalid,
@@ -16,6 +18,8 @@ enum class Status
 
 class RENDER_API Shader
 {
+  friend class RenderingSystem;
+
   u32 Id_;
 
 public:
@@ -41,17 +45,23 @@ public:
 
   Core::String<char> GetInfoLog() const;
 
+protected:
   Shader(Kind Kind, Core::StringView<char> Source);
-  Shader(Kind Kind, Core::Vector<Core::StringView<char>> Sources);
+  Shader(Kind Kind, Core::Span<Core::StringView<char>> Sources);
+
+public:
   virtual ~Shader();
 };
 
 class RENDER_API Program
 {
+  friend class RenderingSystem;
   u32 Id_;
 
+protected:
+  Program(Core::Span<Shader const*> Shaders);
+
 public:
-  Program(Core::Span<Shader> Shaders);
   virtual ~Program();
 
   Status GetStatus() const;

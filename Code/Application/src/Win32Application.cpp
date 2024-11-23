@@ -1,45 +1,48 @@
 #include <Application/LogApplication.h>
 #include <Core/Assert/Assert.h>
 #include <Input/Base/Translator.h>
+#include <Render/RenderingSystem.h>
+#include <Render/Shaders/Shaders.h>
 #include <Windows.h>
-#include <glad/glad.h>
 #include <hidusage.h>
 
-wchar_t const CLASS_NAME[]  = L"GE_MAIN_WINDOW_CLASS";
-HDC           GDICtx        = NULL;
-HGLRC         Ctx           = NULL;
-HWND          MainWindowHnd = NULL;
-HINSTANCE     hInstance;
+wchar_t const CLASS_NAME[]           = L"GE_MAIN_WINDOW_CLASS";
+char const    VERTEX_SHADER_NAME[]   = "BasicVertexShader";
+char const    FRAGMENT_SHADER_NAME[] = "BasicFragmentShader";
+char const    PROGRAM_NAME[]         = "BasicProgram";
+HINSTANCE     hInstance{};
+HWND          MainWindowHnd{};
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-bool             CreateOpenGLWindow(wchar_t const* Title, int const Width, int const Height, int const Depth, bool const Fullscreen);
+bool             CreateRenderingWindow(wchar_t const* Title, int const Width, int const Height);
 bool             InitRawInput();
-bool             InitRawInput();
-void             ResizeViewport(int width, int height);
-bool             InitOpenGL();
-void             Render();
-void             ShutdownOpenGL();
 
 struct EngineShutdownOnExit
 {
   ~EngineShutdownOnExit()
   {
-    ShutdownOpenGL();
+    Render::RenderingSystem::Shutdown();
+
+    if (MainWindowHnd)
+      DestroyWindow(MainWindowHnd);
+
+    UnregisterClass(CLASS_NAME, hInstance);
   }
 };
 
-int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nShowCmd)
+int WINAPI wWinMain(_In_ HINSTANCE hInstance_, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nShowCmd)
 {
   (void)hPrevInstance;
+  (void)lpCmdLine;
 
-  ::hInstance = hInstance;
+  hInstance = hInstance_;
 
   EngineShutdownOnExit _;
 
-  if (!verifyf(CreateOpenGLWindow(L"Game Engine - OpenGL Rendering", 640, 480, 8, false), "Couldn't create main window."))
+  if (!verifyf(CreateRenderingWindow(L"Game Engine - OpenGL Drawing", 640, 480), "Couldn't create main window."))
     return -1;
 
-  if (!verifyf(InitOpenGL(), "Couldn't initialize OpenGL."))
+  if (!verifyf(Render::RenderingSystem::Init(MainWindowHnd, false), "Couldn't initialize Rendering System."))
     return -2;
 
   if (!verifyf(InitRawInput(), "Couldn't initialize raw input."))
@@ -47,21 +50,63 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 
   ShowWindow(MainWindowHnd, nShowCmd);
 
+  {
+
+    auto vertexShader = Render::RenderingSystem::CreateShader(VERTEX_SHADER_NAME, Render::Shader::Kind::VertexShader, R"(
+      #version 330 core
+      layout (location = 0) in vec3 aPos;
+      void main()
+      {
+        gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+      }
+      )");
+
+    auto fragmentShader = Render::RenderingSystem::CreateShader(FRAGMENT_SHADER_NAME, Render::Shader::Kind::FragmentShader, R"(
+      #version 330 core
+      out vec4 FragColor;
+      void main()
+      {
+        FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+      }
+      )");
+
+    Render::RenderingSystem::CreateProgram(PROGRAM_NAME, {vertexShader.get(), fragmentShader.get()});
+
+    // constexpr float const vertices[] = {
+    //     -0.5f, -0.5f, 0.0f,
+    //     0.5f, -0.5f, 0.0f,
+    //     0.0f, 0.5f, 0.0f};
+    //
+    // u32 VBO;
+    // glGenBuffers(1, &VBO);
+    // glGenVertexArrays(1, &VAO);
+    //
+    //// 0. copy our vertices array in a buffer for OpenGL to use
+    // glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    // glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    //// 1. then set the vertex attributes pointers
+    // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+    // glEnableVertexAttribArray(0);
+  }
+
   while (true)
   {
     MSG msg{};
     while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
     {
       if (msg.message == WM_QUIT)
-        return msg.wParam;
+        return (i32)msg.wParam;
 
       if (msg.message != WM_INPUT)
         TranslateMessage(&msg);
       DispatchMessage(&msg);
     }
 
-    Render();
-    SwapBuffers(GDICtx);
+    auto program = Render::RenderingSystem::FindProgram(PROGRAM_NAME);
+    if (!program->IsActive())
+      program->Activate();
+
+    Render::RenderingSystem::Render();
   }
 }
 
@@ -83,7 +128,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     return 0;
 
   case WM_SIZE:
-    ResizeViewport(LOWORD(lParam), HIWORD(lParam));
+    Render::RenderingSystem::ResizeViewport(LOWORD(lParam), HIWORD(lParam));
     return 0;
 
   case WM_INPUT: {
@@ -114,58 +159,15 @@ bool InitRawInput()
   return RegisterRawInputDevices(rid, 2, sizeof(RAWINPUTDEVICE));
 }
 
-void ResizeViewport(int width, int height)
+bool CreateRenderingWindow(wchar_t const* Title, int const Width, int const Height)
 {
-  glViewport(0, 0, width, height); // Reset The Current Viewport
-}
-
-bool InitOpenGL()
-{
-  if (!gladLoadGL())
-    return false;
-
-  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-  glClearDepth(1.0f);
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LEQUAL);
-  return true;
-}
-
-void Render()
-{
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-
-void ShutdownOpenGL()
-{
-  ChangeDisplaySettings(NULL, 0);
-  ShowCursor(TRUE);
-
-  if (Ctx)
-  {
-    wglMakeCurrent(NULL, NULL);
-    wglDeleteContext(Ctx);
-  }
-
-  if (GDICtx)
-    ReleaseDC(MainWindowHnd, GDICtx);
-
-  if (MainWindowHnd)
-    DestroyWindow(MainWindowHnd);
-
-  UnregisterClass(CLASS_NAME, hInstance);
-}
-
-bool CreateOpenGLWindow(wchar_t const* Title, int const Width, int const Height, int const Depth, bool const Fullscreen)
-{
-  GLuint PixelFormat{};
-  DWORD  dwExStyle{};
-  DWORD  dwStyle{};
-  RECT   WindowRect = {
-        .left   = 0,
-        .top    = 0,
-        .right  = Width,
-        .bottom = Height,
+  DWORD dwExStyle  = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
+  DWORD dwStyle    = WS_OVERLAPPEDWINDOW;
+  RECT  WindowRect = {
+       .left   = 0,
+       .top    = 0,
+       .right  = Width,
+       .bottom = Height,
   };
   WNDCLASS wc{
       .style         = CS_HREDRAW | CS_VREDRAW | CS_OWNDC,
@@ -178,29 +180,6 @@ bool CreateOpenGLWindow(wchar_t const* Title, int const Width, int const Height,
 
   if (!RegisterClass(&wc))
     return false;
-
-  if (Fullscreen)
-  {
-    DEVMODE dmScreenSettings{};
-    dmScreenSettings.dmSize       = sizeof(dmScreenSettings);
-    dmScreenSettings.dmPelsWidth  = Width;
-    dmScreenSettings.dmPelsHeight = Height;
-    dmScreenSettings.dmBitsPerPel = Depth;
-    dmScreenSettings.dmFields     = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
-    if (ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
-      return false;
-  }
-
-  if (Fullscreen)
-  {
-    dwExStyle = WS_EX_APPWINDOW; // Window Extended Style
-    dwStyle   = WS_POPUP;        // Windows Style
-  }
-  else
-  {
-    dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE; // Window Extended Style
-    dwStyle   = WS_OVERLAPPEDWINDOW;                // Windows Style
-  }
 
   AdjustWindowRectEx(&WindowRect, dwStyle, FALSE, dwExStyle); // Adjust Window To True Requested Size
 
@@ -216,43 +195,6 @@ bool CreateOpenGLWindow(wchar_t const* Title, int const Width, int const Height,
                                  hInstance,
                                  NULL);
   if (!MainWindowHnd)
-    return false;
-
-  static PIXELFORMATDESCRIPTOR pfd = // pfd Tells Windows How We Want Things To Be
-      {
-          sizeof(PIXELFORMATDESCRIPTOR), // Size Of This Pixel Format Descriptor
-          1,                             // Version Number
-          PFD_DRAW_TO_WINDOW |           // Format Must Support Window
-              PFD_SUPPORT_OPENGL |       // Format Must Support OpenGL
-              PFD_DOUBLEBUFFER,          // Must Support Double Buffering
-          PFD_TYPE_RGBA,                 // Request An RGBA Format
-          Depth,                         // Select Our Color Depth
-          0, 0, 0, 0, 0, 0,              // Color Bits Ignored
-          0,                             // No Alpha Buffer
-          0,                             // Shift Bit Ignored
-          0,                             // No Accumulation Buffer
-          0, 0, 0, 0,                    // Accumulation Bits Ignored
-          16,                            // 16Bit Z-Buffer (Depth Buffer)
-          0,                             // No Stencil Buffer
-          0,                             // No Auxiliary Buffer
-          PFD_MAIN_PLANE,                // Main Drawing Layer
-          0,                             // Reserved
-          0, 0, 0                        // Layer Masks Ignored
-      };
-
-  if (!(GDICtx = GetDC(MainWindowHnd)))
-    return false;
-
-  if (!(PixelFormat = ChoosePixelFormat(GDICtx, &pfd)))
-    return false;
-
-  if (!SetPixelFormat(GDICtx, PixelFormat, &pfd))
-    return false;
-
-  if (!(Ctx = wglCreateContext(GDICtx)))
-    return false;
-
-  if (!wglMakeCurrent(GDICtx, Ctx))
     return false;
 
   SetForegroundWindow(MainWindowHnd);
