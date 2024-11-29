@@ -21,8 +21,8 @@ target_compile_definitions(ge_root_config_target INTERFACE
 target_compile_features(ge_root_config_target INTERFACE cxx_std_20)
 
 if(${GE_BUILD_CONFIG} STREQUAL "DEBUG")
-    target_compile_options(ge_root_config_target INTERFACE /fsanitize=address)
-    target_link_options(ge_root_config_target INTERFACE /fsanitize=address)
+    target_compile_options(ge_root_config_target INTERFACE "/fsanitize=address")
+    target_link_options(ge_root_config_target INTERFACE "/fsanitize=address")
 endif()
 
 # 3rd-party libs - Before any other project as those are self-contained and possibly consumed by other projects
@@ -35,6 +35,10 @@ add_subdirectory("Code/UnitTestFramework")
 
 # Engine modules
 add_subdirectory("Code/Core")
+
+# An exception as EnTT allows to override the assert macro, so we need checkf()
+add_subdirectory("Code/ThirdParty/entt")
+
 add_subdirectory("Code/Shared")
 add_subdirectory("Code/Math")
 add_subdirectory("Code/Input")
