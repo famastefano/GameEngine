@@ -1,5 +1,5 @@
 #include <Core/Assert/Assert.h>
-#include <Render/Private/LogRender.h>
+#include <Render/Private/OpenGL_Helpers.h>
 #include <Render/Shaders/Shaders.h>
 #include <glad/glad.h>
 
@@ -18,7 +18,9 @@ Shader::Kind Shader::GetKind() const
   GLint param;
   glGetShaderiv(Id_, GL_SHADER_TYPE, &param);
 
-  if (glGetError() != GL_NO_ERROR)
+  auto const err = glGetError();
+  GE_RENDER_LOG_OPENGL_ERRORS(err);
+  if (err != GL_NO_ERROR)
     return Invalid;
 
   return GLTypeToKind((GLenum)param);
@@ -74,14 +76,20 @@ Status Shader::GetStatus() const
   GLint param;
 
   glGetShaderiv(Id_, GL_DELETE_STATUS, &param);
-  if (glGetError() != GL_NO_ERROR)
+
+  auto err = glGetError();
+  GE_RENDER_LOG_OPENGL_ERRORS(err);
+  if (err != GL_NO_ERROR)
     return Invalid;
 
   if (param)
     return MarkedForDeletion;
 
   glGetShaderiv(Id_, GL_COMPILE_STATUS, &param);
-  if (glGetError() != GL_NO_ERROR)
+
+  err = glGetError();
+  GE_RENDER_LOG_OPENGL_ERRORS(err);
+  if (err != GL_NO_ERROR)
     return Invalid;
 
   if (param)
@@ -97,13 +105,19 @@ Core::String<char> Shader::GetInfoLog() const
 
   GLint param;
   glGetShaderiv(Id_, GL_INFO_LOG_LENGTH, &param);
-  if (glGetError() != GL_NO_ERROR)
+
+  auto err = glGetError();
+  GE_RENDER_LOG_OPENGL_ERRORS(err);
+  if (err != GL_NO_ERROR)
     return {};
 
   GLint              len{};
   Core::String<char> log(param, '\0');
   glGetShaderInfoLog(Id_, param, &len, log.Data());
-  if (glGetError() != GL_NO_ERROR)
+
+  err = glGetError();
+  GE_RENDER_LOG_OPENGL_ERRORS(err);
+  if (err != GL_NO_ERROR)
     return {};
 
   log.Resize(len);
@@ -116,9 +130,17 @@ Shader::Shader(Kind Kind, Core::StringView<char> Source)
 
   GLint const len = Source.Size();
   glShaderSource(Id_, 1, Source.PData(), &len);
-  glCompileShader(Id_);
+  auto err = glGetError();
+  GE_RENDER_LOG_OPENGL_ERRORS(err);
 
-  if (Status::Compiled != GetStatus())
+  if (err == GL_NO_ERROR)
+  {
+    glCompileShader(Id_);
+    err = glGetError();
+    GE_RENDER_LOG_OPENGL_ERRORS(err);
+  }
+
+  if (err != GL_NO_ERROR)
     GE_LOG(LogRender, Core::Verbosity::Error, "Couldn't compile shader.\n%s", GetInfoLog().Data());
 }
 Shader::Shader(Kind Kind, Core::Span<Core::StringView<char>> Sources)
@@ -136,10 +158,18 @@ Shader::Shader(Kind Kind, Core::Span<Core::StringView<char>> Sources)
   GLenum const shaderType = KindToGLType(Kind);
   Id_                     = glCreateShader(shaderType);
 
-  glShaderSource(Id_, Sources.Size(), srcs.Data(), &lens[0]);
-  glCompileShader(Id_);
+  auto err = glGetError();
+  GE_RENDER_LOG_OPENGL_ERRORS(err);
+  if (err == GL_NO_ERROR)
+  {
+    glShaderSource(Id_, Sources.Size(), srcs.Data(), &lens[0]);
+    glCompileShader(Id_);
 
-  if (GetStatus() == Status::Compiled)
+    err = glGetError();
+    GE_RENDER_LOG_OPENGL_ERRORS(err);
+  }
+
+  if (err != GL_NO_ERROR)
     GE_LOG(LogRender, Core::Verbosity::Error, "Couldn't compile shader.\n%s", GetInfoLog().Data());
 }
 Shader::~Shader()
@@ -154,7 +184,10 @@ Program::Program(Core::Span<Shader const*> Shaders)
     glAttachShader(Id_, shader->GetId());
   glLinkProgram(Id_);
 
-  if (GetStatus() != Status::Compiled)
+  auto const err = glGetError();
+  GE_RENDER_LOG_OPENGL_ERRORS(err);
+
+  if (err != GL_NO_ERROR)
     GE_LOG(LogRender, Core::Verbosity::Error, "Couldn't compile program.\n%s", GetInfoLog().Data());
 }
 Program::~Program()
@@ -187,16 +220,15 @@ Status Program::GetStatus() const
 }
 bool Program::IsActive() const
 {
-  GLboolean isCurrentProgram;
-  glGetBooleanv(GL_CURRENT_PROGRAM, &isCurrentProgram);
-  if (glGetError() != GL_NO_ERROR)
-    return false;
-
-  return isCurrentProgram;
+  GLint currentId = 0;
+  glGetIntegerv(GL_CURRENT_PROGRAM, &currentId);
+  return i32(Id_) == currentId;
 }
 void Program::Activate()
 {
   glUseProgram(Id_);
+  auto const err = glGetError();
+  GE_RENDER_LOG_OPENGL_ERRORS(err);
 }
 Core::String<char> Program::GetInfoLog() const
 {

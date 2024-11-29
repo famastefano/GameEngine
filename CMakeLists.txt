@@ -35,6 +35,7 @@ add_subdirectory("Code/UnitTestFramework")
 
 # Engine modules
 add_subdirectory("Code/Core")
+add_subdirectory("Code/Shared")
 add_subdirectory("Code/Math")
 add_subdirectory("Code/Input")
 add_subdirectory("Code/Render")
