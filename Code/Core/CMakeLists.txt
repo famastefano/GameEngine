@@ -27,6 +27,8 @@ add_library(ge_engine_core ${GE_BUILD_ADD_LIBRARY_TYPE}
 
     "include/Core/Hash/Hash.h"
     "src/Hash/Hash.cpp"
+    "src/Hash/xxhash.h"
+    "src/Hash/xxhash.c"
 
     "include/Core/Iterator/ContiguousIterator.h"
 
@@ -43,10 +45,7 @@ add_library(ge_engine_core ${GE_BUILD_ADD_LIBRARY_TYPE}
 add_library(GE::Engine::Core ALIAS ge_engine_core)
 target_compile_definitions(ge_engine_core PRIVATE CORE_API_EXPORTS)
 target_include_directories(ge_engine_core PUBLIC "include/")
-target_link_libraries(ge_engine_core
-    INTERFACE GE::RootConfig
-    PRIVATE GE::ThirdParty::xxhash
-)
+target_link_libraries(ge_engine_core INTERFACE GE::RootConfig)
 
 if(${GE_BUILD_ENABLE_TESTS})
     add_subdirectory("tests")

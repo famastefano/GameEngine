@@ -1,6 +1,7 @@
 #include <Core/Hash/Hash.h>
 #include <Core/Assert/Assert.h>
-#include <xxhash/xxhash.h>
+
+#include "xxhash.h"
 
 u64 Core::CalculateHash(void const* p, i32 const bytes)
 {

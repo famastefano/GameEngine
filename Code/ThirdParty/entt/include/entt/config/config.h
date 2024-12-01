@@ -8,6 +8,7 @@
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
 #define ENTT_NOEXCEPTION
+#define ENTT_ID_TYPE u32
 #define ENTT_ASSERT(Condition, Format) checkf(Condition, Format)
 
 #if defined(__cpp_exceptions) && !defined(ENTT_NOEXCEPTION)

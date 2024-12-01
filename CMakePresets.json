@@ -16,7 +16,8 @@
             "binaryDir": "${sourceDir}/build/bin/${presetName}",
             "cacheVariables": {
                 "VS_INSTALLATION_PATH": "$env{VSINSTALLDIR}",
-                "CMAKE_CXX_FLAGS": "/Oi /arch:AVX2 /fp:strict /GR- /GF /sdl /guard:cf /utf-8 /diagnostics:caret /W4 /permissive- /volatile:iso /Zf /Zc:referenceBinding /Zc:rvalueCast /Zc:strictStrings /Zc:templateScope /Zc:inline /Zc:preprocessor /Zc:enumTypes /Zc:lambda /Zc:__cplusplus /Zc:externConstexpr /Zc:throwingNew /EHa- /w14165 /w44242 /w44254 /w44263 /w34265 /w34287 /w44296 /w44365 /w44388 /w44464 /w14545 /w14546 /w14547 /w14549 /w14555 /w34619 /w34640 /w24826 /w14905 /w14906 /w14928 /w45038",
+                "CMAKE_C_FLAGS": "/Oi /arch:AVX2 /fp:strict /GR- /GF /sdl /guard:cf /utf-8 /diagnostics:caret /w",
+                "CMAKE_CXX_FLAGS": "/std:c++20 /Oi /arch:AVX2 /fp:strict /GR- /GF /sdl /guard:cf /utf-8 /diagnostics:caret /permissive- /volatile:iso /Zf /Zc:referenceBinding /Zc:rvalueCast /Zc:strictStrings /Zc:templateScope /Zc:inline /Zc:preprocessor /Zc:enumTypes /Zc:lambda /Zc:__cplusplus /Zc:externConstexpr /Zc:throwingNew /w14165 /w44242 /w44254 /w44263 /w34265 /w34287 /w44296 /w44365 /w44388 /w44464 /w14545 /w14546 /w14547 /w14549 /w14555 /w34619 /w34640 /w24826 /w14905 /w14906 /w14928 /w45038 /wd4706 /wd4996",
                 "CMAKE_EXE_LINKER_FLAGS": "/machine:x64 /guard:cf"
             },
             "toolchainFile": "cmake/Windows.MSVC.toolchain.cmake",
@@ -24,6 +25,16 @@
                 "microsoft.com/VisualStudioSettings/CMake/1.0": {
                     "hostOS": [ "Windows" ]
                 }
+            }
+        },
+        {
+            "name": "profile",
+            "hidden": true,
+            "cacheVariables": {
+                "GE_PROFILING_ENABLED": true,
+                "TRACY_ENABLE": true,
+                "TRACY_ONLY_IPV4": true,
+                "TRACY_NO_EXIT": true
             }
         },
         {
@@ -58,11 +69,11 @@
         },
         {
             "name": "win64-dbg-all",
-            "inherits": [ "base", "dbg" ]
+            "inherits": [ "base", "dbg", "profile" ]
         },
         {
             "name": "win64-dev-all",
-            "inherits": [ "base", "dev" ]
+            "inherits": [ "base", "dev", "profile" ]
         },
         {
             "name": "win64-rel-all",
