@@ -14,6 +14,7 @@ GE_DEFINE_INLINE_LOG_CATEGORY(LogAssert, Core::Verbosity::Warning)
 #undef verifyOncef
 #undef verifyOnce
 #undef assert
+#undef unreachable
 
 #ifdef GE_BUILD_CONFIG_RELEASE // verify* macros can used inside if-statements, so we need to maintain the check
 #  define checkf(Condition, Format, ...)
@@ -22,6 +23,7 @@ GE_DEFINE_INLINE_LOG_CATEGORY(LogAssert, Core::Verbosity::Warning)
 #  define verify(Condition)               (Condition)
 #  define verifyOnce(Condition)           (Condition)
 #  define assert(Condition)
+#  define unreachable() __assume(0)
 #else
 #  define checkf(Condition, Format, ...)                                                                              \
     if (!(Condition))                                                                                                 \
@@ -49,4 +51,6 @@ GE_DEFINE_INLINE_LOG_CATEGORY(LogAssert, Core::Verbosity::Warning)
 #  define verifyOnce(Condition) verifyOncef(Condition, "")
 
 #  define assert(Condition) check(Condition)
+
+#define unreachable() checkf(false, "Unreachable code.")
 #endif
