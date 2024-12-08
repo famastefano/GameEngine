@@ -1,8 +1,9 @@
 include_guard()
 
 add_library(ge_engine_game_engine ${GE_BUILD_ADD_LIBRARY_TYPE}
-    "src/EventBase.cpp"
     "src/Environment.cpp"
+    "src/EventBase.cpp"
+    "src/GameEngine.cpp"
 )
 add_library(GE::Engine::Engine ALIAS ge_engine_game_engine)
 target_include_directories(ge_engine_game_engine PUBLIC "include/")

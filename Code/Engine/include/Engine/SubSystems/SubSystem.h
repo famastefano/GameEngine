@@ -6,6 +6,8 @@
 
 namespace Engine
 {
+class GameEngine;
+
 class ENGINE_API SubSystem
 {
 public:
@@ -17,11 +19,11 @@ public:
 };
 } // namespace Engine
 
-#define GE_IMPLEMENT_SUBSYSTEM(SubSystemName)         \
+#define GE_IMPLEMENT_SUBSYSTEM(SubSystem)             \
 public:                                               \
   inline Core::StringView<char> Name() const override \
   {                                                   \
-    return #SubSystemName;                            \
+    return #SubSystem;                                \
   }                                                   \
                                                       \
 private:
