@@ -35,8 +35,6 @@ add_subdirectory("Code/ThirdParty/tracy") # Tracy 1st, as we might add it to oth
 
 add_subdirectory("Code/ThirdParty/RapidJson")
 add_subdirectory("Code/ThirdParty/glad")
-add_subdirectory("Code/ThirdParty/entt")
-add_subdirectory("Code/ThirdParty/box2d")
 
 # Standalone unit test framework used by any other library made by me
 add_subdirectory("Code/UnitTestFramework")
@@ -45,6 +43,7 @@ add_subdirectory("Code/Shared")
 add_subdirectory("Code/Math")
 add_subdirectory("Code/Input")
 add_subdirectory("Code/Render")
+add_subdirectory("Code/Engine")
 
 # Runners
 add_subdirectory("Code/Application")
