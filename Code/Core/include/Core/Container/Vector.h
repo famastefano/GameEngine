@@ -19,7 +19,7 @@ template <typename T>
 class Vector
 {
 private:
-  inline static constexpr float ReallocRatio = 1.5f;
+  inline static constexpr f32 ReallocRatio = 1.5f;
 
   IAllocator* Allocator_;
   T*          Mem_;
