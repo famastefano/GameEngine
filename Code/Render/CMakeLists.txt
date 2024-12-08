@@ -12,7 +12,9 @@ target_compile_definitions(ge_engine_render PRIVATE RENDER_API_EXPORTS)
 target_link_libraries(ge_engine_render
     INTERFACE
         ge_root_config_target
-        GE::Engine::Shared
-    PUBLIC GE::Engine::Core
-    PRIVATE GE::ThirdParty::glad
+    PUBLIC
+        GE::Engine::Core
+        GE::Engine::Engine
+    PRIVATE
+        GE::ThirdParty::glad
 )

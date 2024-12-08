@@ -2,20 +2,20 @@
 
 #include <Core/Container/String.h>
 #include <Core/Definitions.h>
-#include <Shared/API.h>
+#include <Engine/API.h>
 
-namespace Shared
+namespace Engine
 {
-class SHARED_API ISubSystem
+class ENGINE_API SubSystem
 {
 public:
-  virtual ~ISubSystem() = default;
+  virtual ~SubSystem() = default;
 
   virtual void Tick(f32 DeltaTime) = 0;
 
   virtual Core::StringView<char> Name() const = 0;
 };
-} // namespace Shared
+} // namespace Engine
 
 #define GE_IMPLEMENT_SUBSYSTEM(SubSystemName)         \
 public:                                               \

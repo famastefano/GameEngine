@@ -1,12 +1,12 @@
 #pragma once
 
-#include <Shared/API.h>
+#include <Engine/API.h>
 
-namespace Shared
+namespace Engine
 {
 class IGameEngine;
 
-class SHARED_API IEnvironment
+class ENGINE_API IEnvironment
 {
 protected:
   static void RegisterGlobalEnvironment(IEnvironment* Environment);
@@ -16,6 +16,6 @@ public:
 
   virtual IGameEngine* GetGameEngine() = 0;
 };
-} // namespace Shared
+} // namespace Engine
 
-SHARED_API extern Shared::IEnvironment* GlobalEnvironment;
+ENGINE_API extern Engine::IEnvironment* GlobalEnvironment;

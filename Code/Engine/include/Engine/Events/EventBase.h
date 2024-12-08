@@ -1,11 +1,11 @@
 #pragma once
 
 #include <Core/Definitions.h>
-#include <Shared/API.h>
+#include <Engine/API.h>
 
-namespace Shared
+namespace Engine
 {
-class SHARED_API EventBase
+class ENGINE_API EventBase
 {
 protected:
   static i32 GenerateUniqueEventID();
@@ -15,11 +15,11 @@ public:
 
   virtual i32 GetID() const = 0;
 };
-} // namespace Shared
+} // namespace Engine
 
 /*
  * Example:
- * struct MyCustomEvent : public Shared::EventBase
+ * struct MyCustomEvent : public Engine::EventBase
  * {
  *    GE_IMPLEMENT_EVENT()
  *

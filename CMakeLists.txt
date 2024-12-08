@@ -39,11 +39,10 @@ add_subdirectory("Code/ThirdParty/glad")
 # Standalone unit test framework used by any other library made by me
 add_subdirectory("Code/UnitTestFramework")
 
-add_subdirectory("Code/Shared")
 add_subdirectory("Code/Math")
 add_subdirectory("Code/Input")
-add_subdirectory("Code/Render")
 add_subdirectory("Code/Engine")
+add_subdirectory("Code/Render")
 
 # Runners
 add_subdirectory("Code/Application")
