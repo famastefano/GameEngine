@@ -17,6 +17,9 @@ public:
   GameEngine(GameEngine const&)            = delete;
   GameEngine& operator=(GameEngine const&) = delete;
 
+  virtual void PreInitialize();
+  virtual void PostInitialize();
+
   virtual void Tick(f32 DeltaTime);
 };
 } // namespace Engine

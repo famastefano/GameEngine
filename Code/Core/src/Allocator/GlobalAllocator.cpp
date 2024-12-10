@@ -12,7 +12,7 @@ IAllocator* globalAllocator = &globalAllocatorInstance;
 
 static HANDLE MemHandle = GetProcessHeap() ? GetProcessHeap() : HeapCreate(0, 0, 0);
 
-constexpr void* ToAlignedPointer(void* p, u64 const alignment)
+constexpr static void* ToAlignedPointer(void* p, u64 const alignment)
 {
   u64 addr  = (u64)p;
   addr     += sizeof(void*) + alignment - 1;
@@ -20,7 +20,7 @@ constexpr void* ToAlignedPointer(void* p, u64 const alignment)
   return (void*)addr;
 }
 
-constexpr void* FromAlignedPointer(void* p, i32 const alignment)
+constexpr static void* FromAlignedPointer(void* p, i32 const alignment)
 {
   return alignment <= MEMORY_ALLOCATION_ALIGNMENT ? p : ((void**)p)[-1];
 }
@@ -31,8 +31,8 @@ __declspec(allocator) __declspec(restrict) void* GlobalAllocator::Alloc(i64 size
   if (alignment <= MEMORY_ALLOCATION_ALIGNMENT)
     return HeapAlloc(MemHandle, HEAP_ZERO_MEMORY, (u64)size);
 
-  i32 const   offset    = i32(sizeof(void*) + (alignment - 1));
-  void* const allocated = HeapAlloc(MemHandle, HEAP_ZERO_MEMORY, u64(size + offset));
+  i32 const   offset    = (i32)(sizeof(void*) + (alignment - 1));
+  void* const allocated = HeapAlloc(MemHandle, HEAP_ZERO_MEMORY, (u64)(size + offset));
   if (!allocated)
     return nullptr;
 

@@ -16,6 +16,9 @@ public:
   virtual void Tick(f32 DeltaTime) = 0;
 
   virtual Core::StringView<char> Name() const = 0;
+
+  virtual void PreInitialize();
+  virtual void PostInitialize();
 };
 } // namespace Engine
 

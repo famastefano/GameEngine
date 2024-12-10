@@ -1,4 +1,5 @@
 #include <Engine/GameEngine/GameEngine.h>
+#include <Engine/Private/LogEngine.h>
 #include <Engine/SubSystems/EngineSubSystem.h>
 #include <Engine/SubSystems/SubSystemRegistration.h>
 
@@ -25,8 +26,21 @@ GameEngine::~GameEngine()
   for (auto* subSystem : EngineSubSystems)
     delete subSystem;
 }
+void GameEngine::PreInitialize()
+{
+  GE_LOG(LogEngine, Core::Verbosity::Info, "Calling EngineSubSystem::PreInitialize");
+  for (auto* subSystem : EngineSubSystems)
+    subSystem->PreInitialize();
+}
+void GameEngine::PostInitialize()
+{
+  GE_LOG(LogEngine, Core::Verbosity::Info, "Calling EngineSubSystem::PostInitialize");
+  for (auto* subSystem : EngineSubSystems)
+    subSystem->PostInitialize();
+}
 void GameEngine::Tick(f32 DeltaTime)
 {
+  GE_LOG(LogEngine, Core::Verbosity::Debug, "Calling EngineSubSystem::Tick");
   for (auto* subSystem : EngineSubSystems)
     subSystem->Tick(DeltaTime);
 }

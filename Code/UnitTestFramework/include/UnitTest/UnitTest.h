@@ -15,6 +15,8 @@ namespace Private
 class TestBase
 {
 public:
+  virtual ~TestBase() = default;
+
   char const* SuiteName_;
   char const* TestName_;
 

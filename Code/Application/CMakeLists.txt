@@ -20,9 +20,7 @@ endif()
 target_include_directories(ge_runner_win32 PRIVATE "include/")
 target_link_libraries(ge_runner_win32
     INTERFACE GE::RootConfig
-    PRIVATE GE::Engine::Core
-    PRIVATE GE::Engine::Input
-    PRIVATE GE::Engine::Render
+    PRIVATE GE::Engine::Engine
 )
 
-ge_copyLibrariesOnPostBuild(ge_runner_win32 GE::Engine::Core GE::Engine::Input GE::Engine::Render)
+ge_copyLibrariesOnPostBuild(ge_runner_win32 GE::Engine::Engine)

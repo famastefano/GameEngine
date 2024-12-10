@@ -1,9 +1,18 @@
 include_guard()
 
-add_library(ge_engine_game_engine ${GE_BUILD_ADD_LIBRARY_TYPE}
-    "src/Environment.cpp"
-    "src/EventBase.cpp"
-    "src/GameEngine.cpp"
+# The Engine library will be linked by the runner executables, like ge_runner_win32.
+# This is necessary as with a monolithic build, where everything is statically linked,
+# MSVC link.exe will find MSVCRT.lib before ge_engine_core.lib, where we override new/delete to use the GlobalAllocator.
+# This issues a linker error, where multiple symbols are defined, thus making it impossible to build.
+# This lookup behaviour happens because the linker finds wWinMain (or whatever inside the .exe),
+# starts loading stuff, finds MSVCRT.lib, loads its symbols, then linka against the monolithic library, and fails.
+# https://developercommunity.visualstudio.com/t/visual-studio-2017-msvcrtlib-link-error/534202
+add_library(ge_engine_game_engine SHARED
+ "src/Environment.cpp"
+ "src/EventBase.cpp"
+ "src/GameEngine.cpp"
+ "src/LogEngine.cpp"
+ "src/SubSystem.cpp"
 )
 add_library(GE::Engine::Engine ALIAS ge_engine_game_engine)
 target_include_directories(ge_engine_game_engine PUBLIC "include/")
@@ -13,4 +22,5 @@ target_link_libraries(ge_engine_game_engine
         ge_root_config_target
     PUBLIC
         GE::Engine::Core
+        GE::Engine::Input
 )

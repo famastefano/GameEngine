@@ -1,11 +1,10 @@
 include_guard()
 
-add_library(ge_engine_input ${GE_BUILD_ADD_LIBRARY_TYPE}
+add_library(ge_engine_input
     "include/Input/API.h"
     
     "include/Input/Base/Events.h"
     "include/Input/Base/Translator.h"
-    
 )
 if(WIN32)
     target_sources(ge_engine_input PRIVATE "src/Base/Win32Translator.cpp")

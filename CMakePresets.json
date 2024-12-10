@@ -1,100 +1,111 @@
 {
-    "version": 9,
-    "cmakeMinimumRequired": {
-        "major": 3,
-        "minor": 31
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 30
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "architecture": {
+        "strategy": "external",
+        "value": "x64"
+      },
+      "binaryDir": "${sourceDir}/build/bin/${presetName}",
+      "cacheVariables": {
+        "VS_INSTALLATION_PATH": "$env{VSINSTALLDIR}",
+        "CMAKE_C_FLAGS": "/Oi /arch:AVX2 /fp:strict /GR- /GF /sdl /guard:cf /utf-8 /diagnostics:caret /w",
+        "CMAKE_CXX_FLAGS": "/std:c++20 /Oi /arch:AVX2 /fp:strict /GR- /GF /sdl /guard:cf /utf-8 /diagnostics:caret /permissive- /volatile:iso /Zf /Zc:referenceBinding /Zc:rvalueCast /Zc:strictStrings /Zc:templateScope /Zc:inline /Zc:preprocessor /Zc:enumTypes /Zc:lambda /Zc:__cplusplus /Zc:externConstexpr /Zc:throwingNew /w14165 /w44242 /w44254 /w44263 /w34265 /w34287 /w44296 /w44365 /w44388 /w44464 /w14545 /w14546 /w14547 /w14549 /w14555 /w34619 /w34640 /w24826 /w14905 /w14906 /w14928 /w45038 /wd4706 /wd4996 /wd4251 /wd4530",
+        "CMAKE_EXE_LINKER_FLAGS": "/MACHINE:x64 /GUARD:CF",
+        "CMAKE_SHARED_LINKER_FLAGS": "/MACHINE:x64 /GUARD:CF",
+        "CMAKE_STATIC_LINKER_FLAGS": "/MACHINE:x64 /GUARD:CF",
+        "CMAKE_LINK_DIRECTORIES_BEFORE": true
+      },
+      "toolchainFile": "cmake/Windows.MSVC.toolchain.cmake",
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "hostOS": [
+            "Windows"
+          ]
+        }
+      }
     },
-    "configurePresets": [
-        {
-            "name": "base",
-            "hidden": true,
-            "generator": "Ninja",
-            "architecture": {
-                "strategy": "external",
-                "value": "x64"
-            },
-            "binaryDir": "${sourceDir}/build/bin/${presetName}",
-            "cacheVariables": {
-                "VS_INSTALLATION_PATH": "$env{VSINSTALLDIR}",
-                "CMAKE_C_FLAGS": "/Oi /arch:AVX2 /fp:strict /GR- /GF /sdl /guard:cf /utf-8 /diagnostics:caret /w",
-                "CMAKE_CXX_FLAGS": "/std:c++20 /Oi /arch:AVX2 /fp:strict /GR- /GF /sdl /guard:cf /utf-8 /diagnostics:caret /permissive- /volatile:iso /Zf /Zc:referenceBinding /Zc:rvalueCast /Zc:strictStrings /Zc:templateScope /Zc:inline /Zc:preprocessor /Zc:enumTypes /Zc:lambda /Zc:__cplusplus /Zc:externConstexpr /Zc:throwingNew /w14165 /w44242 /w44254 /w44263 /w34265 /w34287 /w44296 /w44365 /w44388 /w44464 /w14545 /w14546 /w14547 /w14549 /w14555 /w34619 /w34640 /w24826 /w14905 /w14906 /w14928 /w45038 /wd4706 /wd4996",
-                "CMAKE_EXE_LINKER_FLAGS": "/machine:x64 /guard:cf"
-            },
-            "toolchainFile": "cmake/Windows.MSVC.toolchain.cmake",
-            "vendor": {
-                "microsoft.com/VisualStudioSettings/CMake/1.0": {
-                    "hostOS": [ "Windows" ]
-                }
-            }
-        },
-        {
-            "name": "profile",
-            "hidden": true,
-            "cacheVariables": {
-                "GE_PROFILING_ENABLED": true,
-                "TRACY_ENABLE": true,
-                "TRACY_ONLY_IPV4": true,
-                "TRACY_NO_EXIT": true
-            }
-        },
-        {
-            "name": "dbg",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "GE_BUILD_CONFIG": "DEBUG",
-                "GE_BUILD_ENABLE_TESTS": true,
-                "GE_BUILD_ENABLE_MONOLITHIC": false
-            }
-        },
-        {
-            "name": "dev",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
-                "GE_BUILD_CONFIG": "DEVELOPMENT",
-                "GE_BUILD_ENABLE_TESTS": true,
-                "GE_BUILD_ENABLE_MONOLITHIC": false
-            }
-        },
-        {
-            "name": "rel",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release",
-                "GE_BUILD_CONFIG": "RELEASE",
-                "GE_BUILD_ENABLE_TESTS": false,
-                "GE_BUILD_ENABLE_MONOLITHIC": true
-            }
-        },
-        {
-            "name": "win64-dbg-all",
-            "inherits": [ "base", "dbg", "profile" ]
-        },
-        {
-            "name": "win64-dev-all",
-            "inherits": [ "base", "dev", "profile" ]
-        },
-        {
-            "name": "win64-rel-all",
-            "inherits": [ "base", "rel" ]
-        }
-    ],
-    "buildPresets": [
-        {
-            "name": "win64-dbg-all",
-            "cleanFirst": false,
-            "configurePreset": "win64-dbg-all"
-        },
-        {
-            "name": "win64-rel-all",
-            "cleanFirst": false,
-            "configurePreset": "win64-rel-all"
-        },
-        {
-            "name": "win64-dev-all",
-            "cleanFirst": false,
-            "configurePreset": "win64-dev-all"
-        }
-    ]
+    {
+      "name": "profile",
+      "hidden": true,
+      "cacheVariables": {
+        "GE_PROFILING_ENABLED": true,
+        "TRACY_ENABLE": true,
+        "TRACY_ONLY_IPV4": true,
+        "TRACY_NO_EXIT": true,
+        "USE_MSVC_RUNTIME_LIBRARY_DLL": true
+      }
+    },
+    {
+      "name": "dbg",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "BUILD_SHARED_LIBS": true,
+        "GE_BUILD_CONFIG": "DEBUG",
+        "GE_BUILD_ENABLE_TESTS": true,
+        "GE_BUILD_ENABLE_MONOLITHIC": false,
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDebugDLL",
+        "MSVC_RUNTIME_LIBRARY": "MultiThreadedDebugDLL",
+        "ENABLE_ASAN": true
+      }
+    },
+    {
+      "name": "dev",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "BUILD_SHARED_LIBS": true,
+        "GE_BUILD_CONFIG": "DEVELOPMENT",
+        "GE_BUILD_ENABLE_TESTS": true,
+        "GE_BUILD_ENABLE_MONOLITHIC": false,
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDebugDLL",
+        "MSVC_RUNTIME_LIBRARY": "MultiThreadedDebugDLL",
+        "ENABLE_ASAN": true
+      }
+    },
+    {
+      "name": "rel",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "BUILD_SHARED_LIBS": false,
+        "GE_BUILD_CONFIG": "RELEASE",
+        "GE_BUILD_ENABLE_TESTS": false,
+        "GE_BUILD_ENABLE_MONOLITHIC": true,
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDLL",
+        "MSVC_RUNTIME_LIBRARY": "MultiThreadedDLL"
+      }
+    },
+    {
+      "name": "win64-dbg-all",
+      "inherits": [
+        "base",
+        "dbg",
+        "profile"
+      ]
+    },
+    {
+      "name": "win64-dev-all",
+      "inherits": [
+        "base",
+        "dev",
+        "profile"
+      ]
+    },
+    {
+      "name": "win64-rel-all",
+      "inherits": [
+        "base",
+        "rel"
+      ]
+    }
+  ]
 }
