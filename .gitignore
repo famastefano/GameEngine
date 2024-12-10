@@ -362,6 +362,9 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
+# JetBrains (CLion/Rider)
+.idea/
+
 # Custom
 
 /Code/ThirdParty/rapidjson/example
