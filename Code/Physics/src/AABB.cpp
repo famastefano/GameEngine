@@ -9,43 +9,60 @@ AABB::AABB()
     : AABB({0, 0}, 0)
 {
 }
-AABB::AABB(Math::Vec2Di Center, i32 Size)
-    : AABB(Center, {Size / 2, Size / 2})
+AABB::AABB(Math::Vec2Di const Center, i32 const Extent)
+    : AABB(Center, {Extent, Extent})
 {
 }
-AABB::AABB(Math::Vec2Di Center, Math::Vec2Di Extents)
+AABB::AABB(Math::Vec2Di const Center, Math::Vec2Di const Extents)
     : Center_(Center)
     , Extents_(Extents)
 {
+  checkf(Extents.X() * Extents.Y() >= 0, "Degenerate AABB.");
 }
-bool AABB::Overlaps(AABB Other, bool OnlyIntersection) const
+bool AABB::Contains(AABB const Other) const
 {
-  Math::Vec2Di const tl{Center_.X() - Extents_.X(), Center_.Y() - Extents_.Y()};
-  Math::Vec2Di const br{Center_.X() + Extents_.X(), Center_.Y() + Extents_.Y()};
+  /*
+   * Legend:
+   * C = center, d = half-diagonal, h = half-height, w = half-width
+   * ___________
+   * |\        |
+   * | \       |
+   * |  \d     |
+   * |   \   w |
+   * |    C----|
+   * |    |    |
+   * |    |h   |
+   * |    |    |
+   * |____|____|
+   */
 
-  Math::Vec2Di const otherTL{Other.Center_.X() - Other.Extents_.X(), Other.Center_.Y() - Other.Extents_.Y()};
-  Math::Vec2Di const otherBR{Other.Center_.X() + Other.Extents_.X(), Other.Center_.Y() + Other.Extents_.Y()};
+  // We use squared lengths to avoid sqrt
+  using Math::Vec2Di;
 
-  i32 const leftX   = std::max(tl.X(), otherTL.X());
-  i32 const rightX  = std::min(br.X(), otherBR.X());
-  i32 const topY    = std::max(tl.Y(), otherTL.Y());
-  i32 const bottomY = std::min(br.Y(), otherBR.Y());
+  Vec2Di const C0       = Center_;
+  Vec2Di const C1       = Other.Center_;
+  i32 const    d0       = (Vec2Di{C0.X() + Extents_.X(), C0.Y() + Extents_.Y()} - Vec2Di{C0}).LengthSquared();
+  i32 const    d1       = (Vec2Di{C1.X() + Other.Extents_.X(), C1.Y() + Other.Extents_.Y()} - Vec2Di{C1}).LengthSquared();
+  Vec2Di const distC0C1 = C0 - C1;
 
-  bool const overlaps = leftX < rightX && topY < bottomY;
-  if (!OnlyIntersection || !overlaps)
-    return overlaps;
+  // We are either touching on 1 vertex or even far apart
+  if (distC0C1.LengthSquared() >= d0 + d1)
+    return false;
 
-  Math::Vec2Di const otherVertices[4] = {
-      {Other.Center_.X() - Other.Extents_.X(), Other.Center_.Y() - Other.Extents_.Y()},
-      {Other.Center_.X() + Other.Extents_.X(), Other.Center_.Y() - Other.Extents_.Y()},
-      {Other.Center_.X() + Other.Extents_.X(), Other.Center_.Y() + Other.Extents_.Y()},
-      {Other.Center_.X() - Other.Extents_.X(), Other.Center_.Y() + Other.Extents_.Y()},
-  };
-  bool contained  = Contains(otherVertices[0]);
-  contained      &= Contains(otherVertices[1]);
-  contained      &= Contains(otherVertices[2]);
-  contained      &= Contains(otherVertices[3]);
-  return !contained;
+  i32 const w0 = Extents_.X() * Extents_.X();
+  i32 const w1 = Other.Extents_.X() * Other.Extents_.X();
+  i32 const h0 = Extents_.Y() * Extents_.Y();
+  i32 const h1 = Other.Extents_.Y() * Other.Extents_.Y();
+
+  i32 const  maxH      = std::max(h0, h1);
+  i32 const  minH      = std::min(h0, h1);
+  i32 const  maxW      = std::max(w0, w1);
+  i32 const  minW      = std::min(w0, w1);
+  bool const contained = abs(distC0C1.X()) <= abs(maxW - minW)
+                      && abs(distC0C1.Y()) <= abs(maxH - minH)
+                      // Edge-case where C0 == C1
+                      && (w0 <= w1 && h0 <= h1 || w1 <= w0 && h1 <= h0);
+  return contained;
 }
 bool AABB::Contains(Math::Vec2Di const Point) const
 {
@@ -66,7 +83,7 @@ AABB AABB::CalculateAABB(Core::Span<Math::Vec2Di const> Points)
     max.Y() = std::max(max.Y(), p.Y());
   }
 
-  Math::Vec2Di center  = (max + min);
+  Math::Vec2Di center  = max + min;
   center.X()          /= 2;
   center.Y()          /= 2;
 
@@ -74,7 +91,7 @@ AABB AABB::CalculateAABB(Core::Span<Math::Vec2Di const> Points)
   extents.X()          /= 2;
   extents.Y()          /= 2;
 
-  return AABB(center, extents);
+  return {center, extents};
 }
 AABB AABB::CalculateAABB(Core::Span<const AABB> AABBs)
 {
@@ -95,7 +112,7 @@ AABB AABB::CalculateAABB(Core::Span<const AABB> AABBs)
     max.Y() = std::max(max.Y(), box.Center_.Y() + box.Extents_.Y());
   }
 
-  Math::Vec2Di center  = (max + min);
+  Math::Vec2Di center  = max + min;
   center.X()          /= 2;
   center.Y()          /= 2;
 
@@ -103,6 +120,15 @@ AABB AABB::CalculateAABB(Core::Span<const AABB> AABBs)
   extents.X()          /= 2;
   extents.Y()          /= 2;
 
-  return AABB(center, extents);
+  return {center, extents};
+}
+i32 AABB::Area() const
+{
+  /*
+   *  Extents_.X() = a, Extents_.Y() = b
+   *  w = 2a, h = 2b
+   *  Area = (w*h)/2 = (2a*2b)/2 = 4ab/2 = 2ab
+   */
+  return Extents_.X() * Extents_.Y() * 2;
 }
 } // namespace Physics
