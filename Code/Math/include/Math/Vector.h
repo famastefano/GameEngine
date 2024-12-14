@@ -62,13 +62,45 @@ struct Vec
   {
     return *this * *this;
   }
-  T CosAngleBetween(Vec const& Other) const
+  decltype(auto) Cosine(Vec const& Other) const
   {
-    return Normalized() * Other.Normalized();
+    // Due to integer division we might end up with cos(v, u) = 0, while they aren't perpendicular at all
+    if constexpr (std::is_integral_v<T>)
+      return (f32)Dot(Other) / (Length() * Other.Length());
+    else
+      return Dot(Other) / (Length() * Other.Length());
+  }
+  // Faster alternative if you only care about angles of 90 degrees, as it returns values between 0 and 1
+  decltype(auto) CosineSquared(Vec const& Other) const
+  {
+    // Due to integer division we might end up with cos(v, u) = 0, while they aren't perpendicular at all
+    if constexpr (std::is_integral_v<T>)
+      return (f32)(Dot(Other) * Dot(Other)) / (LengthSquared() * Other.LengthSquared());
+    else
+      return (Dot(Other) * Dot(Other)) / (LengthSquared() * Other.LengthSquared());
   }
   constexpr T Dot(Vec const& Other) const
   {
-    return Vec(*this) * Other;
+    return *this * Other;
+  }
+  constexpr Vec Cross(Vec const& Other) const
+  {
+    static_assert(Dim == 2 || Dim == 3);
+    if constexpr (Dim == 2)
+    {
+      /* (v1 v2
+       *  w1 w2 )
+       */
+      return {X() * Other.Y(), Y() * Other.X()};
+    }
+    else
+    {
+      /* ( i  j  k
+       *  v1 v2 v3
+       *  w1 w2 w3 )
+       */
+      return {(Y() * Other.Z()) - (Z() * Other.Y()), (Z() * Other.X()) - (X() * Other.Z()), (X() * Other.Y()) - (Y() * Other.X())};
+    }
   }
   friend constexpr Vec operator+(Vec const& v, Vec const& u)
   {
@@ -86,10 +118,10 @@ struct Vec
   }
   friend constexpr T operator*(Vec const& v, Vec const& u)
   {
-    Vec cpy;
+    T r = 0;
     for (i32 i = 0; i < Dim; ++i)
-      cpy.Elements_[i] = v.Elements_[i] * u.Elements_[i];
-    return cpy;
+      r = v.Elements_[i] * u.Elements_[i];
+    return r;
   }
   friend constexpr Vec operator*(Vec const& v, T const Scalar)
   {
@@ -100,8 +132,8 @@ struct Vec
   }
   friend constexpr bool operator==(Vec const& v, Vec const& u)
   {
-    for(i32 i = 0; i < Dim; ++i)
-      if(v.Elements_[i] != u.Elements_[i])
+    for (i32 i = 0; i < Dim; ++i)
+      if (v.Elements_[i] != u.Elements_[i])
         return false;
 
     return true;
@@ -164,4 +196,10 @@ using Vec1Di = Vec<i32, 1>;
 using Vec2Di = Vec<i32, 2>;
 
 using Vec3Di = Vec<i32, 3>;
+
+using Vec1Df = Vec<f32, 1>;
+
+using Vec2Df = Vec<f32, 2>;
+
+using Vec3Df = Vec<f32, 3>;
 } // namespace Math
