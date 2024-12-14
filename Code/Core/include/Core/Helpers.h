@@ -2,4 +2,5 @@
 
 #define GE_BIT(Bit) 1ull << Bit
 
-#define GE_STRINGIFY(Symbol) #Symbol
+#define GE_IMPL_STRINGIFY_HELPER(x) #x
+#define GE_STRINGIFY(Symbol)        GE_IMPL_STRINGIFY_HELPER(Symbol)
