@@ -7,7 +7,7 @@ namespace Engine
 {
 namespace
 {
-bool TranslateWin32_WM_INPUT(NativeEvent const Event, InputEvent& Translated)
+bool TranslateWin32_WM_INPUT(NativeEvent const Event, EventInput& Translated)
 {
   if (GET_RAWINPUT_CODE_WPARAM(Event.Windows_.WParam_) != RIM_INPUT)
     return false;
@@ -93,7 +93,7 @@ bool TranslateWin32_WM_INPUT(NativeEvent const Event, InputEvent& Translated)
 }
 } // namespace
 
-bool TranslateNativeEvent(NativeEvent const Event, InputEvent& Translated)
+bool TranslateNativeEvent(NativeEvent const Event, EventInput& Translated)
 {
   switch (Event.Windows_.Message_)
   {

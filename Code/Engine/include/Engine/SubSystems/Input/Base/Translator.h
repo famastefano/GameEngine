@@ -20,5 +20,5 @@ struct NativeEvent
   };
 };
 
-ENGINE_API bool TranslateNativeEvent(NativeEvent const event, InputEvent& Translated);
+ENGINE_API bool TranslateNativeEvent(NativeEvent const event, EventInput& Translated);
 } // namespace Input

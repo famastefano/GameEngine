@@ -34,13 +34,14 @@ void Log(LogCategoryBase& Category, Verbosity Verbosity, CharT const* fmt, va_li
     if constexpr (std::same_as<CharT, char>)
     {
       vsnprintf(buf, (u64)MAX_SZ, fmt, postFmt);
-      OutputDebugStringA(buf);
+      fwrite(buf, sizeof(char), requiredSz, stdout);
     }
     else
     {
       _vsnwprintf_s(buf, (u64)MAX_SZ, (u64)requiredSz, fmt, postFmt);
-      OutputDebugStringW(buf);
+      fwrite(buf, sizeof(wchar_t), requiredSz, stdout);
     }
+    fflush(stdout);
     return;
   }
 
@@ -48,13 +49,14 @@ void Log(LogCategoryBase& Category, Verbosity Verbosity, CharT const* fmt, va_li
   if constexpr (std::same_as<CharT, char>)
   {
     vsnprintf(buf.Data(), (u64)MAX_SZ, fmt, postFmt);
-    OutputDebugStringA(buf.Data());
+    fwrite(buf.Data(), sizeof(char), buf.AllocSize(), stdout);
   }
   else
   {
     _vsnwprintf_s(buf.Data(), (u64)buf.Size(), (u64)requiredSz, fmt, postFmt);
-    OutputDebugStringW(buf.Data());
+    fwrite(buf.Data(), sizeof(wchar_t), buf.AllocSize(), stdout);
   }
+  fflush(stdout);
 }
 
 void Log(LogCategoryBase& Category, Verbosity Verbosity, char const* fmt, ...)

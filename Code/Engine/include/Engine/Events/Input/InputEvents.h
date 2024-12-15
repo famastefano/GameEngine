@@ -36,7 +36,7 @@ struct KeyboardEvent
   wchar_t Char_;
 };
 
-struct InputEvent : EventBase
+struct EventInput : EventBase
 {
   GE_IMPLEMENT_EVENT(InputEvent)
 

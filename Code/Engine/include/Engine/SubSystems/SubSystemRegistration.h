@@ -20,11 +20,11 @@ enum class SubSystemType
 ENGINE_API void RegisterSubSystemFactoryFn(SubSystemType const Type, SubSystemFactoryFn Fn);
 } // namespace Engine
 
-#define GE_REGISTER_SUBSYSTEM(Type, SubSystemType)                                               \
-  static struct AutoRegisterSubSystem_##SubSystemType                                                   \
-  {                                                                                          \
-    AutoRegisterSubSystem_##SubSystemType()                                                      \
-    {                                                                                        \
+#define GE_REGISTER_SUBSYSTEM(Type, SubSystemType)                                                   \
+  static struct AutoRegisterSubSystem_##SubSystemType                                                \
+  {                                                                                                  \
+    AutoRegisterSubSystem_##SubSystemType()                                                          \
+    {                                                                                                \
       Engine::RegisterSubSystemFactoryFn(Type, +[]() -> SubSystem* { return new SubSystemType(); }); \
-    }                                                                                        \
+    }                                                                                                \
   } g_AutoRegisterSubSystem_##SubSystemType##_Instance;

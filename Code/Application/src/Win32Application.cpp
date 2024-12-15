@@ -88,7 +88,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
   break;
 
   case WM_INPUT: {
-    Engine::InputEvent ev;
+    Engine::EventInput ev;
     if (TranslateNativeEvent(nev, ev))
       gWin32Env->Engine_.EnqueueEvent(ev);
     break;
