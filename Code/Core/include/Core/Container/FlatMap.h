@@ -227,6 +227,12 @@ public:
     return const_cast<Value*>(selfConst.Find(u));
   }
 
+  constexpr void Reserve(i32 Capacity)
+  {
+    Keys_.Reserve(Capacity);
+    Values_.Reserve(Capacity);
+  }
+
   template <typename U = Key, typename... Args>
   constexpr bool TryEmplace(U&& key, Args&&... args)
   {
@@ -258,10 +264,10 @@ public:
   }
 };
 
-template <typename Key, typename Value, int Kind>
+template <typename KV, typename Key, typename Value, int Kind>
 class CompactFlatMapIterator;
 
-template <typename Key, typename Value, int Kind>
+template <typename KV, typename Key, typename Value, int Kind>
 class CompactFlatMapFakeContainer;
 
 template <Sortable Key, typename Value>
@@ -304,37 +310,37 @@ public:
   {
   }
 
-  CompactFlatMapIterator<Key const&, Value&, Private::KeyValueIterator> begin()
+  CompactFlatMapIterator<KeyValue, Key const, Value, Private::KeyValueIterator> begin()
   {
     return {Items_.begin()};
   }
 
-  CompactFlatMapIterator<Key const&, Value const&, Private::KeyValueIterator> begin() const
+  CompactFlatMapIterator<KeyValue, Key const, Value const, Private::KeyValueIterator> begin() const
   {
-    return {Items_.begin()};
+    return Items_.begin();
   }
 
-  CompactFlatMapIterator<Key const&, Value&, Private::KeyValueIterator> end()
-  {
-    return {Items_.end()};
-  }
-
-  CompactFlatMapIterator<Key const&, Value const&, Private::KeyValueIterator> end() const
+  CompactFlatMapIterator<KeyValue, Key const, Value, Private::KeyValueIterator> end()
   {
     return {Items_.end()};
   }
 
-  constexpr CompactFlatMapFakeContainer<Key const, Value, Private::KeyIterator> Keys() const
+  CompactFlatMapIterator<KeyValue, Key const, Value const, Private::KeyValueIterator> end() const
+  {
+    return {Items_.end()};
+  }
+
+  constexpr CompactFlatMapFakeContainer<KeyValue, Key const, Value, Private::KeyIterator> Keys() const
   {
     return {begin(), end()};
   }
 
-  constexpr CompactFlatMapFakeContainer<Key const, Value, Private::ValueIterator> Values()
+  constexpr CompactFlatMapFakeContainer<KeyValue, Key const, Value, Private::ValueIterator> Values()
   {
     return {begin(), end()};
   }
 
-  constexpr CompactFlatMapFakeContainer<Key const, Value const, Private::ValueIterator> Values() const
+  constexpr CompactFlatMapFakeContainer<KeyValue, Key const, Value const, Private::ValueIterator> Values() const
   {
     return {begin(), end()};
   }
@@ -368,7 +374,7 @@ public:
     auto end   = Items_.end();
     auto it    = std::lower_bound(begin, end, u);
     if (it != end && *it == u)
-      return &(it->Value_);
+      return &it->Value_;
     return nullptr;
   }
 
@@ -377,6 +383,11 @@ public:
   {
     CompactFlatMap const& selfConst = *this;
     return const_cast<Value*>(selfConst.Find(u));
+  }
+
+  constexpr void Reserve(i32 Capacity)
+  {
+    Items_.Reserve(Capacity);
   }
 
   template <typename U = Key, typename... Args>
@@ -406,13 +417,9 @@ public:
   }
 };
 
-template <typename Key, typename Value, int Kind>
+template <typename KV, typename Key, typename Value, int Kind>
 class CompactFlatMapIterator
 {
-public:
-  using KV = typename CompactFlatMap<Key, Value>::KeyValue;
-
-private:
   KV* Ptr_;
 
 public:
@@ -469,9 +476,9 @@ public:
     if constexpr (Kind == Private::KeyValueIterator)
       return Ptr_[n];
     else if constexpr (Kind == Private::KeyIterator)
-      return Ptr_[n].Key_;
+      return static_cast<Key&>(Ptr_[n].Key_);
     else
-      return Ptr_[n].Value_;
+      return static_cast<Value&>(Ptr_[n].Value_);
   }
 
   constexpr decltype(auto) operator*() const
@@ -510,13 +517,9 @@ public:
   }
 };
 
-template <typename Key, typename Value, int Kind>
+template <typename KV, typename Key, typename Value, int Kind>
 class CompactFlatMapFakeContainer
 {
-public:
-  using KV = typename CompactFlatMap<Key, Value>::KeyValue;
-
-private:
   KV* Curr_;
   KV* End_;
 
@@ -529,12 +532,12 @@ public:
 
   constexpr decltype(auto) begin() const
   {
-    return CompactFlatMapIterator<Key, Value, Kind>{Curr_};
+    return CompactFlatMapIterator<KV, Key, Value, Kind>{Curr_};
   }
 
   constexpr decltype(auto) end() const
   {
-    return CompactFlatMapIterator<Key, Value, Kind>{Curr_};
+    return CompactFlatMapIterator<KV, Key, Value, Kind>{Curr_};
   }
 };
 } // namespace Core
