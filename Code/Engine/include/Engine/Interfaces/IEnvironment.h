@@ -4,7 +4,7 @@
 
 namespace Engine
 {
-class IGameEngine;
+class GameEngine;
 
 class ENGINE_API IEnvironment
 {
@@ -12,9 +12,22 @@ protected:
   static void RegisterGlobalEnvironment(IEnvironment* Environment);
 
 public:
+  using NativeLoopCallbackFn = void(*)();
+  NativeLoopCallbackFn NativeLoopCallback_{};
+
+  IEnvironment();
   virtual ~IEnvironment() = default;
 
-  virtual IGameEngine* GetGameEngine() = 0;
+  virtual GameEngine& GetGameEngine() = 0;
+
+  enum class RunningMode
+  {
+    Client,
+    Server,
+    Standalone,
+    Tool,
+  };
+  virtual RunningMode GetRunningMode() = 0;
 };
 } // namespace Engine
 

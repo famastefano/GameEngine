@@ -6,12 +6,21 @@
 
 namespace Engine
 {
+struct EventBase;
 class GameEngine;
 
 class ENGINE_API SubSystem
 {
+protected:
+  static GameEngine& GetGameEngine();
+
 public:
-  virtual ~SubSystem() = default;
+  SubSystem() = default;
+  SubSystem(SubSystem const&)            = delete;
+  SubSystem(SubSystem&&)                 = delete;
+  SubSystem& operator=(SubSystem const&) = delete;
+  SubSystem& operator=(SubSystem&&)      = delete;
+  virtual ~SubSystem()                   = default;
 
   virtual void Tick(f32 DeltaTime) = 0;
 
@@ -19,6 +28,8 @@ public:
 
   virtual void PreInitialize();
   virtual void PostInitialize();
+
+  virtual bool HandleEvent(EventBase& Event);
 };
 } // namespace Engine
 

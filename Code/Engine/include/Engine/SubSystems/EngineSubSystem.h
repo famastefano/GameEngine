@@ -7,5 +7,6 @@ namespace Engine
 class ENGINE_API EngineSubSystem : public SubSystem
 {
 public:
+  using Super = SubSystem;
 };
 } // namespace Engine

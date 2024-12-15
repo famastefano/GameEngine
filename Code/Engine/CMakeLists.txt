@@ -8,11 +8,12 @@ include_guard()
 # starts loading stuff, finds MSVCRT.lib, loads its symbols, then linka against the monolithic library, and fails.
 # https://developercommunity.visualstudio.com/t/visual-studio-2017-msvcrtlib-link-error/534202
 add_library(ge_engine_game_engine SHARED
- "src/Environment.cpp"
- "src/EventBase.cpp"
- "src/GameEngine.cpp"
- "src/LogEngine.cpp"
- "src/SubSystem.cpp"
+        "src/Environment.cpp"
+        "src/GameEngine.cpp"
+        "src/LogEngine.cpp"
+        "src/SubSystem.cpp"
+        "src/SubSystems/Renderer/RendererSubSystem.cpp"
+        "src/SubSystems/Input/InputSubSystem.cpp"
 )
 add_library(GE::Engine::Engine ALIAS ge_engine_game_engine)
 target_include_directories(ge_engine_game_engine PUBLIC "include/")
@@ -22,5 +23,6 @@ target_link_libraries(ge_engine_game_engine
         ge_root_config_target
     PUBLIC
         GE::Engine::Core
-        GE::Engine::Input
+        PRIVATE
+        GE::ThirdParty::glad
 )

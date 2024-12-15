@@ -1,19 +1,15 @@
 #pragma once
 
 #include <Core/Definitions.h>
+#include <Core/Hash/Hash.h>
 #include <Engine/API.h>
 
 namespace Engine
 {
-class ENGINE_API EventBase
+struct ENGINE_API EventBase
 {
-protected:
-  static i32 GenerateUniqueEventID();
-
-public:
-  virtual ~EventBase() = default;
-
-  virtual i32 GetID() const = 0;
+  virtual ~EventBase()      = default;
+  virtual u64 GetID() const = 0;
 };
 } // namespace Engine
 
@@ -21,21 +17,21 @@ public:
  * Example:
  * struct MyCustomEvent : public Engine::EventBase
  * {
- *    GE_IMPLEMENT_EVENT()
+ *    GE_IMPLEMENT_EVENT(MyCustomEvent)
  *
  *    MyData Data_;
  * };
  */
 
-#define GE_IMPLEMENT_EVENT()                 \
-public:                                      \
-  inline static i32 GetUniqueID() const      \
-  {                                          \
-    static i32 id = GenerateUniqueEventID(); \
-    return id;                               \
-  }                                          \
-                                             \
-  inline i32 GetID() const override          \
-  {                                          \
-    return GetUniqueID();                    \
+#define GE_IMPLEMENT_EVENT(EventType)                                          \
+public:                                                                        \
+  inline static u64 GetUniqueID()                                              \
+  {                                                                            \
+    static const u64 id = Core::CalculateHash(#EventType, sizeof(#EventType)); \
+    return id;                                                                 \
+  }                                                                            \
+                                                                               \
+  inline u64 GetID() const override                                            \
+  {                                                                            \
+    return GetUniqueID();                                                      \
   }

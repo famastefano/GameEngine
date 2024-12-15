@@ -17,31 +17,46 @@ void RegisterSubSystemFactoryFn(SubSystemType const Type, SubSystemFactoryFn Fn)
 GameEngine::GameEngine()
 {
   auto const& factories = SubSystemFactories[(i32)SubSystemType::Engine];
-  EngineSubSystems.Reserve(factories.Size());
+  EngineSubSystems_.Reserve(factories.Size());
   for (auto* factory : factories)
-    EngineSubSystems.EmplaceBackUnsafe((EngineSubSystem*)factory());
+  {
+    auto* subSystem = (EngineSubSystem*)factory();
+    const bool added = EngineSubSystems_.TryEmplace(subSystem->Name().CalculateHash(), subSystem);
+    checkf(added, "SubSystem %.*s already added.", subSystem->Name().Size(), subSystem->Name().Data());
+  }
 }
 GameEngine::~GameEngine()
 {
-  for (auto* subSystem : EngineSubSystems)
-    delete subSystem;
+  for (auto& [key, subsystem] : EngineSubSystems_)
+    delete subsystem;
 }
 void GameEngine::PreInitialize()
 {
   GE_LOG(LogEngine, Core::Verbosity::Info, "Calling EngineSubSystem::PreInitialize");
-  for (auto* subSystem : EngineSubSystems)
+  for (const auto& [key, subSystem] : EngineSubSystems_)
     subSystem->PreInitialize();
 }
 void GameEngine::PostInitialize()
 {
   GE_LOG(LogEngine, Core::Verbosity::Info, "Calling EngineSubSystem::PostInitialize");
-  for (auto* subSystem : EngineSubSystems)
+  for (const auto& [key, subSystem] : EngineSubSystems_)
     subSystem->PostInitialize();
 }
 void GameEngine::Tick(f32 DeltaTime)
 {
-  GE_LOG(LogEngine, Core::Verbosity::Debug, "Calling EngineSubSystem::Tick");
-  for (auto* subSystem : EngineSubSystems)
+  GE_LOG(LogEngine, Core::Verbosity::Debug, "Calling EngineSubSystem::Tick - %.4fs", DeltaTime);
+  for (const auto& [key, subSystem] : EngineSubSystems_)
     subSystem->Tick(DeltaTime);
+}
+EngineSubSystem* GameEngine::GetEngineSubSystem(Core::StringView<char> Name)
+{
+  auto subSystem = EngineSubSystems_.Find(Name.CalculateHash());
+  return subSystem ? *subSystem : nullptr;
+}
+void GameEngine::EnqueueEvent(EventBase& Event)
+{
+  for (auto& [key, subSystem] : EngineSubSystems_)
+    if (subSystem->HandleEvent(Event))
+      return;
 }
 } // namespace Engine

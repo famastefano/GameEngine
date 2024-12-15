@@ -2,10 +2,14 @@
 
 namespace Engine
 {
-Engine::IEnvironment* GlobalEnvironment{};
-
 void IEnvironment::RegisterGlobalEnvironment(IEnvironment* Environment)
 {
   GlobalEnvironment = Environment;
 }
+IEnvironment::IEnvironment()
+{
+  RegisterGlobalEnvironment(this);
+}
 } // namespace Engine
+
+Engine::IEnvironment* GlobalEnvironment{};

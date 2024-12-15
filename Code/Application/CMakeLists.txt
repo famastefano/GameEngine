@@ -2,9 +2,7 @@ include_guard()
 
 include("${PROJECT_SOURCE_DIR}/cmake/Utils.cmake")
 
-add_executable(ge_runner_win32
-    "src/LogApplication.cpp"
-)
+add_executable(ge_runner_win32)
 if(WIN32)
     set_target_properties(ge_runner_win32
         PROPERTIES
@@ -17,10 +15,8 @@ else()
     message(FATAL_ERROR "Only a Win32 Application is supported.")
 endif()
 
-target_include_directories(ge_runner_win32 PRIVATE "include/")
 target_link_libraries(ge_runner_win32
     INTERFACE GE::RootConfig
     PRIVATE GE::Engine::Engine
 )
-
-ge_copyLibrariesOnPostBuild(ge_runner_win32 GE::Engine::Engine)
+ge_copyLibrariesOnPostBuild(ge_runner_win32 GE::Engine::Core GE::Engine::Engine)
