@@ -25,6 +25,6 @@ public:
   bool HandleEvent(EventBase& Event) override;
 
 private:
-  void ResizeViewport(i32 const Width, i32 const Height);
+  static void ResizeViewport(i32 const Width, i32 const Height);
 };
 } // namespace Engine

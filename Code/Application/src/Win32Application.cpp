@@ -1,6 +1,7 @@
 #include <Engine/Events/Renderer/EventResizeWindow.h>
 #include <Engine/GameEngine/GameEngine.h>
 #include <Engine/Interfaces/IEnvironment.h>
+#include <Engine/SubSystems/Input/Base/Translator.h>
 #include <Windows.h>
 #include <chrono>
 #include <hidusage.h>
@@ -65,15 +66,14 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance_, _In_opt_ HINSTANCE hPrevInstance,
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-  // TODO: forward to input subsystem
-  // Input::NativeEvent const nev{
-  //     .windows = {
-  //         .Hwnd_    = hwnd,
-  //         .WParam_  = wParam,
-  //         .LParam_  = lParam,
-  //         .Message_ = uMsg,
-  //     },
-  // };
+  Engine::NativeEvent const nev{
+      .Windows_ = {
+          .Hwnd_    = hwnd,
+          .WParam_  = wParam,
+          .LParam_  = lParam,
+          .Message_ = uMsg,
+      },
+  };
 
   switch (uMsg)
   {
@@ -88,11 +88,9 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
   break;
 
   case WM_INPUT: {
-    // TODO: forward to input subsystem
-    // Input::InputEvent ev;
-    // if (Input::TranslateNativeEvent(nev, ev))
-    // {
-    // }
+    Engine::InputEvent ev;
+    if (TranslateNativeEvent(nev, ev))
+      gWin32Env->Engine_.EnqueueEvent(ev);
     break;
   }
   }

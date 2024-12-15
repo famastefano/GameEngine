@@ -16,6 +16,11 @@ add_library(ge_engine_game_engine SHARED
         "src/SubSystems/Input/InputSubSystem.cpp"
 )
 add_library(GE::Engine::Engine ALIAS ge_engine_game_engine)
+
+if (WIN32)
+    target_sources(ge_engine_game_engine PRIVATE "src/SubSystems/Input/Base/Win32Translator.cpp")
+endif ()
+
 target_include_directories(ge_engine_game_engine PUBLIC "include/")
 target_compile_definitions(ge_engine_game_engine PRIVATE ENGINE_API_EXPORTS)
 target_link_libraries(ge_engine_game_engine

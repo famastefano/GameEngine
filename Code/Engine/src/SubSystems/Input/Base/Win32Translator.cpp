@@ -1,29 +1,18 @@
 #include <Core/Assert/Assert.h>
-#include <Input/Base/Translator.h>
+#include <Engine/SubSystems/Input/Base/Translator.h>
 #include <Windows.h>
 #include <bit>
 
-namespace Input::Private
+namespace Engine
 {
-bool TranslateWin32_WM_INPUT(NativeEvent const event, InputEvent& translated);
-}
-
-bool Input::TranslateNativeEvent(NativeEvent const event, InputEvent& translated)
+namespace
 {
-  switch (event.windows.Message_)
-  {
-  case WM_INPUT:
-    return Private::TranslateWin32_WM_INPUT(event, translated);
-  }
-  return false;
-}
-
-bool Input::Private::TranslateWin32_WM_INPUT(NativeEvent const event, InputEvent& translated)
+bool TranslateWin32_WM_INPUT(NativeEvent const Event, InputEvent& Translated)
 {
-  if (GET_RAWINPUT_CODE_WPARAM(event.windows.WParam_) != RIM_INPUT)
+  if (GET_RAWINPUT_CODE_WPARAM(Event.Windows_.WParam_) != RIM_INPUT)
     return false;
 
-  HRAWINPUT hraw = (HRAWINPUT)event.windows.LParam_;
+  HRAWINPUT hraw = (HRAWINPUT)Event.Windows_.LParam_;
   RAWINPUT  rawData{};
   UINT      pcbSize = sizeof(RAWINPUT);
   if (GetRawInputData(hraw, RID_INPUT, &rawData, &pcbSize, sizeof(RAWINPUTHEADER)) <= 0 || rawData.header.dwType == RIM_TYPEHID)
@@ -57,7 +46,7 @@ bool Input::Private::TranslateWin32_WM_INPUT(NativeEvent const event, InputEvent
     };
     const RAWMOUSE& mouse = rawData.data.mouse;
     int const       index = std::countr_zero(mouse.usButtonFlags);
-    translated.Kind_      = infos[index].Kind_;
+    Translated.Kind_      = infos[index].Kind_;
 
     MouseEvent ev{};
     ev.Button_ = infos[index].Button_;
@@ -67,7 +56,7 @@ bool Input::Private::TranslateWin32_WM_INPUT(NativeEvent const event, InputEvent
       ev.MoveX_ = (i16)mouse.lLastX;
       ev.MoveY_ = (i16)mouse.lLastY;
     }
-    translated.Mouse_ = ev;
+    Translated.Mouse_ = ev;
   }
   else
   {
@@ -78,7 +67,7 @@ bool Input::Private::TranslateWin32_WM_INPUT(NativeEvent const event, InputEvent
     KeyboardEvent ev{};
     ev.NativeVirtualKey_ = kbd.VKey;
 
-    const HKL kbdLayout = GetKeyboardLayout(0);
+    HKL kbdLayout = GetKeyboardLayout(0);
 
     if (kbd.MakeCode)
     {
@@ -97,8 +86,20 @@ bool Input::Private::TranslateWin32_WM_INPUT(NativeEvent const event, InputEvent
       ev.Char_ = 0;
 
     constexpr Kind kinds[] = {Kind::Key_Press, Kind::Key_Release};
-    translated.Kind_       = kinds[kbd.Flags & 0x1];
-    translated.Keyboard_   = ev;
+    Translated.Kind_       = kinds[kbd.Flags & 0x1];
+    Translated.Keyboard_   = ev;
   }
   return true;
 }
+} // namespace
+
+bool TranslateNativeEvent(NativeEvent const Event, InputEvent& Translated)
+{
+  switch (Event.Windows_.Message_)
+  {
+  case WM_INPUT:
+    return TranslateWin32_WM_INPUT(Event, Translated);
+  }
+  return false;
+}
+} // namespace Engine

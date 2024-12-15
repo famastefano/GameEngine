@@ -1,4 +1,5 @@
-﻿#include <Engine/SubSystems/Input/InputSubSystem.h>
+﻿#include <Engine/Events/Input/InputEvents.h>
+#include <Engine/SubSystems/Input/InputSubSystem.h>
 #include <Windows.h>
 #include <hidusage.h>
 
@@ -7,7 +8,6 @@ namespace Engine
 void InputSubSystem::Tick(f32 DeltaTime)
 {
 }
-
 void InputSubSystem::PreInitialize()
 {
   EngineSubSystem::PreInitialize();
@@ -23,5 +23,13 @@ void InputSubSystem::PreInitialize()
   rid[1].hwndTarget     = nullptr;
   const bool success = RegisterRawInputDevices(rid, 2, sizeof(RAWINPUTDEVICE));
   checkf(success, "Failed to register raw input");
+}
+bool InputSubSystem::HandleEvent(EventBase& Event)
+{
+  if (Event.GetID() == InputEvent::GetUniqueID())
+  {
+    return true;
+  }
+  return false;
 }
 } // namespace Engine

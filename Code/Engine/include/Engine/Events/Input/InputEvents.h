@@ -1,8 +1,8 @@
 #pragma once
 
-#include <Core/Definitions.h>
+#include <Engine/Events/EventBase.h>
 
-namespace Input
+namespace Engine
 {
 enum class Kind : u8
 {
@@ -36,8 +36,10 @@ struct KeyboardEvent
   wchar_t Char_;
 };
 
-struct InputEvent
+struct InputEvent : EventBase
 {
+  GE_IMPLEMENT_EVENT(InputEvent)
+
   union {
     MouseEvent    Mouse_;
     KeyboardEvent Keyboard_;

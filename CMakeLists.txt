@@ -49,7 +49,6 @@ if(GE_BUILD_ENABLE_TESTS)
 endif()
 
 add_subdirectory("Code/Math")
-add_subdirectory("Code/Input")
 add_subdirectory("Code/Physics")
 
 # Needs to be last as we link all the libraries into the Engine
