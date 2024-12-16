@@ -61,6 +61,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance_, _In_opt_ HINSTANCE hPrevInstance,
     auto const                       frameEnd = std::chrono::steady_clock::now();
     std::chrono::duration<f32> const dt       = frameEnd - frameStart;
     env.Engine_.Tick(dt.count());
+    frameStart = frameEnd;
   }
 }
 
