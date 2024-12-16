@@ -1,5 +1,6 @@
 ﻿#include <Engine/Events/Renderer/EventResizeWindow.h>
 #include <Engine/Interfaces/IEnvironment.h>
+#include <Engine/Private/LogRenderer.h>
 #include <Engine/SubSystems/Renderer/RendererSubSystem.h>
 #include <Engine/SubSystems/SubSystemRegistration.h>
 #include <Windows.h>
@@ -18,6 +19,57 @@ HDC   GDICtx{};
 HGLRC Ctx{};
 HWND  MainWindowHnd{};
 i32   PixelFormat{};
+
+void APIENTRY OpenGLMessageCallback(GLenum Source, GLenum Type, GLuint ID, GLenum Severity, GLsizei Length, GLchar const* Message, void const* UserParam)
+{
+  auto const* source = [Source] {
+    switch (Source)
+    {
+    case GL_DEBUG_SOURCE_API:
+      return "API";
+    case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+      return "WINDOW SYSTEM";
+    case GL_DEBUG_SOURCE_SHADER_COMPILER:
+      return "SHADER COMPILER";
+    case GL_DEBUG_SOURCE_THIRD_PARTY:
+      return "THIRD PARTY";
+    case GL_DEBUG_SOURCE_APPLICATION:
+      return "APPLICATION";
+    case GL_DEBUG_SOURCE_OTHER:
+      return "OTHER";
+    }
+    return "UNKNOWN";
+  }();
+
+  auto const* type = [Type] {
+    switch (Type)
+    {
+    case GL_DEBUG_TYPE_ERROR:
+      return "ERROR";
+    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+      return "DEPRECATED_BEHAVIOR";
+    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+      return "UNDEFINED_BEHAVIOR";
+    case GL_DEBUG_TYPE_PORTABILITY:
+      return "PORTABILITY";
+    case GL_DEBUG_TYPE_PERFORMANCE:
+      return "PERFORMANCE";
+    case GL_DEBUG_TYPE_MARKER:
+      return "MARKER";
+    case GL_DEBUG_TYPE_OTHER:
+      return "OTHER";
+    }
+    return "UNKNOWN";
+  }();
+
+  using enum Core::Verbosity;
+  auto verbosity = Info;
+  if (Type == GL_DEBUG_TYPE_ERROR || Type == GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR || Severity == GL_DEBUG_SEVERITY_HIGH)
+    verbosity = Error;
+  else if (Type == GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR || Type == GL_DEBUG_TYPE_PERFORMANCE || Severity == GL_DEBUG_SEVERITY_MEDIUM)
+    verbosity = Warning;
+  GE_LOG(LogRenderer, verbosity, "[%s][%s]#%u: %.*s", source, type, ID, Length, Message);
+}
 } // namespace
 
 RendererSubSystem::RendererSubSystem()
@@ -32,26 +84,25 @@ void RendererSubSystem::Tick(f32 DeltaTime)
 }
 RendererSubSystem::~RendererSubSystem()
 {
-  ChangeDisplaySettings(NULL, 0);
-  ShowCursor(TRUE);
-
-  if (Ctx)
-  {
-    wglMakeCurrent(NULL, NULL);
-    wglDeleteContext(Ctx);
-  }
-
-  if (GDICtx)
-    ReleaseDC(MainWindowHnd, GDICtx);
-
-  if (MainWindowHnd)
-    DestroyWindow(MainWindowHnd);
-
-  UnregisterClassW(WINDOW_CLASS_NAME, GetModuleHandle(NULL));
+  Cleanup();
 }
 void RendererSubSystem::PreInitialize()
 {
   EngineSubSystem::PreInitialize();
+
+  using enum IEnvironment::RunningMode;
+  if (GlobalEnvironment->GetRunningMode() != Client && GlobalEnvironment->GetRunningMode() != Standalone)
+    return; // no rendering done
+
+  struct CleanupHandler
+  {
+    bool success = false;
+    ~CleanupHandler()
+    {
+      if (!success)
+        Cleanup();
+    }
+  } cleanupHandler;
 
   DWORD const dwExStyle  = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
   DWORD const dwStyle    = WS_OVERLAPPEDWINDOW;
@@ -131,7 +182,21 @@ void RendererSubSystem::PreInitialize()
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LEQUAL);
 
+  glEnable(GL_DEBUG_OUTPUT);
+  glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+  glDebugMessageCallback(OpenGLMessageCallback, nullptr);
+
   ShowWindow(MainWindowHnd, SW_SHOW);
+
+  cleanupHandler.success = true;
+}
+void RendererSubSystem::PostInitialize()
+{
+  EngineSubSystem::PostInitialize();
+
+  using enum IEnvironment::RunningMode;
+  if (GlobalEnvironment->GetRunningMode() == Client || GlobalEnvironment->GetRunningMode() == Standalone)
+    checkf(Ctx, "Failed to initialize RendererSubSystem.");
 }
 bool RendererSubSystem::HandleEvent(EventBase& Event)
 {
@@ -146,5 +211,24 @@ bool RendererSubSystem::HandleEvent(EventBase& Event)
 void RendererSubSystem::ResizeViewport(i32 const Width, i32 const Height)
 {
   glViewport(0, 0, Width, Height);
+}
+void RendererSubSystem::Cleanup()
+{
+  ChangeDisplaySettings(NULL, 0);
+  ShowCursor(TRUE);
+
+  if (Ctx)
+  {
+    wglMakeCurrent(NULL, NULL);
+    wglDeleteContext(Ctx);
+  }
+
+  if (GDICtx)
+    ReleaseDC(MainWindowHnd, GDICtx);
+
+  if (MainWindowHnd)
+    DestroyWindow(MainWindowHnd);
+
+  UnregisterClassW(WINDOW_CLASS_NAME, GetModuleHandle(NULL));
 }
 } // namespace Engine

@@ -21,10 +21,12 @@ public:
   ~RendererSubSystem() override;
 
   void PreInitialize() override;
+  void PostInitialize() override;
 
   bool HandleEvent(EventBase& Event) override;
 
 private:
   static void ResizeViewport(i32 const Width, i32 const Height);
+  static void Cleanup();
 };
 } // namespace Engine
