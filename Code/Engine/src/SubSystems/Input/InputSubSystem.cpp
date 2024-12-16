@@ -32,21 +32,6 @@ bool InputSubSystem::HandleEvent(EventBase& Event)
 {
   if (Event.GetID() == EventInput::GetUniqueID())
   {
-    using enum Kind;
-    EventInput& ev = (EventInput&)Event;
-    switch (ev.Kind_)
-    {
-    case Mouse_Press:
-    case Mouse_Release:
-    case Mouse_Move:
-    case Mouse_Wheel:
-      GE_LOG(LogInput, Core::Verbosity::Error, "Mouse Input");
-      break;
-    case Key_Press:
-    case Key_Release:
-      GE_LOG(LogInput, Core::Verbosity::Error, "Keyboard Input");
-      break;
-    }
     return true;
   }
   return false;
