@@ -2,6 +2,6 @@
 
 namespace Engine
 {
-class RendererSubSystem;
-extern RendererSubSystem* CurrentRendererSubSystem;
+class RenderingSubSystem;
+extern RenderingSubSystem* CurrentRenderingSubSystem;
 }; // namespace Engine

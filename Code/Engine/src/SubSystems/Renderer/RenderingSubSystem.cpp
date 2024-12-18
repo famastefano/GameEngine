@@ -2,7 +2,7 @@
 #include <Engine/Interfaces/IEnvironment.h>
 #include <Engine/LogRenderer.h>
 #include <Engine/SubSystems/Globals.h>
-#include <Engine/SubSystems/Renderer/RendererSubSystem.h>
+#include <Engine/SubSystems/Renderer/RenderingSubSystem.h>
 #include <Engine/SubSystems/SubSystemRegistration.h>
 #include <Windows.h>
 #include <bit>
@@ -10,9 +10,9 @@
 
 namespace Engine
 {
-GE_REGISTER_SUBSYSTEM(SubSystemType::Engine, RendererSubSystem)
+GE_REGISTER_SUBSYSTEM(SubSystemType::Engine, RenderingSubSystem)
 
-RendererSubSystem* CurrentRendererSubSystem{};
+RenderingSubSystem* CurrentRenderingSubSystem{};
 
 namespace
 {
@@ -75,22 +75,22 @@ void APIENTRY OpenGLMessageCallback(GLenum Source, GLenum Type, GLuint ID, GLenu
 }
 } // namespace
 
-RendererSubSystem::RendererSubSystem()
+RenderingSubSystem::RenderingSubSystem()
     : Super()
 {
-  CurrentRendererSubSystem = this;
+  CurrentRenderingSubSystem = this;
   checkf(std::has_single_bit((u32)TileSize_) && TileSize_ > 0, "TileSize must be a power of 2.");
 }
-void RendererSubSystem::Tick(f32 DeltaTime)
+void RenderingSubSystem::Tick(f32 DeltaTime)
 {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   SwapBuffers(GDICtx);
 }
-RendererSubSystem::~RendererSubSystem()
+RenderingSubSystem::~RenderingSubSystem()
 {
   Cleanup();
 }
-void RendererSubSystem::PreInitialize()
+void RenderingSubSystem::PreInitialize()
 {
   EngineSubSystem::PreInitialize();
 
@@ -194,15 +194,15 @@ void RendererSubSystem::PreInitialize()
 
   cleanupHandler.success = true;
 }
-void RendererSubSystem::PostInitialize()
+void RenderingSubSystem::PostInitialize()
 {
   EngineSubSystem::PostInitialize();
 
   using enum IEnvironment::RunningMode;
   if (GlobalEnvironment->GetRunningMode() == Client || GlobalEnvironment->GetRunningMode() == Standalone)
-    checkf(Ctx, "Failed to initialize RendererSubSystem.");
+    checkf(Ctx, "Failed to initialize RenderingSubSystem.");
 }
-bool RendererSubSystem::HandleEvent(EventBase& Event)
+bool RenderingSubSystem::HandleEvent(EventBase& Event)
 {
   if (auto const* resizeEvent = Event.GetAs<EventResizeWindow>())
   {
@@ -211,11 +211,11 @@ bool RendererSubSystem::HandleEvent(EventBase& Event)
   }
   return false;
 }
-void RendererSubSystem::ResizeViewport(i32 const Width, i32 const Height)
+void RenderingSubSystem::ResizeViewport(i32 const Width, i32 const Height)
 {
   glViewport(0, 0, Width, Height);
 }
-void RendererSubSystem::Cleanup()
+void RenderingSubSystem::Cleanup()
 {
   ChangeDisplaySettings(NULL, 0);
   ShowCursor(TRUE);

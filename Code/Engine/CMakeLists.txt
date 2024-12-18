@@ -13,7 +13,7 @@ add_library(ge_engine_game_engine SHARED
 
         "src/LogCategories.cpp"
         "src/SubSystem.cpp"
-        "src/SubSystems/Renderer/RendererSubSystem.cpp"
+        "src/SubSystems/Renderer/RenderingSubSystem.cpp"
         "src/SubSystems/Input/InputSubSystem.cpp"
 
         "src/EventsMetadata.cpp"

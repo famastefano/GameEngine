@@ -6,9 +6,9 @@ namespace Engine
 {
 struct EventBase;
 
-class RendererSubSystem : public EngineSubSystem
+class RenderingSubSystem : public EngineSubSystem
 {
-  GE_IMPLEMENT_SUBSYSTEM(RendererSubSystem)
+  GE_IMPLEMENT_SUBSYSTEM(RenderingSubSystem)
 
 public:
   using Super = EngineSubSystem;
@@ -16,9 +16,9 @@ public:
   // Size of the tile
   i32 const TileSize_ = 16;
 
-  RendererSubSystem();
+  RenderingSubSystem();
   void Tick(f32 DeltaTime) override;
-  ~RendererSubSystem() override;
+  ~RenderingSubSystem() override;
 
   void PreInitialize() override;
   void PostInitialize() override;
