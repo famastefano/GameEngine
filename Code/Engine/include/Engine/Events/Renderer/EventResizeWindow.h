@@ -4,7 +4,7 @@
 
 namespace Engine
 {
-struct EventResizeWindow : public EventBase
+struct ENGINE_API EventResizeWindow : public EventBase
 {
   GE_DECLARE_STRUCT_TYPE_METADATA()
 

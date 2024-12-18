@@ -36,7 +36,7 @@ struct KeyboardEvent
   wchar_t Char_;
 };
 
-struct EventInput : EventBase
+struct ENGINE_API EventInput : EventBase
 {
   GE_DECLARE_STRUCT_TYPE_METADATA()
 
