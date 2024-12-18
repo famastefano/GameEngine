@@ -1,6 +1,7 @@
 ﻿#include <Engine/Events/Renderer/EventResizeWindow.h>
 #include <Engine/Interfaces/IEnvironment.h>
 #include <Engine/Private/LogRenderer.h>
+#include <Engine/LogRenderer.h>
 #include <Engine/SubSystems/Renderer/RendererSubSystem.h>
 #include <Engine/SubSystems/SubSystemRegistration.h>
 #include <Windows.h>

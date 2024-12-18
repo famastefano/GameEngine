@@ -1,5 +1,5 @@
 ﻿#include <Engine/Events/Input/InputEvents.h>
-#include <Engine/Private/LogInput.h>
+#include <Engine/LogInput.h>
 #include <Engine/SubSystems/Input/InputSubSystem.h>
 #include <Engine/SubSystems/SubSystemRegistration.h>
 #include <Windows.h>

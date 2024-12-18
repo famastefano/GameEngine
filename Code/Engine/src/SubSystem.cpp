@@ -1,4 +1,4 @@
-#include <Engine/Private/LogEngine.h>
+#include <Engine/LogEngine.h>
 #include <Engine/SubSystems/SubSystem.h>
 #include <Engine/Interfaces/IEnvironment.h>
 #include <Engine/GameEngine/GameEngine.h>

@@ -1,5 +1,5 @@
 #include <Engine/GameEngine/GameEngine.h>
-#include <Engine/Private/LogEngine.h>
+#include <Engine/LogEngine.h>
 #include <Engine/SubSystems/EngineSubSystem.h>
 #include <Engine/SubSystems/SubSystemRegistration.h>
 
