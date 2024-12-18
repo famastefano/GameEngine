@@ -30,10 +30,6 @@ void InputSubSystem::PreInitialize()
 }
 bool InputSubSystem::HandleEvent(EventBase& Event)
 {
-  if (Event.GetID() == EventInput::GetUniqueID())
-  {
-    return true;
-  }
-  return false;
+  return Event.GetAs<EventInput>();
 }
 } // namespace Engine

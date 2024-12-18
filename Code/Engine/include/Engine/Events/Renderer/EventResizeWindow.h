@@ -6,7 +6,7 @@ namespace Engine
 {
 struct EventResizeWindow : public EventBase
 {
-  GE_IMPLEMENT_EVENT(EventResizeWindow)
+  GE_DECLARE_STRUCT_TYPE_METADATA()
 
   EventResizeWindow(i32 const Width, i32 const Height)
       : Width_(Width)

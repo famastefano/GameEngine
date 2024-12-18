@@ -200,10 +200,9 @@ void RendererSubSystem::PostInitialize()
 }
 bool RendererSubSystem::HandleEvent(EventBase& Event)
 {
-  if (Event.GetID() == EventResizeWindow::GetUniqueID())
+  if (auto const* resizeEvent = Event.GetAs<EventResizeWindow>())
   {
-    auto const& ev = (EventResizeWindow&)Event;
-    ResizeViewport(ev.Width_, ev.Height_);
+    ResizeViewport(resizeEvent->Width_, resizeEvent->Height_);
     return true;
   }
   return false;

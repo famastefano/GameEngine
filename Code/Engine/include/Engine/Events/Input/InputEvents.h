@@ -38,7 +38,7 @@ struct KeyboardEvent
 
 struct EventInput : EventBase
 {
-  GE_IMPLEMENT_EVENT(InputEvent)
+  GE_DECLARE_STRUCT_TYPE_METADATA()
 
   union {
     MouseEvent    Mouse_;
