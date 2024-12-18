@@ -17,11 +17,11 @@ add_library(ge_engine_game_engine SHARED
         "src/SubSystems/Input/InputSubSystem.cpp"
         "src/SubSystems/Rendering/RenderingSubSystem.cpp"
 
+        "src/Reflection/Reflection.cpp"
         "src/EventsMetadata.cpp"
 
         "src/Components/ComponentBase.cpp"
         "src/Components/SpriteComponent.cpp"
-        src/Reflection/Reflection.cpp
 )
 add_library(GE::Engine::Engine ALIAS ge_engine_game_engine)
 

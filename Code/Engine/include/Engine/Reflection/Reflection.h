@@ -1,7 +1,9 @@
 #pragma once
 
 #include <Core/Container/FlatMap.h>
+#include <Core/Container/Span.h>
 #include <Core/Container/Vector.h>
+#include <Engine/Serialization/Serialization.h>
 #include <concepts>
 
 namespace Engine
@@ -9,8 +11,8 @@ namespace Engine
 struct TypeMetaData
 {
   using FactoryFn     = void* (*)();
-  using SerializeFn   = void (*)(void*, Core::Vector<u8>&);
-  using DeserializeFn = void (*)(void*, u8*);
+  using SerializeFn   = void (*)(void*, u32&, Core::Vector<u8>&);
+  using DeserializeFn = void (*)(void*, Serialization::SerializationHeader const&, Core::Span<u8 const>);
 
   u64           ID_{};
   char const*   Name_{};
@@ -27,8 +29,8 @@ concept Reflectable = requires(T t) {
 
 template <typename T>
 concept Serializable = requires(T t) {
-  t.Serialize(std::declval<Core::Vector<u8>>);
-  t.Deserialize((u8*)nullptr);
+  t.Serialize(std::declval<u32>, std::declval<Core::Vector<u8>>);
+  t.Deserialize(std::declval<Serialization::SerializationHeader const>, std::declval<Core::Span<u8 const>>);
 };
 
 template <typename T>

@@ -20,7 +20,7 @@ void SubSystem::PostInitialize()
   auto const name = Name();
   GE_LOG(LogEngine, Core::Verbosity::Info, "SubSystem `%*.s`", name.Size(), name.Data());
 }
-bool SubSystem::HandleEvent(EventBase& Event)
+bool SubSystem::HandleEvent(EventBase&)
 {
   return false;
 }

@@ -32,10 +32,13 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 int WINAPI wWinMain(_In_ HINSTANCE hInstance_, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nShowCmd)
 {
+  (void)hInstance_;
   (void)hPrevInstance;
   (void)lpCmdLine;
+  (void)nShowCmd;
 
   Win32Env env(Win32Env::RunningMode::Standalone);
+  // ReSharper disable once CppDFALocalValueEscapesFunction
   gWin32Env = &env;
 
   env.NativeLoopCallback_ = (Win32Env::NativeLoopCallbackFn)WindowProc;
