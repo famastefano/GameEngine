@@ -41,5 +41,5 @@ public:
   virtual bool OwnedByContainer() = 0;
 };
 
-extern CORE_API IAllocator* globalAllocator;
+CORE_API IAllocator* GetGlobalAllocator();
 } // namespace Core

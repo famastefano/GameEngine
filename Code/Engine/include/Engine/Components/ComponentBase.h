@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <Core/Definitions.h>
+#include <Engine/Reflection/Reflection.h>
 #include <Engine/API.h>
 
 namespace Engine::Entities
@@ -12,6 +13,8 @@ namespace Engine::Components
 {
 class ENGINE_API ComponentBase
 {
+  GE_DECLARE_TYPE_METADATA_BASE()
+
   Entities::ActorBase* Owner_{};
 
 public:

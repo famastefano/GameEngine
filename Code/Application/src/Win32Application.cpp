@@ -83,10 +83,12 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     return 0;
 
   case WM_SIZE: {
-    Engine::EventResizeWindow ev{LOWORD(lParam), HIWORD(lParam)};
+    Engine::EventResizeWindow ev;
+    ev.Width_  = LOWORD(lParam);
+    ev.Height_ = HIWORD(lParam);
     gWin32Env->Engine_.EnqueueEvent(ev);
+    break;
   }
-  break;
 
   case WM_INPUT: {
     Engine::EventInput ev;

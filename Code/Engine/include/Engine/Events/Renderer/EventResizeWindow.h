@@ -8,12 +8,6 @@ struct ENGINE_API EventResizeWindow : public EventBase
 {
   GE_DECLARE_STRUCT_TYPE_METADATA()
 
-  EventResizeWindow(i32 const Width, i32 const Height)
-      : Width_(Width)
-      , Height_(Height)
-  {
-  }
-
-  i32 Width_, Height_;
+  i32 Width_ = 0, Height_ = 0;
 };
 } // namespace Engine

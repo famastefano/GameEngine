@@ -48,17 +48,17 @@ private:
   }
 
 public:
-  constexpr Vector(IAllocator* allocator = globalAllocator);
-  constexpr Vector(i32 const initialSize, IAllocator* allocator = globalAllocator);
+  constexpr Vector(IAllocator* allocator = GetGlobalAllocator());
+  constexpr Vector(i32 const initialSize, IAllocator* allocator = GetGlobalAllocator());
 
   template <typename U = T>
-  constexpr Vector(std::initializer_list<U> init, IAllocator* allocator = globalAllocator);
+  constexpr Vector(std::initializer_list<U> init, IAllocator* allocator = GetGlobalAllocator());
 
   template <typename U = T>
-  constexpr Vector(i32 const initialSize, U const& initialValue, IAllocator* allocator = globalAllocator);
+  constexpr Vector(i32 const initialSize, U const& initialValue, IAllocator* allocator = GetGlobalAllocator());
 
   template <std::input_iterator Iterator>
-  constexpr Vector(Iterator begin, Iterator end, IAllocator* allocator = globalAllocator);
+  constexpr Vector(Iterator begin, Iterator end, IAllocator* allocator = GetGlobalAllocator());
 
   constexpr Vector(Vector const& other);
   constexpr Vector(Vector const& other, IAllocator* allocator);
@@ -336,7 +336,7 @@ constexpr inline Vector<T>::Vector(Iterator begin, Iterator end, IAllocator* all
 
 template <typename T>
 constexpr inline Vector<T>::Vector(Vector const& other)
-    : Vector(other, other.Allocator_->IsCopyable() ? other.Allocator_ : globalAllocator)
+    : Vector(other, other.Allocator_->IsCopyable() ? other.Allocator_ : GetGlobalAllocator())
 {
 }
 
@@ -355,12 +355,12 @@ constexpr inline Vector<T>::Vector(Vector&& other)
     Mem_       = std::exchange(other.Mem_, nullptr);
     Capacity_  = std::exchange(other.Capacity_, 0);
     Size_      = std::exchange(other.Size_, 0);
-    Allocator_ = std::exchange(other.Allocator_, globalAllocator);
+    Allocator_ = std::exchange(other.Allocator_, GetGlobalAllocator());
   }
   else
   {
     // We still allocate the entire capacity to keep the behavior as similar as possible
-    Allocator_ = other.Allocator_->IsCopyable() ? other.Allocator_ : globalAllocator;
+    Allocator_ = other.Allocator_->IsCopyable() ? other.Allocator_ : GetGlobalAllocator();
     Realloc(other.Capacity());
     Algorithm::Move(other.begin(), other.end(), begin());
     other.Reset();
@@ -379,7 +379,7 @@ template <typename T>
 constexpr inline Vector<T>& Vector<T>::operator=(Vector const& other)
 {
   Reset();
-  Allocator_ = other.Allocator_->IsCopyable() ? other.Allocator_ : globalAllocator;
+  Allocator_ = other.Allocator_->IsCopyable() ? other.Allocator_ : GetGlobalAllocator();
   Realloc(other.Capacity_);
   Algorithm::Copy(other.begin(), other.end(), begin());
   return *this;
@@ -393,11 +393,11 @@ constexpr inline Vector<T>& Vector<T>::operator=(Vector&& other)
     Mem_       = std::exchange(other.Mem_, nullptr);
     Capacity_  = std::exchange(other.Capacity_, 0);
     Size_      = std::exchange(other.Size_, 0);
-    Allocator_ = std::exchange(other.Allocator_, globalAllocator);
+    Allocator_ = std::exchange(other.Allocator_, GetGlobalAllocator());
   }
   else
   {
-    Allocator_ = other.Allocator_->IsCopyable() ? other.Allocator_ : globalAllocator;
+    Allocator_ = other.Allocator_->IsCopyable() ? other.Allocator_ : GetGlobalAllocator();
     Realloc(other.Capacity_);
     Algorithm::Move(other.begin(), other.end(), begin());
     other.Reset();

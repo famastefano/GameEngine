@@ -8,7 +8,10 @@ static Core::GlobalAllocator globalAllocatorInstance;
 
 namespace Core
 {
-IAllocator* globalAllocator = &globalAllocatorInstance;
+IAllocator* GetGlobalAllocator()
+{
+  return &globalAllocatorInstance;
+}
 
 static HANDLE MemHandle = GetProcessHeap() ? GetProcessHeap() : HeapCreate(0, 0, 0);
 

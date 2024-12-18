@@ -13,26 +13,26 @@
 namespace Core
 {
 template <typename CharT>
-class StringView : public Span<CharT const, DynamicSize>
+class StringView : public Span<CharT const>
 {
   static_assert(std::same_as<CharT, char> || std::same_as<CharT, wchar_t>, "StringView supports only char and wchar_t.");
 
 public:
-  using Super = Span<CharT const, DynamicSize>;
+  using Super = Span<CharT const>;
 
   inline static constexpr i32 NotFound = -1;
 
-  using Span<CharT const, DynamicSize>::Span;
+  using Span<CharT const>::Span;
 
-  template <typename CharU = CharT, std::enable_if_t<std::same_as<CharU, char>, bool> = true>
+  template <typename CharU = CharT>
   constexpr StringView(CharU const* s)
-      : Super(s, i32(strlen(s)))
+      requires (std::same_as<CharU, char>) : Super(s, i32(strlen(s)))
   {
   }
 
-  template <typename CharU = CharT, std::enable_if_t<std::same_as<CharU, wchar_t>, bool> = true>
+  template <typename CharU = CharT>
   constexpr StringView(CharU const* s)
-      : Super(s, i32(wcslen(s)))
+      requires (std::same_as<CharU, wchar_t>) : Super(s, i32(wcslen(s)))
   {
   }
 
@@ -216,18 +216,18 @@ class String
   Vector<CharT> Mem_;
 
 public:
-  constexpr String(IAllocator* allocator = globalAllocator)
+  constexpr String(IAllocator* allocator = GetGlobalAllocator())
       : Mem_(allocator)
   {
   }
 
-  constexpr String(i32 const count, char const c, IAllocator* allocator = globalAllocator)
+  constexpr String(i32 const count, char const c, IAllocator* allocator = GetGlobalAllocator())
       : String(allocator)
   {
     Assign(c, count);
   }
 
-  constexpr String(StringView<CharT> view, IAllocator* allocator = globalAllocator)
+  constexpr String(StringView<CharT> view, IAllocator* allocator = GetGlobalAllocator())
       : String(allocator)
   {
     Assign(view);

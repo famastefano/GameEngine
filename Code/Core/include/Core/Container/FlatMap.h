@@ -145,7 +145,7 @@ class FlatMap
   Vector<Value> Values_;
 
 public:
-  constexpr FlatMap(IAllocator* allocator = globalAllocator)
+  constexpr FlatMap(IAllocator* allocator = GetGlobalAllocator())
       : Keys_(allocator)
       , Values_(allocator)
   {
@@ -305,7 +305,7 @@ private:
   Vector<KeyValue> Items_;
 
 public:
-  constexpr CompactFlatMap(IAllocator* allocator = globalAllocator)
+  constexpr CompactFlatMap(IAllocator* allocator = GetGlobalAllocator())
       : Items_(allocator)
   {
   }

@@ -13,10 +13,15 @@ add_library(ge_engine_game_engine SHARED
 
         "src/LogCategories.cpp"
         "src/SubSystem.cpp"
-        "src/SubSystems/Rendering/RenderingSubSystem.cpp"
+        "src/SubSystems/ECS/EntityComponentSubSystem.cpp"
         "src/SubSystems/Input/InputSubSystem.cpp"
+        "src/SubSystems/Rendering/RenderingSubSystem.cpp"
 
         "src/EventsMetadata.cpp"
+
+        "src/Components/ComponentBase.cpp"
+        "src/Components/SpriteComponent.cpp"
+        src/Reflection/Reflection.cpp
 )
 add_library(GE::Engine::Engine ALIAS ge_engine_game_engine)
 
