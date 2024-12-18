@@ -2,7 +2,7 @@
 #include <Engine/Interfaces/IEnvironment.h>
 #include <Engine/LogRenderer.h>
 #include <Engine/SubSystems/Globals.h>
-#include <Engine/SubSystems/Renderer/RenderingSubSystem.h>
+#include <Engine/SubSystems/Rendering/RenderingSubSystem.h>
 #include <Engine/SubSystems/SubSystemRegistration.h>
 #include <Windows.h>
 #include <bit>
