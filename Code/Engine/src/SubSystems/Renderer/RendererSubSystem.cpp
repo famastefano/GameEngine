@@ -1,7 +1,7 @@
 ﻿#include <Engine/Events/Renderer/EventResizeWindow.h>
 #include <Engine/Interfaces/IEnvironment.h>
-#include <Engine/Private/LogRenderer.h>
 #include <Engine/LogRenderer.h>
+#include <Engine/SubSystems/Globals.h>
 #include <Engine/SubSystems/Renderer/RendererSubSystem.h>
 #include <Engine/SubSystems/SubSystemRegistration.h>
 #include <Windows.h>
@@ -11,6 +11,8 @@
 namespace Engine
 {
 GE_REGISTER_SUBSYSTEM(SubSystemType::Engine, RendererSubSystem)
+
+RendererSubSystem* CurrentRendererSubSystem{};
 
 namespace
 {
@@ -76,6 +78,7 @@ void APIENTRY OpenGLMessageCallback(GLenum Source, GLenum Type, GLuint ID, GLenu
 RendererSubSystem::RendererSubSystem()
     : Super()
 {
+  CurrentRendererSubSystem = this;
   checkf(std::has_single_bit((u32)TileSize_) && TileSize_ > 0, "TileSize must be a power of 2.");
 }
 void RendererSubSystem::Tick(f32 DeltaTime)
