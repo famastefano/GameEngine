@@ -67,26 +67,41 @@ struct AutoRegisterTypeMetadata
 };
 } // namespace Engine
 
-#define GE_DECLARE_TYPE_METADATA_BASE()                            \
-  virtual const Engine::TypeMetaData& GetTypeMetaData() const = 0; \
-                                                                   \
-  template <Engine::Reflectable T>                                 \
-  T* GetAs()                                                       \
-  {                                                                \
-    if (GetTypeMetaData().ID_ == T::GetStaticTypeMetaData().ID_)   \
-      return static_cast<T*>(this);                                \
-    return nullptr;                                                \
+#define GE_DECLARE_STRUCT_TYPE_METADATA_BASE()                                   \
+  [[nodiscard]] virtual const Engine::TypeMetaData& GetTypeMetaData() const = 0; \
+                                                                                 \
+  template <Engine::Reflectable T>                                               \
+  [[nodiscard]] T* GetAs()                                                       \
+  {                                                                              \
+    if (GetTypeMetaData().ID_ == T::GetStaticTypeMetaData().ID_)                 \
+      return static_cast<T*>(this);                                              \
+    return nullptr;                                                              \
   }
+
+#define GE_DECLARE_CLASS_TYPE_METADATA_BASE()                                    \
+public:                                                                          \
+  [[nodiscard]] virtual const Engine::TypeMetaData& GetTypeMetaData() const = 0; \
+                                                                                 \
+  template <Engine::Reflectable T>                                 \
+  [[nodiscard]] T* GetAs()                                                       \
+  {                                                                \
+    if (GetTypeMetaData().ID_ == T::GetStaticTypeMetaData().ID_)                 \
+      return static_cast<T*>(this);                                              \
+    return nullptr;                                                              \
+  }                                                                              \
+                                                                                 \
+private:
 
 #define GE_DECLARE_CLASS_TYPE_METADATA()                       \
 public:                                                        \
-  virtual const Engine::TypeMetaData& GetTypeMetaData() const; \
+  [[nodiscard]] virtual const Engine::TypeMetaData& GetTypeMetaData() const; \
+  [[nodiscard]] static const Engine::TypeMetaData&  GetStaticTypeMetaData(); \
                                                                \
 private:
 
 #define GE_DECLARE_STRUCT_TYPE_METADATA()                      \
-  virtual const Engine::TypeMetaData& GetTypeMetaData() const; \
-  static const Engine::TypeMetaData&  GetStaticTypeMetaData();
+  [[nodiscard]] virtual const Engine::TypeMetaData& GetTypeMetaData() const; \
+  [[nodiscard]] static const Engine::TypeMetaData&  GetStaticTypeMetaData();
 
 #define GE_DEFINE_TYPE_METADATA(FullyQualifiedTypeWithNamespace)                                                                    \
   const Engine::TypeMetaData& FullyQualifiedTypeWithNamespace::GetTypeMetaData() const                                              \

@@ -7,8 +7,9 @@ namespace Engine
 {
 struct ENGINE_API EventBase
 {
-  GE_DECLARE_TYPE_METADATA_BASE()
-  
+  GE_DECLARE_STRUCT_TYPE_METADATA_BASE()
+
+  EventBase() = default;
   virtual ~EventBase() = default;
 };
 } // namespace Engine

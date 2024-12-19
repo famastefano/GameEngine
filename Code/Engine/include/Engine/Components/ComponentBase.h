@@ -13,7 +13,7 @@ namespace Engine::Components
 {
 class ENGINE_API ComponentBase
 {
-  GE_DECLARE_TYPE_METADATA_BASE()
+  GE_DECLARE_CLASS_TYPE_METADATA_BASE()
 
   Entities::ActorBase* Owner_{};
 

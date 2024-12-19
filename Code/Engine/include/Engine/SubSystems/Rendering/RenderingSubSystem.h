@@ -16,6 +16,7 @@ public:
   // Size of the tile
   i32 const TileSize_ = 16;
 
+  // EngineSubSystem
   RenderingSubSystem();
   void Tick(f32 DeltaTime) override;
   ~RenderingSubSystem() override;
@@ -24,9 +25,11 @@ public:
   void PostInitialize() override;
 
   bool HandleEvent(EventBase& Event) override;
+  // ---
 
 private:
-  static void ResizeViewport(i32 const Width, i32 const Height);
+  static void ResizeViewport(i32 Width, i32 Height);
   static void Cleanup();
+  static bool IsComponentHandledByUs(u64 ID);
 };
 } // namespace Engine

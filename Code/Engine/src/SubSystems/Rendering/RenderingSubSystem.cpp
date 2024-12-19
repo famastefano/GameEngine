@@ -1,4 +1,8 @@
-﻿#include <Engine/Events/Renderer/EventResizeWindow.h>
+﻿#include <Engine/Components/ComponentBase.h>
+#include <Engine/Components/SpriteComponent.h>
+#include <Engine/Events/ECS/ComponentAttached.h>
+#include <Engine/Events/ECS/ComponentDetached.h>
+#include <Engine/Events/Renderer/EventResizeWindow.h>
 #include <Engine/Interfaces/IEnvironment.h>
 #include <Engine/LogRenderer.h>
 #include <Engine/SubSystems/Globals.h>
@@ -13,6 +17,8 @@ namespace Engine
 GE_REGISTER_SUBSYSTEM(SubSystemType::Engine, RenderingSubSystem)
 
 RenderingSubSystem* CurrentRenderingSubSystem{};
+
+static Core::FlatMap<u64, Core::Vector<Components::ComponentBase*>> RenderingComponents;
 
 namespace
 {
@@ -103,6 +109,7 @@ void RenderingSubSystem::PreInitialize()
     bool success = false;
     ~CleanupHandler()
     {
+      checkf(success, "Failed to initialize RenderingSubSystem.");
       if (!success)
         Cleanup();
     }
@@ -209,6 +216,40 @@ bool RenderingSubSystem::HandleEvent(EventBase& Event)
     ResizeViewport(resizeEvent->Width_, resizeEvent->Height_);
     return true;
   }
+
+  if (auto const* attachedEvent = Event.GetAs<EventComponentAttached>())
+  {
+    u64 const ID = attachedEvent->Component_->GetTypeMetaData().ID_;
+    if (!IsComponentHandledByUs(ID))
+      return false;
+
+    if (auto* Components = RenderingComponents.Find(ID))
+    {
+      Components->EmplaceBack(attachedEvent->Component_);
+    }
+    else
+    {
+      bool const success = RenderingComponents.TryEmplace(ID);
+      checkf(success, "Failed to register component %llu.", ID);
+      if (success)
+        RenderingComponents[ID].EmplaceBack(attachedEvent->Component_);
+    }
+    return true;
+  }
+
+  if (auto const* detachedEvent = Event.GetAs<EventComponentDetached>())
+  {
+    u64 const ID = detachedEvent->Component_->GetTypeMetaData().ID_;
+    if (!IsComponentHandledByUs(ID))
+      return false;
+
+    auto* Components = RenderingComponents.Find(ID);
+    checkf(Components, "Failed to find component %llu.", ID);
+    if (Components)
+      Components->EraseIf([C = detachedEvent->Component_](Components::ComponentBase* const& Registered) { return Registered == C; });
+    return true;
+  }
+
   return false;
 }
 void RenderingSubSystem::ResizeViewport(i32 const Width, i32 const Height)
@@ -233,5 +274,17 @@ void RenderingSubSystem::Cleanup()
     DestroyWindow(MainWindowHnd);
 
   UnregisterClassW(WINDOW_CLASS_NAME, GetModuleHandle(NULL));
+}
+bool RenderingSubSystem::IsComponentHandledByUs(u64 const ID)
+{
+  using namespace Components;
+  for (u64 const SupportedID : {
+           SpriteComponent::GetStaticTypeMetaData().ID_,
+       })
+  {
+    if (ID == SupportedID)
+      return true;
+  }
+  return false;
 }
 } // namespace Engine

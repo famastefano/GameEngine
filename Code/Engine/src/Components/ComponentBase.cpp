@@ -1,5 +1,9 @@
 ﻿#include <Core/Assert/Assert.h>
 #include <Engine/Components/ComponentBase.h>
+#include <Engine/Events/ECS/ComponentAttached.h>
+#include <Engine/Events/ECS/ComponentDetached.h>
+#include <Engine/GameEngine/GameEngine.h>
+#include <Engine/Interfaces/IEnvironment.h>
 
 namespace Engine::Components
 {
@@ -14,8 +18,11 @@ void ComponentBase::PreAttach(Entities::ActorBase& NewOwner)
 }
 void ComponentBase::PostAttach(Entities::ActorBase& NewOwner)
 {
-  (void)NewOwner;
   check(!Owner_);
+  EventComponentAttached ev;
+  ev.NewOwner_  = &NewOwner;
+  ev.Component_ = this;
+  GlobalEnvironment->GetGameEngine().EnqueueEvent(ev);
 }
 void ComponentBase::PreDetach(Entities::ActorBase& PrevOwner)
 {
@@ -27,6 +34,11 @@ void ComponentBase::PostDetach(Entities::ActorBase& PrevOwner)
   (void)PrevOwner;
   check(Owner_ == &PrevOwner);
   Owner_ = nullptr;
+
+  EventComponentDetached ev;
+  ev.PrevOwner_ = &PrevOwner;
+  ev.Component_ = this;
+  GlobalEnvironment->GetGameEngine().EnqueueEvent(ev);
 }
 void ComponentBase::Tick(f32)
 {
