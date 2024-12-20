@@ -2,5 +2,5 @@
 
 namespace Engine
 {
-Core::FlatMap<u64, TypeMetaData*> TypeMetaDatas;
+Core::FlatMap<u64, TypeMetaData const*> TypeMetaDatas;
 } // namespace Engine

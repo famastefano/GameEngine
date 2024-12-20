@@ -8,7 +8,7 @@ struct EventBase;
 
 class RenderingSubSystem : public EngineSubSystem
 {
-  GE_IMPLEMENT_SUBSYSTEM(RenderingSubSystem)
+  GE_DECLARE_CLASS_TYPE_METADATA()
 
 public:
   using Super = EngineSubSystem;

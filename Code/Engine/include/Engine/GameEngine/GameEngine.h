@@ -1,10 +1,10 @@
 #pragma once
 
-#include <Core/Container/FlatMap.h>
-#include <Core/Container/String.h>
+#include <Core/Container/Vector.h>
 #include <Engine/API.h>
 #include <Engine/Events/EventBase.h>
-#include <Engine/Events/Renderer/EventResizeWindow.h>
+#include <Engine/Reflection/Reflection.h>
+#include <Engine/SubSystems/EngineSubSystem.h>
 
 namespace Engine
 {
@@ -12,7 +12,9 @@ class EngineSubSystem;
 
 class ENGINE_API GameEngine
 {
-  Core::CompactFlatMap<u64, EngineSubSystem*> EngineSubSystems_;
+  GE_DECLARE_CLASS_TYPE_METADATA();
+
+  Core::Vector<EngineSubSystem*> EngineSubSystems_;
 
 public:
   GameEngine();
@@ -25,8 +27,13 @@ public:
 
   virtual void Tick(f32 DeltaTime);
 
-  virtual EngineSubSystem* GetEngineSubSystem(Core::StringView<char> Name);
-
   virtual void EnqueueEvent(EventBase& Event);
+
+  template <SubSystemType T>
+  T* FindSubSystem()
+  {
+    auto const* SubSystem = EngineSubSystems_.Find([](EngineSubSystem const* SubSystem) { return SubSystem->GetTypeMetaData().ID_ == T::GetStaticTypeMetaData().ID_; });
+    return (T*)SubSystem;
+  }
 };
 } // namespace Engine

@@ -6,7 +6,7 @@ namespace Engine
 {
 class EntityComponentSubSystem : public EngineSubSystem
 {
-  GE_IMPLEMENT_SUBSYSTEM(EntityComponentSubSystem)
+  GE_DECLARE_CLASS_TYPE_METADATA()
 
 public:
   void PreInitialize() override;

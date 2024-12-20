@@ -1,5 +1,7 @@
 ﻿#include <Engine/SubSystems/ECS/EntityComponentSubSystem.h>
 
+GE_DEFINE_TYPE_METADATA(Engine::EntityComponentSubSystem, Engine::TypeMetaData::EngineSubSystem)
+
 namespace Engine
 {
 void EntityComponentSubSystem::PreInitialize()

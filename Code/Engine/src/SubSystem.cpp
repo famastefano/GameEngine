@@ -1,7 +1,7 @@
+#include <Engine/GameEngine/GameEngine.h>
+#include <Engine/Interfaces/IEnvironment.h>
 #include <Engine/LogEngine.h>
 #include <Engine/SubSystems/SubSystem.h>
-#include <Engine/Interfaces/IEnvironment.h>
-#include <Engine/GameEngine/GameEngine.h>
 
 namespace Engine
 {
@@ -12,13 +12,11 @@ GameEngine& SubSystem::GetGameEngine()
 }
 void SubSystem::PreInitialize()
 {
-  auto const name = Name();
-  GE_LOG(LogEngine, Core::Verbosity::Info, "SubSystem `%*.s`", name.Size(), name.Data());
+  GE_LOG(LogEngine, Core::Verbosity::Info, "SubSystem `%s`", GetTypeMetaData().Name_);
 }
 void SubSystem::PostInitialize()
 {
-  auto const name = Name();
-  GE_LOG(LogEngine, Core::Verbosity::Info, "SubSystem `%*.s`", name.Size(), name.Data());
+  GE_LOG(LogEngine, Core::Verbosity::Info, "SubSystem `%s`", GetTypeMetaData().Name_);
 }
 bool SubSystem::HandleEvent(EventBase&)
 {

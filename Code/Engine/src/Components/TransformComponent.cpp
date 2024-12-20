@@ -1,3 +1,3 @@
 ﻿#include <Engine/Components/TransformComponent.h>
 
-GE_DEFINE_TYPE_METADATA(Engine::Components::TransformComponent)
+GE_DEFINE_TYPE_METADATA(Engine::Components::TransformComponent, Engine::TypeMetaData::Component)

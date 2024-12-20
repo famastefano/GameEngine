@@ -6,7 +6,7 @@ namespace Engine
 {
 class InputSubSystem : public EngineSubSystem
 {
-  GE_IMPLEMENT_SUBSYSTEM(InputSubSystem)
+  GE_DECLARE_CLASS_TYPE_METADATA()
 
 public:
   void Tick(f32 DeltaTime) override;

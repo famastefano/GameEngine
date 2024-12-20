@@ -5,4 +5,4 @@ namespace Engine::Components
 
 }
 
-GE_DEFINE_TYPE_METADATA(Engine::Components::SpriteComponent)
+GE_DEFINE_TYPE_METADATA(Engine::Components::SpriteComponent, Engine::TypeMetaData::Component)

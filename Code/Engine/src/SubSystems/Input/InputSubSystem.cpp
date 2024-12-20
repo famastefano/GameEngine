@@ -1,14 +1,13 @@
 ﻿#include <Engine/Events/Input/InputEvents.h>
 #include <Engine/LogInput.h>
 #include <Engine/SubSystems/Input/InputSubSystem.h>
-#include <Engine/SubSystems/SubSystemRegistration.h>
 #include <Windows.h>
 #include <hidusage.h>
 
+GE_DEFINE_TYPE_METADATA(Engine::InputSubSystem, Engine::TypeMetaData::EngineSubSystem)
+
 namespace Engine
 {
-GE_REGISTER_SUBSYSTEM(SubSystemType::Engine, InputSubSystem)
-
 void InputSubSystem::Tick(f32 DeltaTime)
 {
 }

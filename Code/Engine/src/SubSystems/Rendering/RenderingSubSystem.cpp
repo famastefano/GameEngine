@@ -9,15 +9,14 @@
 #include <Engine/LogRenderer.h>
 #include <Engine/SubSystems/Globals.h>
 #include <Engine/SubSystems/Rendering/RenderingSubSystem.h>
-#include <Engine/SubSystems/SubSystemRegistration.h>
 #include <Windows.h>
 #include <bit>
 #include <glad/glad.h>
 
+GE_DEFINE_TYPE_METADATA(Engine::RenderingSubSystem, Engine::TypeMetaData::EngineSubSystem)
+
 namespace Engine
 {
-GE_REGISTER_SUBSYSTEM(SubSystemType::Engine, RenderingSubSystem)
-
 RenderingSubSystem* CurrentRenderingSubSystem{};
 
 static Core::FlatMap<u64, Core::Vector<Components::ComponentBase*>> RenderingComponents;
