@@ -92,11 +92,11 @@ public:                                                                         
                                                                                  \
 private:
 
-#define GE_DECLARE_CLASS_TYPE_METADATA()                       \
-public:                                                        \
+#define GE_DECLARE_CLASS_TYPE_METADATA()                                     \
+public:                                                                      \
   [[nodiscard]] virtual const Engine::TypeMetaData& GetTypeMetaData() const; \
   [[nodiscard]] static const Engine::TypeMetaData&  GetStaticTypeMetaData(); \
-                                                               \
+                                                                             \
 private:
 
 #define GE_DECLARE_STRUCT_TYPE_METADATA()                      \

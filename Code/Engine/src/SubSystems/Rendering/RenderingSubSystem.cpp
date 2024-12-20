@@ -1,5 +1,7 @@
 ﻿#include <Engine/Components/ComponentBase.h>
 #include <Engine/Components/SpriteComponent.h>
+#include <Engine/Components/TransformComponent.h>
+#include <Engine/Entities/ActorBase.h>
 #include <Engine/Events/ECS/ComponentAttached.h>
 #include <Engine/Events/ECS/ComponentDetached.h>
 #include <Engine/Events/Renderer/EventResizeWindow.h>
@@ -89,6 +91,19 @@ RenderingSubSystem::RenderingSubSystem()
 }
 void RenderingSubSystem::Tick(f32 DeltaTime)
 {
+  using namespace Components;
+  for (auto const& [ID, Components] : RenderingComponents)
+  {
+    if (ID == SpriteComponent::GetStaticTypeMetaData().ID_)
+    {
+      for (auto const* Component : Components)
+      {
+        auto const* sprite    = (SpriteComponent*)Component;
+        auto const* transform = sprite->Owner()->FindComponentChecked<TransformComponent>();
+      }
+    }
+  }
+
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   SwapBuffers(GDICtx);
 }

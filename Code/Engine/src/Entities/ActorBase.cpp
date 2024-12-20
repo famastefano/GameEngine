@@ -2,34 +2,35 @@
 
 namespace Engine::Entities
 {
-Actor::Actor(char const*& Name) : Name_(Name)
+void ActorBase::SetName(Core::String<char> Name)
 {
+  Name_ = std::move(Name);
 }
-Core::StringView<char> Actor::Name() const
+Core::StringView<char> ActorBase::Name() const
 {
   return Name_.AsView();
 }
-void Actor::PreInitialize()
+void ActorBase::PreInitialize()
 {
 }
-void Actor::PostInitialize()
+void ActorBase::PostInitialize()
 {
 }
-void Actor::PreDeinitialize()
+void ActorBase::PreDeinitialize()
 {
 }
-void Actor::PostDeinitialize()
+void ActorBase::PostDeinitialize()
 {
 }
-void Actor::PreTickComponents(f32 DeltaTime)
+void ActorBase::PreTickComponents(f32 DeltaTime)
 {
 }
-void Actor::TickComponents(f32 DeltaTime)
+void ActorBase::TickComponents(f32 DeltaTime)
 {
-  for (auto* component : Components_)
-    component->Tick(DeltaTime);
+  for (auto&& [K, V] : Components_)
+    V->Tick(DeltaTime);
 }
-void Actor::PostTickComponents(f32 DeltaTime)
+void ActorBase::PostTickComponents(f32 DeltaTime)
 {
 }
 } // namespace Engine::Entities

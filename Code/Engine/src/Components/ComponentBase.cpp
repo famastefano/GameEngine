@@ -13,8 +13,8 @@ Entities::ActorBase* ComponentBase::Owner() const
 }
 void ComponentBase::PreAttach(Entities::ActorBase& NewOwner)
 {
-  (void)NewOwner;
   check(!Owner_);
+  Owner_ = &NewOwner;
 }
 void ComponentBase::PostAttach(Entities::ActorBase& NewOwner)
 {

@@ -20,8 +20,10 @@ add_library(ge_engine_game_engine SHARED
         "src/Reflection/Reflection.cpp"
         "src/EventsMetadata.cpp"
 
+        "src/Entities/ActorBase.cpp"
         "src/Components/ComponentBase.cpp"
         "src/Components/SpriteComponent.cpp"
+        "src/Components/TransformComponent.cpp"
 )
 add_library(GE::Engine::Engine ALIAS ge_engine_game_engine)
 
@@ -36,6 +38,7 @@ target_link_libraries(ge_engine_game_engine
         ge_root_config_target
     PUBLIC
         GE::Engine::Core
+        GE::Engine::Math
         PRIVATE
         GE::ThirdParty::glad
 )

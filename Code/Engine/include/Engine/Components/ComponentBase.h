@@ -33,4 +33,7 @@ public:
   virtual void PostDetach(Entities::ActorBase& PrevOwner);
   virtual void Tick(f32 DeltaTime);
 };
+
+template <typename T>
+concept Component = std::derived_from<T, ComponentBase>;
 } // namespace Engine::Components
