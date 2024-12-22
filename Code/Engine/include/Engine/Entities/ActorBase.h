@@ -5,6 +5,7 @@
 #include <Engine/API.h>
 #include <Engine/Components/ComponentBase.h>
 #include <Engine/Reflection/Reflection.h>
+#include <Engine/Components/TransformComponent.h>
 
 namespace Engine::Entities
 {
@@ -17,6 +18,8 @@ class ENGINE_API ActorBase
   Core::String<char> Name_;
 
 public:
+  Components::TransformComponent Transform_;
+
   ActorBase()                            = default;
   ActorBase(ActorBase const&)            = delete;
   ActorBase& operator=(ActorBase const&) = delete;

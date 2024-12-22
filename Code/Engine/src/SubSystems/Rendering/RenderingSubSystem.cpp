@@ -98,7 +98,7 @@ void RenderingSubSystem::Tick(f32 DeltaTime)
       for (auto const* Component : Components)
       {
         auto const* sprite    = (SpriteComponent*)Component;
-        auto const* transform = sprite->Owner()->FindComponentChecked<TransformComponent>();
+        auto const& transform = sprite->Owner()->Transform_;
       }
     }
   }
