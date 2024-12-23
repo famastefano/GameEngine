@@ -22,4 +22,30 @@ bool EntityComponentSubSystem::HandleEvent(EventBase& Event)
 EntityComponentSubSystem::~EntityComponentSubSystem()
 {
 }
+Entities::ActorBase* EntityComponentSubSystem::SpawnActor(u64 ClassID, Core::StringView<char> Name, Math::Vec3Df WorldPosition)
+{
+  if (auto const** p = TypeMetaDatas.Find(ClassID))
+  {
+    auto const& metaData = **p;
+    if (metaData.Kind_ != TypeMetaData::Actor)
+      return nullptr;
+
+    Entities::ActorBase* actor = (Entities::ActorBase*)metaData.Factory_();
+
+    actor->SetName(Name);
+    actor->Transform_.Position_ = WorldPosition;
+    return actor;
+  }
+  return nullptr;
+}
+void EntityComponentSubSystem::DestroyActor(Entities::ActorBase* Actor)
+{
+  Actor->Deinitialize();
+  Actors_.TryRemove(Actor->ID());
+}
+void EntityComponentSubSystem::DestroyActor(u64 const ID)
+{
+  if (auto** actor = Actors_.Find(ID))
+    DestroyActor(*actor);
+}
 } // namespace Engine

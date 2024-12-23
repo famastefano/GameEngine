@@ -4,14 +4,17 @@
 #include <Core/Container/String.h>
 #include <Engine/API.h>
 #include <Engine/Components/ComponentBase.h>
-#include <Engine/Reflection/Reflection.h>
 #include <Engine/Components/TransformComponent.h>
+#include <Engine/Reflection/Reflection.h>
+#include <concepts>
 
 namespace Engine::Entities
 {
 class ENGINE_API ActorBase
 {
   GE_DECLARE_CLASS_TYPE_METADATA_BASE()
+
+  u64 ID_;
 
   Core::CompactFlatMap<u64, Components::ComponentBase*> Components_;
 
@@ -20,7 +23,7 @@ class ENGINE_API ActorBase
 public:
   Components::TransformComponent Transform_;
 
-  ActorBase()                            = default;
+  ActorBase();
   ActorBase(ActorBase const&)            = delete;
   ActorBase& operator=(ActorBase const&) = delete;
   ActorBase(ActorBase&& actor)           = delete;
@@ -29,6 +32,7 @@ public:
 
   void SetName(Core::String<char> Name);
 
+  [[nodiscard]] u64                    ID() const;
   [[nodiscard]] Core::StringView<char> Name() const;
 
   virtual void PreInitialize();
@@ -38,6 +42,7 @@ public:
   virtual void PreTickComponents(f32 DeltaTime);
   void         TickComponents(f32 DeltaTime);
   virtual void PostTickComponents(f32 DeltaTime);
+  void         Deinitialize();
 
   template <Components::Component Component>
   [[nodiscard]] Component* AttachComponent()
@@ -102,4 +107,6 @@ public:
     return found;
   }
 };
+template <typename T>
+concept ActorType = std::derived_from<T, ActorBase>;
 } // namespace Engine::Entities
