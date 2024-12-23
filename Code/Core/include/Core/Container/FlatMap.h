@@ -185,22 +185,6 @@ public:
   }
 
   template <typename U = Key>
-  constexpr Value& operator[](U const& u)
-  {
-    auto* found = Find(u);
-    check(found);
-    return *found;
-  }
-
-  template <typename U = Key>
-  constexpr Value const& operator[](U const& u) const
-  {
-    auto* found = Find(u);
-    check(found);
-    return *found;
-  }
-
-  template <typename U = Key>
   constexpr bool Contains(U const& u) const
   {
     return Find(u);
@@ -234,18 +218,18 @@ public:
   }
 
   template <typename U = Key, typename... Args>
-  constexpr bool TryEmplace(U&& key, Args&&... args)
+  constexpr Value* TryEmplace(U&& key, Args&&... args)
   {
     auto begin = Keys_.begin();
     auto end   = Keys_.end();
     auto it    = std::lower_bound(begin, end, key);
     if (it != end && *it == key)
-      return false;
+      return nullptr;
 
     i32 const pos = i32(it - begin);
     Keys_.Emplace(pos, std::forward<U>(key));
-    Values_.Emplace(pos, std::forward<Args>(args)...);
-    return true;
+    auto * value = Values_.Emplace(pos, std::forward<Args>(args)...);
+    return value;
   }
 
   template <typename U = Key>
@@ -261,6 +245,12 @@ public:
     Keys_.Erase(pos);
     Values_.Erase(pos);
     return true;
+  }
+
+  void Clear()
+  {
+    Keys_.Clear();
+    Values_.Clear();
   }
 };
 
@@ -330,35 +320,19 @@ public:
     return {Items_.end()};
   }
 
-  constexpr CompactFlatMapFakeContainer<KeyValue, Key const, Value, Private::KeyIterator> Keys() const
+  constexpr CompactFlatMapFakeContainer<KeyValue const, Key const, Value, Private::KeyIterator> Keys() const
   {
-    return {begin(), end()};
+    return {Items_.begin(), Items_.end()};
   }
 
   constexpr CompactFlatMapFakeContainer<KeyValue, Key const, Value, Private::ValueIterator> Values()
   {
-    return {begin(), end()};
+    return {Items_.begin(), Items_.end()};
   }
 
-  constexpr CompactFlatMapFakeContainer<KeyValue, Key const, Value const, Private::ValueIterator> Values() const
+  constexpr CompactFlatMapFakeContainer<KeyValue const, Key const, Value const, Private::ValueIterator> Values() const
   {
-    return {begin(), end()};
-  }
-
-  template <typename U = Key>
-  constexpr Value& operator[](U const& u)
-  {
-    auto* found = Find(u);
-    check(found);
-    return *found;
-  }
-
-  template <typename U = Key>
-  constexpr Value const& operator[](U const& u) const
-  {
-    auto* found = Find(u);
-    check(found);
-    return *found;
+    return {Items_.begin(), Items_.end()};
   }
 
   template <typename U = Key>
@@ -414,6 +388,11 @@ public:
 
     Items_.Erase(it);
     return true;
+  }
+
+  void Clear()
+  {
+    Items_.Clear();
   }
 };
 

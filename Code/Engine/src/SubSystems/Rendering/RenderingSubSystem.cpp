@@ -243,10 +243,10 @@ bool RenderingSubSystem::HandleEvent(EventBase& Event)
     }
     else
     {
-      bool const success = RenderingComponents.TryEmplace(ID);
-      checkf(success, "Failed to register component %llu.", ID);
-      if (success)
-        RenderingComponents[ID].EmplaceBack(attachedEvent->Component_);
+      auto* components = RenderingComponents.TryEmplace(ID);
+      checkf(components, "Failed to register component %llu.", ID);
+      if (components)
+        components->EmplaceBack(attachedEvent->Component_);
     }
     return true;
   }
@@ -257,10 +257,10 @@ bool RenderingSubSystem::HandleEvent(EventBase& Event)
     if (!IsComponentHandledByUs(ID))
       return false;
 
-    auto* Components = RenderingComponents.Find(ID);
-    checkf(Components, "Failed to find component %llu.", ID);
-    if (Components)
-      Components->EraseIf([C = detachedEvent->Component_](Components::ComponentBase* const& Registered) { return Registered == C; });
+    auto* components = RenderingComponents.Find(ID);
+    checkf(components, "Failed to find component %llu.", ID);
+    if (components)
+      components->EraseIf([C = detachedEvent->Component_](Components::ComponentBase* const& Registered) { return Registered == C; });
     return true;
   }
 
