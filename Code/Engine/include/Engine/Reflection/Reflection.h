@@ -135,4 +135,4 @@ private:
     static Engine::TypeMetaData typeMetaData = Engine::MakeMetaData<FullyQualifiedTypeWithNamespace>((u64) & name, name, TypeKind); \
     return typeMetaData;                                                                                                            \
   }                                                                                                                                 \
-  static Engine::AutoRegisterTypeMetadata<void> GE_JOIN(g_reg_metadata, __COUNTER__) (FullyQualifiedTypeWithNamespace::GetStaticTypeMetaData());
+  static Engine::AutoRegisterTypeMetadata<void> GE_JOIN(g_reg_metadata, __COUNTER__)(FullyQualifiedTypeWithNamespace::GetStaticTypeMetaData());
