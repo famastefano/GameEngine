@@ -2,5 +2,9 @@
 
 namespace Engine
 {
-Core::FlatMap<u64, TypeMetaData const*> TypeMetaDatas;
+ENGINE_API Core::CompactFlatMap<u64, TypeMetaData const*>& GetTypesMetaData()
+{
+  static Core::CompactFlatMap<u64, TypeMetaData const*> metaData;
+  return metaData;
+}
 } // namespace Engine

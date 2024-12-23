@@ -1,5 +1,7 @@
 ﻿#include <Engine/Entities/ActorBase.h>
 
+GE_DEFINE_TYPE_METADATA(Engine::Entities::ActorBase, Engine::TypeMetaData::Actor)
+
 namespace Engine::Entities
 {
 namespace

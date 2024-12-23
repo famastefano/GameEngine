@@ -3,6 +3,7 @@
 #include <Core/Container/FlatMap.h>
 #include <Core/Container/Span.h>
 #include <Core/Container/Vector.h>
+#include <Core/Helpers.h>
 #include <Engine/API.h>
 #include <Engine/Serialization/Serialization.h>
 #include <concepts>
@@ -75,14 +76,14 @@ TypeMetaData MakeMetaData(u64 const ID, char const* Name, u16 const Kind)
   };
 }
 
-ENGINE_API extern Core::FlatMap<u64, TypeMetaData const*> TypeMetaDatas;
+ENGINE_API Core::CompactFlatMap<u64, TypeMetaData const*>& GetTypesMetaData();
 
 template <typename T>
 struct AutoRegisterTypeMetadata
 {
-  explicit AutoRegisterTypeMetadata(TypeMetaData& MetaData)
+  explicit AutoRegisterTypeMetadata(TypeMetaData const& MetaData)
   {
-    TypeMetaDatas.TryEmplace(MetaData.ID_, &MetaData);
+    GetTypesMetaData().TryEmplace(MetaData.ID_, &MetaData);
   }
 };
 } // namespace Engine
@@ -123,15 +124,15 @@ private:
   [[nodiscard]] virtual const Engine::TypeMetaData& GetTypeMetaData() const; \
   [[nodiscard]] static const Engine::TypeMetaData&  GetStaticTypeMetaData();
 
-#define GE_DEFINE_TYPE_METADATA(FullyQualifiedTypeWithNamespace, TypeKind)                                                                    \
-  const Engine::TypeMetaData& FullyQualifiedTypeWithNamespace::GetTypeMetaData() const                                                        \
-  {                                                                                                                                           \
-    return GetStaticTypeMetaData();                                                                                                           \
-  }                                                                                                                                           \
-  const Engine::TypeMetaData& FullyQualifiedTypeWithNamespace::GetStaticTypeMetaData()                                                        \
-  {                                                                                                                                           \
-    static const char*                    name         = #FullyQualifiedTypeWithNamespace;                                                    \
-    static Engine::TypeMetaData           typeMetaData = Engine::MakeMetaData<FullyQualifiedTypeWithNamespace>((u64) & name, name, TypeKind); \
-    static AutoRegisterTypeMetadata<void> reg{typeMetaData};                                                                                  \
-    return typeMetaData;                                                                                                                      \
-  }
+#define GE_DEFINE_TYPE_METADATA(FullyQualifiedTypeWithNamespace, TypeKind)                                                          \
+  const Engine::TypeMetaData& FullyQualifiedTypeWithNamespace::GetTypeMetaData() const                                              \
+  {                                                                                                                                 \
+    return GetStaticTypeMetaData();                                                                                                 \
+  }                                                                                                                                 \
+  const Engine::TypeMetaData& FullyQualifiedTypeWithNamespace::GetStaticTypeMetaData()                                              \
+  {                                                                                                                                 \
+    static const char*          name         = #FullyQualifiedTypeWithNamespace;                                                    \
+    static Engine::TypeMetaData typeMetaData = Engine::MakeMetaData<FullyQualifiedTypeWithNamespace>((u64) & name, name, TypeKind); \
+    return typeMetaData;                                                                                                            \
+  }                                                                                                                                 \
+  static Engine::AutoRegisterTypeMetadata<void> GE_JOIN(g_reg_metadata, __COUNTER__) (FullyQualifiedTypeWithNamespace::GetStaticTypeMetaData());

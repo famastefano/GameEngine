@@ -21,10 +21,15 @@ bool EntityComponentSubSystem::HandleEvent(EventBase& Event)
 }
 EntityComponentSubSystem::~EntityComponentSubSystem()
 {
+  for (auto* actor : Actors_.Values())
+  {
+    actor->Deinitialize();
+    delete actor;
+  }
 }
 Entities::ActorBase* EntityComponentSubSystem::SpawnActor(u64 ClassID, Core::StringView<char> Name, Math::Vec3Df WorldPosition)
 {
-  if (auto const** p = TypeMetaDatas.Find(ClassID))
+  if (auto const** p = GetTypesMetaData().Find(ClassID))
   {
     auto const& metaData = **p;
     if (metaData.Kind_ != TypeMetaData::Actor)

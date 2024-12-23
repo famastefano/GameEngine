@@ -1,6 +1,7 @@
 #include <Engine/Events/Renderer/EventResizeWindow.h>
 #include <Engine/GameEngine/GameEngine.h>
 #include <Engine/Interfaces/IEnvironment.h>
+#include <Engine/SubSystems/ECS/EntityComponentSubSystem.h>
 #include <Engine/SubSystems/Input/Base/Translator.h>
 #include <Windows.h>
 #include <chrono>
@@ -46,6 +47,12 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance_, _In_opt_ HINSTANCE hPrevInstance,
   env.Engine_.PreInitialize();
   env.Engine_.PostInitialize();
 
+  auto* ECS = env.Engine_.FindSubSystem<Engine::EntityComponentSubSystem>();
+  check(ECS);
+
+  auto* actor = ECS->SpawnActor<Engine::Entities::ActorBase>("Debug Actor");
+  check(actor);
+
   auto frameStart = std::chrono::steady_clock::now();
 
   while (true)
@@ -66,6 +73,8 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance_, _In_opt_ HINSTANCE hPrevInstance,
     env.Engine_.Tick(dt.count());
     frameStart = frameEnd;
   }
+
+  ECS->DestroyActor(actor);
 }
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)

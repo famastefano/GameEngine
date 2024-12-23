@@ -6,7 +6,7 @@
 
 namespace Engine
 {
-class EntityComponentSubSystem : public EngineSubSystem
+class ENGINE_API EntityComponentSubSystem : public EngineSubSystem
 {
   GE_DECLARE_CLASS_TYPE_METADATA()
 

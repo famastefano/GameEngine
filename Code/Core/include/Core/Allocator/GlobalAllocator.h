@@ -7,6 +7,8 @@ namespace Core
 class CORE_API GlobalAllocator final : public IAllocator
 {
 public:
+  static GlobalAllocator& GetInstance();
+
   // clang-format off
   // Inherited via IAllocator
   __declspec(allocator) __declspec(restrict) void* Alloc(i64 const size, i32 const alignment) override;

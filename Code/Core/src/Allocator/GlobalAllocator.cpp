@@ -4,13 +4,11 @@
 #include <bit>
 #include <new>
 
-static Core::GlobalAllocator globalAllocatorInstance;
-
 namespace Core
 {
 IAllocator* GetGlobalAllocator()
 {
-  return &globalAllocatorInstance;
+  return &GlobalAllocator::GetInstance();
 }
 
 static HANDLE MemHandle = GetProcessHeap() ? GetProcessHeap() : HeapCreate(0, 0, 0);
@@ -28,6 +26,11 @@ constexpr static void* FromAlignedPointer(void* p, i32 const alignment)
   return alignment <= MEMORY_ALLOCATION_ALIGNMENT ? p : ((void**)p)[-1];
 }
 
+GlobalAllocator& GlobalAllocator::GetInstance()
+{
+  static GlobalAllocator instance;
+  return instance;
+}
 __declspec(allocator) __declspec(restrict) void* GlobalAllocator::Alloc(i64 size, i32 const alignment)
 {
   checkf(std::has_single_bit((u32)alignment), "Alignment must be a power of 2.");
@@ -91,85 +94,85 @@ bool GlobalAllocator::OwnedByContainer()
 
 void* operator new(std::size_t count)
 {
-  return globalAllocatorInstance.Alloc((i64)count, MEMORY_ALLOCATION_ALIGNMENT);
+  return Core::GetGlobalAllocator()->Alloc((i64)count, MEMORY_ALLOCATION_ALIGNMENT);
 }
 void* operator new[](std::size_t count)
 {
-  return globalAllocatorInstance.Alloc((i64)count, MEMORY_ALLOCATION_ALIGNMENT);
+  return Core::GetGlobalAllocator()->Alloc((i64)count, MEMORY_ALLOCATION_ALIGNMENT);
 }
 void* operator new(std::size_t count, std::align_val_t al)
 {
-  return globalAllocatorInstance.Alloc((i64)count, (i32)al);
+  return Core::GetGlobalAllocator()->Alloc((i64)count, (i32)al);
 }
 void* operator new[](std::size_t count, std::align_val_t al)
 {
-  return globalAllocatorInstance.Alloc((i64)count, (i32)al);
+  return Core::GetGlobalAllocator()->Alloc((i64)count, (i32)al);
 }
 void* operator new(std::size_t count, std::nothrow_t const&) noexcept
 {
-  return globalAllocatorInstance.Alloc((i64)count, MEMORY_ALLOCATION_ALIGNMENT);
+  return Core::GetGlobalAllocator()->Alloc((i64)count, MEMORY_ALLOCATION_ALIGNMENT);
 }
 void* operator new[](std::size_t count, std::nothrow_t const&) noexcept
 {
-  return globalAllocatorInstance.Alloc((i64)count, MEMORY_ALLOCATION_ALIGNMENT);
+  return Core::GetGlobalAllocator()->Alloc((i64)count, MEMORY_ALLOCATION_ALIGNMENT);
 }
 void* operator new(std::size_t count, std::align_val_t al, std::nothrow_t const&) noexcept
 {
-  return globalAllocatorInstance.Alloc((i64)count, (i32)al);
+  return Core::GetGlobalAllocator()->Alloc((i64)count, (i32)al);
 }
 void* operator new[](std::size_t count, std::align_val_t al, std::nothrow_t const&) noexcept
 {
-  return globalAllocatorInstance.Alloc((i64)count, (i32)al);
+  return Core::GetGlobalAllocator()->Alloc((i64)count, (i32)al);
 }
 
 // operator delete
 
 void operator delete(void* ptr) noexcept
 {
-  globalAllocatorInstance.Free(ptr, MEMORY_ALLOCATION_ALIGNMENT);
+  Core::GetGlobalAllocator()->Free(ptr, MEMORY_ALLOCATION_ALIGNMENT);
 }
 void operator delete[](void* ptr) noexcept
 {
-  globalAllocatorInstance.Free(ptr, MEMORY_ALLOCATION_ALIGNMENT);
+  Core::GetGlobalAllocator()->Free(ptr, MEMORY_ALLOCATION_ALIGNMENT);
 }
 void operator delete(void* ptr, std::align_val_t al) noexcept
 {
-  globalAllocatorInstance.Free(ptr, (i32)al);
+  Core::GetGlobalAllocator()->Free(ptr, (i32)al);
 }
 void operator delete[](void* ptr, std::align_val_t al) noexcept
 {
-  globalAllocatorInstance.Free(ptr, (i32)al);
+  Core::GetGlobalAllocator()->Free(ptr, (i32)al);
 }
 void operator delete(void* ptr, std::size_t) noexcept
 {
-  globalAllocatorInstance.Free(ptr, MEMORY_ALLOCATION_ALIGNMENT);
+  Core::GetGlobalAllocator()->Free(ptr, MEMORY_ALLOCATION_ALIGNMENT);
 }
 void operator delete[](void* ptr, std::size_t) noexcept
 {
-  globalAllocatorInstance.Free(ptr, MEMORY_ALLOCATION_ALIGNMENT);
+  Core::GetGlobalAllocator()->Free(ptr, MEMORY_ALLOCATION_ALIGNMENT);
 }
 void operator delete(void* ptr, std::size_t, std::align_val_t al) noexcept
 {
-  globalAllocatorInstance.Free(ptr, (i32)al);
+  Core::GetGlobalAllocator()->Free(ptr, (i32)al);
 }
 void operator delete[](void* ptr, std::size_t, std::align_val_t al) noexcept
 {
-  globalAllocatorInstance.Free(ptr, (i32)al);
+  Core::GetGlobalAllocator()->Free(ptr, (i32)al);
 }
 void operator delete(void* ptr, std::nothrow_t const&) noexcept
 {
-  globalAllocatorInstance.Free(ptr, MEMORY_ALLOCATION_ALIGNMENT);
+  Core::GetGlobalAllocator()->Free(ptr, MEMORY_ALLOCATION_ALIGNMENT);
 }
 void operator delete[](void* ptr, std::nothrow_t const&) noexcept
 {
-  globalAllocatorInstance.Free(ptr, MEMORY_ALLOCATION_ALIGNMENT);
+  Core::GetGlobalAllocator()->Free(ptr, MEMORY_ALLOCATION_ALIGNMENT);
 }
 void operator delete(void* ptr, std::align_val_t al, std::nothrow_t const&) noexcept
 {
-  globalAllocatorInstance.Free(ptr, (i32)al);
+  Core::GetGlobalAllocator()->Free(ptr, (i32)al);
 }
 void operator delete[](void* ptr, std::align_val_t al, std::nothrow_t const&) noexcept
 {
-  globalAllocatorInstance.Free(ptr, (i32)al);
+  Core::GetGlobalAllocator()->Free(ptr, (i32)al);
 }
 #pragma warning(default : 28'251)

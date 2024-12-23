@@ -9,7 +9,7 @@ namespace Engine
 GameEngine::GameEngine()
 {
   Core::Vector<TypeMetaData const*> subSystemsMetaData;
-  for (const auto&[ID, MetaData] : TypeMetaDatas)
+  for (const auto&[ID, MetaData] : GetTypesMetaData())
   {
     if (MetaData->Kind_ == TypeMetaData::EngineSubSystem)
       subSystemsMetaData.EmplaceBack(MetaData);

@@ -12,7 +12,7 @@ namespace Engine::Entities
 {
 class ENGINE_API ActorBase
 {
-  GE_DECLARE_CLASS_TYPE_METADATA_BASE()
+  GE_DECLARE_CLASS_TYPE_METADATA()
 
   u64 ID_;
 
