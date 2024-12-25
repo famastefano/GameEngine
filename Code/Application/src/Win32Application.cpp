@@ -1,3 +1,4 @@
+#include <Engine/Components/SpriteComponent.h>
 #include <Engine/Events/Renderer/EventResizeWindow.h>
 #include <Engine/GameEngine/GameEngine.h>
 #include <Engine/Interfaces/IEnvironment.h>
@@ -53,6 +54,8 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance_, _In_opt_ HINSTANCE hPrevInstance,
   auto* actor = ECS->SpawnActor<Engine::Entities::ActorBase>("Debug Actor");
   check(actor);
 
+  actor->AttachComponent<Engine::Components::SpriteComponent>();
+
   auto frameStart = std::chrono::steady_clock::now();
 
   while (true)
@@ -73,8 +76,6 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance_, _In_opt_ HINSTANCE hPrevInstance,
     env.Engine_.Tick(dt.count());
     frameStart = frameEnd;
   }
-
-  ECS->DestroyActor(actor);
 }
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)

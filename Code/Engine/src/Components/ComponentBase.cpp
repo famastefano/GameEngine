@@ -18,7 +18,7 @@ void ComponentBase::PreAttach(Entities::ActorBase& NewOwner)
 }
 void ComponentBase::PostAttach(Entities::ActorBase& NewOwner)
 {
-  check(!Owner_);
+  check(Owner_ == &NewOwner);
   EventComponentAttached ev;
   ev.NewOwner_  = &NewOwner;
   ev.Component_ = this;

@@ -1,14 +1,23 @@
 ﻿#pragma once
 
+#include <Core/Container/FlatMap.h>
 #include <Engine/SubSystems/EngineSubSystem.h>
 
 namespace Engine
 {
 struct EventBase;
 
-class RenderingSubSystem : public EngineSubSystem
+namespace Components
+{
+class ComponentBase;
+}
+
+class ENGINE_API RenderingSubSystem : public EngineSubSystem
 {
   GE_DECLARE_CLASS_TYPE_METADATA()
+
+  Core::FlatMap<u64, Core::Vector<Components::ComponentBase*>> RenderingComponents_;
+  Core::CompactFlatMap<u64, u32>                               Shaders_;
 
 public:
   using Super = EngineSubSystem;
@@ -29,7 +38,8 @@ public:
 
 private:
   static void ResizeViewport(i32 Width, i32 Height);
-  static void Cleanup();
+  void        Cleanup();
   static bool IsComponentHandledByUs(u64 ID);
+  void        CompileShaders();
 };
 } // namespace Engine
