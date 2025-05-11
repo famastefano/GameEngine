@@ -38,7 +38,7 @@ UNIT_TEST_SUITE(Container)
     UNIT_TEST_REQUIRE(v.IsEmpty());
     UNIT_TEST_REQUIRE(v.Size() == 0);
     UNIT_TEST_REQUIRE(v.Capacity() == 0);
-    UNIT_TEST_REQUIRE(v.Allocator() == Core::globalAllocator);
+    UNIT_TEST_REQUIRE(v.Allocator() == Core::GetGlobalAllocator());
   }
   UNIT_TEST(Vector_TrivialType_CtorWithCustomAllocator)
   {
@@ -52,7 +52,7 @@ UNIT_TEST_SUITE(Container)
     UNIT_TEST_REQUIRE_FALSE(v.IsEmpty());
     UNIT_TEST_REQUIRE(v.Size() == 10);
     UNIT_TEST_REQUIRE(v.Capacity() == 10);
-    UNIT_TEST_REQUIRE(v.Allocator() == Core::globalAllocator);
+    UNIT_TEST_REQUIRE(v.Allocator() == Core::GetGlobalAllocator());
   }
   UNIT_TEST(Vector_TrivialType_CtorWithInitialSizeAndValue)
   {
@@ -98,11 +98,11 @@ UNIT_TEST_SUITE(Container)
   {
     NullAllocator alloc;
     Vector<int>   v0(&alloc);
-    Vector<int>   v1(v0, Core::globalAllocator);
+    Vector<int>   v1(v0, Core::GetGlobalAllocator());
     UNIT_TEST_REQUIRE(v0.Size() == v1.Size());
     UNIT_TEST_REQUIRE(v0.Capacity() == v1.Capacity());
     UNIT_TEST_REQUIRE_FALSE(v0.Allocator() == v1.Allocator());
-    UNIT_TEST_REQUIRE(v1.Allocator() == Core::globalAllocator);
+    UNIT_TEST_REQUIRE(v1.Allocator() == Core::GetGlobalAllocator());
   }
   UNIT_TEST(Vector_TrivialType_MoveCtorFromEmpty)
   {
@@ -113,7 +113,7 @@ UNIT_TEST_SUITE(Container)
     Vector<int> v1(std::move(v0));
     UNIT_TEST_REQUIRE(v1.Size() == v0_sz);
     UNIT_TEST_REQUIRE(v1.Capacity() == v0_cap);
-    UNIT_TEST_REQUIRE(v1.Allocator() == Core::globalAllocator);
+    UNIT_TEST_REQUIRE(v1.Allocator() == Core::GetGlobalAllocator());
 
     UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
     UNIT_TEST_REQUIRE(v0.IsEmpty());
@@ -128,7 +128,7 @@ UNIT_TEST_SUITE(Container)
     Vector<int> v1(std::move(v0));
     UNIT_TEST_REQUIRE(v1.Size() == v0_sz);
     UNIT_TEST_REQUIRE(v1.Capacity() == v0_cap);
-    UNIT_TEST_REQUIRE(v1.Allocator() == Core::globalAllocator);
+    UNIT_TEST_REQUIRE(v1.Allocator() == Core::GetGlobalAllocator());
 
     UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
     UNIT_TEST_REQUIRE(v0.IsEmpty());
@@ -160,7 +160,7 @@ UNIT_TEST_SUITE(Container)
     Vector<int> v1 = std::move(v0);
     UNIT_TEST_REQUIRE(v1.Size() == v0_sz);
     UNIT_TEST_REQUIRE(v1.Capacity() == v0_cap);
-    UNIT_TEST_REQUIRE(v1.Allocator() == Core::globalAllocator);
+    UNIT_TEST_REQUIRE(v1.Allocator() == Core::GetGlobalAllocator());
 
     UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
     UNIT_TEST_REQUIRE(v0.IsEmpty());
@@ -175,7 +175,7 @@ UNIT_TEST_SUITE(Container)
     Vector<int> v1 = std::move(v0);
     UNIT_TEST_REQUIRE(v1.Size() == v0_sz);
     UNIT_TEST_REQUIRE(v1.Capacity() == v0_cap);
-    UNIT_TEST_REQUIRE(v1.Allocator() == Core::globalAllocator);
+    UNIT_TEST_REQUIRE(v1.Allocator() == Core::GetGlobalAllocator());
 
     UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
     UNIT_TEST_REQUIRE(v0.IsEmpty());
@@ -564,7 +564,7 @@ UNIT_TEST_SUITE(Container)
     UNIT_TEST_REQUIRE(v.IsEmpty());
     UNIT_TEST_REQUIRE(v.Size() == 0);
     UNIT_TEST_REQUIRE(v.Capacity() == 0);
-    UNIT_TEST_REQUIRE(v.Allocator() == Core::globalAllocator);
+    UNIT_TEST_REQUIRE(v.Allocator() == Core::GetGlobalAllocator());
   }
   UNIT_TEST(Vector_NonTrivialCopyable_CtorWithCustomAllocator)
   {
@@ -578,7 +578,7 @@ UNIT_TEST_SUITE(Container)
     UNIT_TEST_REQUIRE_FALSE(v.IsEmpty());
     UNIT_TEST_REQUIRE(v.Size() == 10);
     UNIT_TEST_REQUIRE(v.Capacity() == 10);
-    UNIT_TEST_REQUIRE(v.Allocator() == Core::globalAllocator);
+    UNIT_TEST_REQUIRE(v.Allocator() == Core::GetGlobalAllocator());
   }
   UNIT_TEST(Vector_NonTrivialCopyable_CtorWithInitialSizeAndValue)
   {
@@ -624,11 +624,11 @@ UNIT_TEST_SUITE(Container)
   {
     NullAllocator              alloc;
     Vector<NonTrivialCopyable> v0(&alloc);
-    Vector<NonTrivialCopyable> v1(v0, Core::globalAllocator);
+    Vector<NonTrivialCopyable> v1(v0, Core::GetGlobalAllocator());
     UNIT_TEST_REQUIRE(v0.Size() == v1.Size());
     UNIT_TEST_REQUIRE(v0.Capacity() == v1.Capacity());
     UNIT_TEST_REQUIRE_FALSE(v0.Allocator() == v1.Allocator());
-    UNIT_TEST_REQUIRE(v1.Allocator() == Core::globalAllocator);
+    UNIT_TEST_REQUIRE(v1.Allocator() == Core::GetGlobalAllocator());
   }
   UNIT_TEST(Vector_NonTrivialCopyable_MoveCtorFromEmpty)
   {
@@ -639,7 +639,7 @@ UNIT_TEST_SUITE(Container)
     Vector<NonTrivialCopyable> v1(std::move(v0));
     UNIT_TEST_REQUIRE(v1.Size() == v0_sz);
     UNIT_TEST_REQUIRE(v1.Capacity() == v0_cap);
-    UNIT_TEST_REQUIRE(v1.Allocator() == Core::globalAllocator);
+    UNIT_TEST_REQUIRE(v1.Allocator() == Core::GetGlobalAllocator());
 
     UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
     UNIT_TEST_REQUIRE(v0.IsEmpty());
@@ -654,7 +654,7 @@ UNIT_TEST_SUITE(Container)
     Vector<NonTrivialCopyable> v1(std::move(v0));
     UNIT_TEST_REQUIRE(v1.Size() == v0_sz);
     UNIT_TEST_REQUIRE(v1.Capacity() == v0_cap);
-    UNIT_TEST_REQUIRE(v1.Allocator() == Core::globalAllocator);
+    UNIT_TEST_REQUIRE(v1.Allocator() == Core::GetGlobalAllocator());
 
     UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
     UNIT_TEST_REQUIRE(v0.IsEmpty());
@@ -686,7 +686,7 @@ UNIT_TEST_SUITE(Container)
     Vector<NonTrivialCopyable> v1 = std::move(v0);
     UNIT_TEST_REQUIRE(v1.Size() == v0_sz);
     UNIT_TEST_REQUIRE(v1.Capacity() == v0_cap);
-    UNIT_TEST_REQUIRE(v1.Allocator() == Core::globalAllocator);
+    UNIT_TEST_REQUIRE(v1.Allocator() == Core::GetGlobalAllocator());
 
     UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
     UNIT_TEST_REQUIRE(v0.IsEmpty());
@@ -701,7 +701,7 @@ UNIT_TEST_SUITE(Container)
     Vector<NonTrivialCopyable> v1 = std::move(v0);
     UNIT_TEST_REQUIRE(v1.Size() == v0_sz);
     UNIT_TEST_REQUIRE(v1.Capacity() == v0_cap);
-    UNIT_TEST_REQUIRE(v1.Allocator() == Core::globalAllocator);
+    UNIT_TEST_REQUIRE(v1.Allocator() == Core::GetGlobalAllocator());
 
     UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
     UNIT_TEST_REQUIRE(v0.IsEmpty());
@@ -1063,7 +1063,7 @@ UNIT_TEST_SUITE(Container)
     UNIT_TEST_REQUIRE(v.IsEmpty());
     UNIT_TEST_REQUIRE(v.Size() == 0);
     UNIT_TEST_REQUIRE(v.Capacity() == 0);
-    UNIT_TEST_REQUIRE(v.Allocator() == Core::globalAllocator);
+    UNIT_TEST_REQUIRE(v.Allocator() == Core::GetGlobalAllocator());
   }
   UNIT_TEST(Vector_MovableOnlyType_CtorWithCustomAllocator)
   {
@@ -1077,7 +1077,7 @@ UNIT_TEST_SUITE(Container)
     UNIT_TEST_REQUIRE_FALSE(v.IsEmpty());
     UNIT_TEST_REQUIRE(v.Size() == 10);
     UNIT_TEST_REQUIRE(v.Capacity() == 10);
-    UNIT_TEST_REQUIRE(v.Allocator() == Core::globalAllocator);
+    UNIT_TEST_REQUIRE(v.Allocator() == Core::GetGlobalAllocator());
   }
   UNIT_TEST(Vector_MovableOnlyType_CtorWithInitialSizeAndValue)
   {
@@ -1110,7 +1110,7 @@ UNIT_TEST_SUITE(Container)
     Vector<MovableOnlyType> v1(std::move(v0));
     UNIT_TEST_REQUIRE(v1.Size() == v0_sz);
     UNIT_TEST_REQUIRE(v1.Capacity() == v0_cap);
-    UNIT_TEST_REQUIRE(v1.Allocator() == Core::globalAllocator);
+    UNIT_TEST_REQUIRE(v1.Allocator() == Core::GetGlobalAllocator());
 
     UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
     UNIT_TEST_REQUIRE(v0.IsEmpty());
@@ -1125,7 +1125,7 @@ UNIT_TEST_SUITE(Container)
     Vector<MovableOnlyType> v1(std::move(v0));
     UNIT_TEST_REQUIRE(v1.Size() == v0_sz);
     UNIT_TEST_REQUIRE(v1.Capacity() == v0_cap);
-    UNIT_TEST_REQUIRE(v1.Allocator() == Core::globalAllocator);
+    UNIT_TEST_REQUIRE(v1.Allocator() == Core::GetGlobalAllocator());
 
     UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
     UNIT_TEST_REQUIRE(v0.IsEmpty());
@@ -1140,7 +1140,7 @@ UNIT_TEST_SUITE(Container)
     Vector<MovableOnlyType> v1 = std::move(v0);
     UNIT_TEST_REQUIRE(v1.Size() == v0_sz);
     UNIT_TEST_REQUIRE(v1.Capacity() == v0_cap);
-    UNIT_TEST_REQUIRE(v1.Allocator() == Core::globalAllocator);
+    UNIT_TEST_REQUIRE(v1.Allocator() == Core::GetGlobalAllocator());
 
     UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
     UNIT_TEST_REQUIRE(v0.IsEmpty());
@@ -1155,7 +1155,7 @@ UNIT_TEST_SUITE(Container)
     Vector<MovableOnlyType> v1 = std::move(v0);
     UNIT_TEST_REQUIRE(v1.Size() == v0_sz);
     UNIT_TEST_REQUIRE(v1.Capacity() == v0_cap);
-    UNIT_TEST_REQUIRE(v1.Allocator() == Core::globalAllocator);
+    UNIT_TEST_REQUIRE(v1.Allocator() == Core::GetGlobalAllocator());
 
     UNIT_TEST_REQUIRE(v0.Allocator() == v1.Allocator());
     UNIT_TEST_REQUIRE(v0.IsEmpty());
