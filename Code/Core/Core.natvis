@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- STL Natvis: Microsoft Visual Studio\2022\Community\Common7\Packages\Debugger\Visualizers\stl.natvis -->
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
     <!-- Allocators -->
     <Type Name="Core::GlobalAllocator">
@@ -9,6 +8,7 @@
             <Item Name="OwnedByContainer">false</Item>
         </Expand>
     </Type>
+
     <Type Name="Core::ArenaAllocator&lt;*,*&gt;">
         <DisplayString>{{ size=$T1, alignment=$T2 }}</DisplayString>
         <Expand>
@@ -17,6 +17,7 @@
             <Item Name="OwnedByContainer">false</Item>
         </Expand>
     </Type>
+
     <!-- Containers -->
     <!-- Vector -->
     <Type Name="Core::Vector&lt;*&gt;">
@@ -30,6 +31,7 @@
             </ArrayItems>
         </Expand>
     </Type>
+
     <!-- Span -->
     <Type Name="Core::Span&lt;*,*&gt;">
         <Intrinsic Name="IsFixed" Expression="$T2 != -1" />
@@ -46,6 +48,8 @@
             </ArrayItems>
         </Expand>
     </Type>
+
+    <!-- Span specializations for character types -->
     <Type Name="Core::Span&lt;char,*&gt;">
         <Intrinsic Name="IsFixed" Expression="$T1 != -1" />
         <DisplayString Condition="!IsFixed()">{Data_,[SpanSize_.N_]}</DisplayString>
@@ -65,6 +69,7 @@
             </ArrayItems>
         </Expand>
     </Type>
+
     <Type Name="Core::Span&lt;char const,*&gt;">
         <Intrinsic Name="IsFixed" Expression="$T1 != -1" />
         <DisplayString Condition="!IsFixed()">{Data_,[SpanSize_.N_]}</DisplayString>
@@ -84,6 +89,7 @@
             </ArrayItems>
         </Expand>
     </Type>
+
     <Type Name="Core::Span&lt;wchar_t,*&gt;">
         <Intrinsic Name="IsFixed" Expression="$T1 != -1" />
         <DisplayString Condition="!IsFixed()">{Data_,[SpanSize_.N_]}</DisplayString>
@@ -103,6 +109,7 @@
             </ArrayItems>
         </Expand>
     </Type>
+
     <Type Name="Core::Span&lt;wchar_t const,*&gt;">
         <Intrinsic Name="IsFixed" Expression="$T1 != -1" />
         <DisplayString Condition="!IsFixed()">{Data_,[SpanSize_.N_]}</DisplayString>
@@ -120,6 +127,63 @@
                 <Size>SpanSize_.N_</Size>
                 <ValuePointer>Data_</ValuePointer>
             </ArrayItems>
+        </Expand>
+    </Type>
+
+    <!-- FlatMap -->
+    <Type Name="Core::FlatMap&lt;*,*&gt;">
+        <DisplayString>{{ size={Keys_._size} }}</DisplayString>
+        <Expand>
+            <Item Name="[size]">Keys_._size</Item>
+            <CustomListItems>
+                <Variable Name="i" InitialValue="0"/>
+                <Size>Keys_._size</Size>
+                <Loop>
+                    <Item Name="[{Keys_._data[i]}]">Values_._data[i]</Item>
+                    <Exec>i++</Exec>
+                </Loop>
+            </CustomListItems>
+        </Expand>
+    </Type>
+
+    <!-- CompactFlatMap -->
+    <Type Name="Core::CompactFlatMap&lt;*,*&gt;">
+        <DisplayString>{{ size={Items_._size} }}</DisplayString>
+        <Expand>
+            <Item Name="[size]">Items_._size</Item>
+            <CustomListItems>
+                <Variable Name="i" InitialValue="0"/>
+                <Size>Items_._size</Size>
+                <Loop>
+                    <Item Name="[{Items_._data[i].Key_}]">Items_._data[i].Value_</Item>
+                    <Exec>i++</Exec>
+                </Loop>
+            </CustomListItems>
+        </Expand>
+    </Type>
+
+    <!-- Iterator visualizers -->
+    <Type Name="Core::FlatMapIterator&lt;*,*&gt;">
+        <DisplayString>{{ key={*Key_} value={*Value_} }}</DisplayString>
+        <Expand>
+            <Item Name="[key]">*Key_</Item>
+            <Item Name="[value]">*Value_</Item>
+        </Expand>
+    </Type>
+
+    <Type Name="Core::CompactFlatMapIterator&lt;*,*,*,*&gt;">
+        <DisplayString>{{ ptr={Ptr_} }}</DisplayString>
+        <Expand>
+            <Item Name="[ptr]">Ptr_</Item>
+        </Expand>
+    </Type>
+
+    <!-- Compound Types -->
+    <Type Name="Core::CompactFlatMap&lt;*,*&gt;::KeyValue">
+        <DisplayString>{{ {Key_} : {Value_} }}</DisplayString>
+        <Expand>
+            <Item Name="[key]">Key_</Item>
+            <Item Name="[value]">Value_</Item>
         </Expand>
     </Type>
 </AutoVisualizer>
