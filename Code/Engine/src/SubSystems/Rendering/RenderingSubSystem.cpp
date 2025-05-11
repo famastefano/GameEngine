@@ -120,18 +120,20 @@ void RenderingSubSystem::Tick(f32 DeltaTime)
             transform.Position_.Z(),
         };
 
+        unsigned int VAO;
+        glGenVertexArrays(1, &VAO);
+        glBindVertexArray(VAO);
+
         unsigned int VBO;
         glGenBuffers(1, &VBO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
-
-        unsigned int VAO;
-        glGenVertexArrays(1, &VAO);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-        glDeleteBuffers(1, &VAO);
+        glBindVertexArray(0);
+        glDeleteVertexArrays(1, &VAO);
         glDeleteBuffers(1, &VBO);
       }
     }
