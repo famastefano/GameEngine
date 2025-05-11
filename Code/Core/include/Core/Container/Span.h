@@ -200,8 +200,8 @@ template <typename T, i32 N>
 Span(T (&)[N]) -> Span<T, N>;
 
 template <i32 N>
-Span(char (&)[N])->Span<char const, N> const;
+Span(char (&)[N]) -> Span<char const, N>;
 
 template <i32 N>
-Span(wchar_t (&)[N])->Span<wchar_t const, N> const;
+Span(wchar_t (&)[N]) -> Span<wchar_t const, N>;
 } // namespace Core
