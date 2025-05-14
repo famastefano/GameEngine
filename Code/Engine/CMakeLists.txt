@@ -20,6 +20,7 @@ add_library(ge_engine_game_engine SHARED
         "src/Reflection/Reflection.cpp"
         "src/EventsMetadata.cpp"
 
+        "src/Events/EventHook.cpp"
         "src/Entities/ActorBase.cpp"
         "src/Components/ComponentBase.cpp"
         "src/Components/SpriteComponent.cpp"

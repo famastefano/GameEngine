@@ -1,3 +1,5 @@
+#include "Engine/Events/EventHook.h"
+
 #include <Engine/GameEngine/GameEngine.h>
 #include <Engine/LogEngine.h>
 #include <Engine/SubSystems/EngineSubSystem.h>
@@ -46,6 +48,8 @@ void GameEngine::Tick(f32 DeltaTime)
 }
 void GameEngine::EnqueueEvent(EventBase& Event)
 {
+  EventHook::SendEvent(Event);
+
   for (auto* subSystem : EngineSubSystems_)
     if (subSystem->HandleEvent(Event))
       return;
