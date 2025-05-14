@@ -97,6 +97,14 @@ struct AutoRegisterTypeMetadata
     if (GetTypeMetaData().ID_ == T::GetStaticTypeMetaData().ID_)                 \
       return static_cast<T*>(this);                                              \
     return nullptr;                                                              \
+  }                                                                              \
+                                                                                 \
+  template <Engine::Reflectable T>                                               \
+  [[nodiscard]] T const* GetAs() const                                           \
+  {                                                                              \
+    if (GetTypeMetaData().ID_ == T::GetStaticTypeMetaData().ID_)                 \
+      return static_cast<T const*>(this);                                        \
+    return nullptr;                                                              \
   }
 
 #define GE_DECLARE_CLASS_TYPE_METADATA_BASE()                                    \

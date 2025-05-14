@@ -11,14 +11,14 @@ class ENGINE_API EventHook
   EventHook* Next_{};
 
 protected:
-  void Next(EventBase& Event) const;
+  void Next(EventBase const& Event) const;
 
 public:
   virtual ~EventHook() = default;
 
   // Handles the event.
   // You have to manually call `Next(Event)` to propagate the event along the chain.
-  virtual void HandleEvent(EventBase& Event) const = 0;
+  virtual void HandleEvent(EventBase const& Event) const = 0;
 
   template<typename THookClass, typename... TArgs>
   static void RegisterHook(TArgs&&... Args)
@@ -28,6 +28,6 @@ public:
     Head_ = NewHook;
   }
 
-  static void SendEvent(EventBase& Event);
+  static void SendEvent(EventBase const& Event);
 };
 }
