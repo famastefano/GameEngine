@@ -1,4 +1,5 @@
 #include <Engine/Components/SpriteComponent.h>
+#include <Engine/Events/EventHook.h>
 #include <Engine/Events/Renderer/EventResizeWindow.h>
 #include <Engine/GameEngine/GameEngine.h>
 #include <Engine/Interfaces/IEnvironment.h>
@@ -6,7 +7,46 @@
 #include <Engine/SubSystems/Input/Base/Translator.h>
 #include <Windows.h>
 #include <chrono>
-#include <hidusage.h>
+#include <iostream>
+
+void MoveUp() { std::cout << "Move Up" << std::endl; }
+void MoveDown() { std::cout << "Move Down" << std::endl; }
+void MoveLeft() { std::cout << "Move Left" << std::endl; }
+void MoveRight() { std::cout << "Move Right" << std::endl; }
+
+class MovementEventHook : public Engine::EventHook
+{
+public:
+  void HandleEvent(Engine::EventBase const& Event) const override
+  {
+    if (auto const* ev = Event.GetAs<Engine::EventInput>())
+    {
+      if (ev->Kind_ == Engine::Kind::Key_Press)
+      {
+        switch (ev->Keyboard_.NativeVirtualKey_)
+        {
+        case 'W':
+        case VK_UP:
+          MoveUp();
+          break;
+        case 'S':
+        case VK_DOWN:
+          MoveDown();
+          break;
+        case 'A':
+        case VK_LEFT:
+          MoveLeft();
+          break;
+        case 'D':
+        case VK_RIGHT:
+          MoveRight();
+          break;
+        }
+        Next(Event);
+      }
+    }
+  }
+};
 
 struct Win32Env : Engine::IEnvironment
 {
@@ -42,6 +82,8 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance_, _In_opt_ HINSTANCE hPrevInstance,
   Win32Env env(Win32Env::RunningMode::Standalone);
   // ReSharper disable once CppDFALocalValueEscapesFunction
   gWin32Env = &env;
+
+  Engine::EventHook::RegisterHook<MovementEventHook>();
 
   env.NativeLoopCallback_ = (Win32Env::NativeLoopCallbackFn)WindowProc;
 
